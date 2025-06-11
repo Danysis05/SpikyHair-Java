@@ -18,5 +18,4 @@ public interface Idao <T, ID> {
     // metodo para eliminar
     void delete(ID id);
 
-
 }

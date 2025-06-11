@@ -1,20 +1,17 @@
 package com.proyecto.spikyhair.controller;
 
 import java.util.List;
-
+ 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.UsuarioService;
 
-@Controller
+@RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
@@ -23,12 +20,10 @@ public class UsuarioController {
 
     // Mostrar todos los usuarios
     @GetMapping
-    public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.getAll();
-        model.addAttribute("usuarios", usuarios);
-        return "usuarios/lista"; // Vista: src/main/resources/templates/usuarios/lista.html
+    public List<Usuario> listarUsuarios() {
+        return usuarioService.getAll();
     }
-
+   
     // Mostrar formulario para nuevo usuario
     @GetMapping("/nuevo")
     public String mostrarFormularioNuevo(Model model) {
@@ -37,28 +32,44 @@ public class UsuarioController {
     }
 
     // Guardar nuevo usuario
-    @PostMapping("/guardar")
-    public String guardarUsuario(@ModelAttribute Usuario usuario) {
-        usuarioService.create(usuario);
-        return "redirect:/usuarios";
+
+    @PostMapping
+    public ResponseEntity<Usuario> guardarUsuario(@RequestBody Usuario usuario) {
+        Usuario creado = usuarioService.create(usuario);
+        return new ResponseEntity<>(creado, HttpStatus.CREATED); 
     }
 
+ 
     // Mostrar formulario para editar usuario
-    @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
-        Usuario usuario = usuarioService.getById(id);
-        if (usuario != null) {
-            model.addAttribute("usuario", usuario);
-            return "usuarios/formulario";
+    @PutMapping("/editar/{id}")
+    public ResponseEntity <Usuario> actualizarUsuario(@PathVariable Long id,@RequestBody Usuario datosNuevos) {
+        Usuario usuarioExistente = usuarioService.getById(id);
+        if (usuarioExistente == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } else {
-            return "redirect:/usuarios";
+            if (datosNuevos.getNombre() != null) {
+                usuarioExistente.setNombre(datosNuevos.getNombre());
+            }
+            if (datosNuevos.getEmail() != null) {
+                usuarioExistente.setEmail(datosNuevos.getEmail());
+            }
+            if (datosNuevos.getContrasena() != null) {
+                usuarioExistente.setContrasena(datosNuevos.getContrasena());
+            }
+            if (datosNuevos.getRol() != null) {
+                usuarioExistente.setRol(datosNuevos.getRol());
+            }
+
+            usuarioService.update(usuarioExistente);
+            return ResponseEntity.ok(usuarioExistente);
         }
     }
 
     // Eliminar usuario
-    @GetMapping("/eliminar/{id}")
-    public String eliminarUsuario(@PathVariable Long id) {
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.delete(id);
-        return "redirect:/usuarios";
+        return ResponseEntity.noContent().build(); // HTTP 204 No Content
     }
+
 }

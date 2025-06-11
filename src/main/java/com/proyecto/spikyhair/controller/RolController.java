@@ -3,18 +3,16 @@ package com.proyecto.spikyhair.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.proyecto.spikyhair.entity.Rol;
 import com.proyecto.spikyhair.service.RolService;
 
-@Controller
+
+
+@RestController
 @RequestMapping("/roles")
 public class RolController {
 
@@ -23,42 +21,36 @@ public class RolController {
 
     // Mostrar la lista de roles
     @GetMapping
-    public String listarRoles(Model model) {
-        List<Rol> roles = rolService.getAll();
-        model.addAttribute("roles", roles);
-        return "roles/lista"; // Vista HTML: src/main/resources/templates/roles/lista.html
-    }
-
-    // Mostrar formulario para nuevo rol
-    @GetMapping("/nuevo")
-    public String mostrarFormularioNuevo(Model model) {
-        model.addAttribute("rol", new Rol());
-        return "roles/formulario"; // Vista HTML: roles/formulario.html
+    public List<Rol> listarRoles() {
+        return rolService.getAll(); // Esto se convierte automáticamente a JSON
     }
 
     // Guardar nuevo rol
     @PostMapping("/guardar")
-    public String guardarRol(@ModelAttribute Rol rol) {
-        rolService.create(rol);
-        return "redirect:/roles";
+    public ResponseEntity<Rol> guardarRol(@RequestBody Rol rol) {
+        Rol creado = rolService.create(rol);
+        return new ResponseEntity<>(creado,HttpStatus.CREATED);
     }
 
     // Mostrar formulario para editar rol existente
-    @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
-        Rol rol = rolService.getById(id);
-        if (rol != null) {
-            model.addAttribute("rol", rol);
-            return "roles/formulario"; // Reutiliza el mismo formulario
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Rol> actualizarRol(@PathVariable Long id, @RequestBody Rol rolActualizado) {
+        Rol rolExistente = rolService.getById(id);
+        if (rolExistente != null) {
+            rolActualizado.setId(id); // asegurar que se use el ID correcto
+            Rol rolGuardado = rolService.update(rolActualizado);
+            return ResponseEntity.ok(rolGuardado);
         } else {
-            return "redirect:/roles"; // O muestra un error
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    // Eliminar un rol por ID
-    @GetMapping("/eliminar/{id}")
-    public String eliminarRol(@PathVariable Long id) {
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> eliminarRol(@PathVariable Long id) {
         rolService.delete(id);
-        return "redirect:/roles";
+        return ResponseEntity.noContent().build(); // HTTP 204 No Content
     }
+
 }

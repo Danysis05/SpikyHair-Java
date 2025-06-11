@@ -45,5 +45,6 @@ public class UsuarioService implements Idao<Usuario, Long> {
         if (usuarioRepository.existsById(id)) {
             usuarioRepository.deleteById(id);
         }
+
     }
 }

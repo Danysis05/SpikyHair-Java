@@ -24,7 +24,7 @@ public class RolService implements Idao<Rol, Long> {
     @Override
     public Rol getById(Long id) {
         Optional<Rol> optionalRol = rolRepository.findById(id);
-        return optionalRol.orElse(null); // O puedes lanzar una excepción si no se encuentra
+        return optionalRol.orElse(null);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class RolService implements Idao<Rol, Long> {
         if (rolRepository.existsById(entity.getId())) {
             return rolRepository.save(entity);
         }
-        return null; // O lanzar una excepción si no existe
+        return null; 
     }
 
     @Override
@@ -45,6 +45,6 @@ public class RolService implements Idao<Rol, Long> {
         if (rolRepository.existsById(id)) {
             rolRepository.deleteById(id);
         }
-        // Si no existe, podrías lanzar una excepción si lo deseas
+        
     }
 }

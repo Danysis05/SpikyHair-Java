@@ -21,7 +21,5 @@ public class ServiciosDto {
 
     private String imagen;
 
-    private ReservasDto reserva;
-
 
 }

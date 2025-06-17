@@ -1,50 +1,60 @@
 package com.proyecto.spikyhair.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.repository.UsuarioRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-public class UsuarioService implements Idao<Usuario, Long> {
+public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ModelMapper modelMapper = new ModelMapper();
 
-    @Override
-    public List<Usuario> getAll() {
-        return usuarioRepository.findAll();
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
-    public Usuario getById(Long id) {
-        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
-        return optionalUsuario.orElse(null); // O lanzar excepción personalizada
+    public List<UsuarioDto> getAll() {
+        return usuarioRepository.findAll()
+                .stream()
+                .map(usuario -> modelMapper.map(usuario, UsuarioDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Usuario create(Usuario entity) {
-        return usuarioRepository.save(entity);
+    public UsuarioDto getById(Long id) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow();
+        return modelMapper.map(usuario, UsuarioDto.class);
     }
 
     @Override
-    public Usuario update(Usuario entity) {
-        if (usuarioRepository.existsById(entity.getId())) {
-            return usuarioRepository.save(entity);
-        }
-        return null; // O lanzar excepción si no existe
+    public UsuarioDto save(UsuarioDto dto) {
+        Usuario usuario = modelMapper.map(dto, Usuario.class);
+        Usuario creado = usuarioRepository.save(usuario);
+        return modelMapper.map(creado, UsuarioDto.class);
+    }
+
+    @Override
+    public UsuarioDto update(Long id, UsuarioDto dto) {
+        Usuario existente = usuarioRepository.findById(id).orElseThrow();
+        existente.setNombre(dto.getNombre());
+        existente.setEmail(dto.getEmail());
+        existente.setContrasena(dto.getContrasena());
+        // Aquí puedes añadir más campos si los tiene UsuarioDto
+        Usuario actualizado = usuarioRepository.save(existente);
+        return modelMapper.map(actualizado, UsuarioDto.class);
     }
 
     @Override
     public void delete(Long id) {
-        if (usuarioRepository.existsById(id)) {
-            usuarioRepository.deleteById(id);
-        }
-
+        usuarioRepository.deleteById(id);
     }
 }

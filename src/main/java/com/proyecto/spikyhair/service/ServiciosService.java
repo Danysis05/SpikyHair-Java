@@ -1,48 +1,62 @@
 package com.proyecto.spikyhair.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.proyecto.spikyhair.DTO.ServiciosDto;
 import com.proyecto.spikyhair.entity.Servicios;
 import com.proyecto.spikyhair.repository.ServiciosRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-public class ServiciosService implements Idao<Servicios, Long> {
+public class ServiciosService implements Idao<Servicios, Long, ServiciosDto> {
 
-    @Autowired
-    private ServiciosRepository serviciosRepository;
-    @Override
-    public List<Servicios> getAll() {
-        return serviciosRepository.findAll();
+    private final ServiciosRepository serviciosRepository;
+    private final ModelMapper modelMapper = new ModelMapper();
+
+    public ServiciosService(ServiciosRepository serviciosRepository) {
+        this.serviciosRepository = serviciosRepository;
     }
 
     @Override
-    public Servicios getById(Long id) {
-        Optional<Servicios> optionalServicio = serviciosRepository.findById(id);
-        return optionalServicio.orElse(null); // O lanzar una excepción si no se encuentra
-    }
-    @Override
-    public Servicios create(Servicios entity) {
-        return serviciosRepository.save(entity);
+    public List<ServiciosDto> getAll() {
+        return serviciosRepository.findAll()
+                .stream()
+                .map(servicio -> modelMapper.map(servicio, ServiciosDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Servicios update(Servicios entity) {
-        if (serviciosRepository.existsById(entity.getId())) {
-            return serviciosRepository.save(entity);
-        }
-        return null; // O lanzar una excepción si no existe
+    public ServiciosDto getById(Long id) {
+        Servicios servicio = serviciosRepository.findById(id).orElseThrow();
+        return modelMapper.map(servicio, ServiciosDto.class);
+    }
+
+    @Override
+    public ServiciosDto save(ServiciosDto dto) {
+        Servicios servicio = modelMapper.map(dto, Servicios.class);
+        Servicios creado = serviciosRepository.save(servicio);
+        return modelMapper.map(creado, ServiciosDto.class);
+    }
+
+    @Override
+    public ServiciosDto update(Long id, ServiciosDto dto) {
+        Servicios existente = serviciosRepository.findById(id).orElseThrow();
+        existente.setNombre(dto.getNombre());
+        existente.setPrecio(dto.getPrecio());
+        existente.setDescripcion(dto.getDescripcion());
+        // agrega otros setters si hay más campos
+
+        Servicios actualizado = serviciosRepository.save(existente);
+        return modelMapper.map(actualizado, ServiciosDto.class);
     }
 
     @Override
     public void delete(Long id) {
-        if (serviciosRepository.existsById(id)) {
-            serviciosRepository.deleteById(id);
-        }
-        // Si no existe, podrías lanzar una excepción si lo deseas
+        serviciosRepository.deleteById(id);
     }
 }
+

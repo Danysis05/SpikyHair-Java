@@ -1,12 +1,8 @@
 package com.proyecto.spikyhair.entity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Table(name = "servicios")
@@ -36,8 +32,8 @@ public class Servicios {
     @Column(name = "imagen", nullable = true, length = 255)
     private String imagen;
 
-    @ManyToOne
-    @JoinColumn(name = "Reserva_id", nullable = false)
-    private Reserva reserva;
+    @OneToMany(mappedBy = "servicios")
+
+    private List<Reserva> reservas;
 
 }

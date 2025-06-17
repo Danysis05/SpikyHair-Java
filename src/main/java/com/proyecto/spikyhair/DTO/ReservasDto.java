@@ -19,5 +19,6 @@ public class ReservasDto {
     private Estado estado;
     private String duracion;
     private List<ServiciosDto> servicios;
+    private UsuarioDto usuario;
 
 }

@@ -43,7 +43,9 @@ public class Reserva {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
-    private List<Servicios> servicios;
+    @ManyToOne
+    @JoinColumn(name = "servicios_id",nullable = false)
+    private Servicios servicios;
+
 
 }

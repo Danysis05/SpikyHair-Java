@@ -1,17 +1,17 @@
 package com.proyecto.spikyhair.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
 import com.proyecto.spikyhair.DTO.ReservasDto;
 import com.proyecto.spikyhair.entity.Reserva;
 import com.proyecto.spikyhair.entity.Servicios;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.repository.ReservasRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
@@ -37,7 +37,7 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
         return modelMapper.map(reserva, ReservasDto.class);
     }
 
-    @Override
+@Override
     public ReservasDto save(ReservasDto dto) {
         Reserva reserva = modelMapper.map(dto, Reserva.class);
         Reserva guardada = reservasRepository.save(reserva);
@@ -66,4 +66,5 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     public void delete(Long id) {
         reservasRepository.deleteById(id);
     }
+
 }

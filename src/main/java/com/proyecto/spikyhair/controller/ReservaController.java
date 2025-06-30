@@ -3,12 +3,13 @@ package com.proyecto.spikyhair.controller;
 import com.proyecto.spikyhair.DTO.ReservasDto;
 import com.proyecto.spikyhair.service.ReservasService;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/reservas")
 public class ReservaController {
 
@@ -18,29 +19,55 @@ public class ReservaController {
         this.reservasService = reservasService;
     }
 
+    // Mostrar todas las reservas
     @GetMapping
-    public ResponseEntity<List<ReservasDto>> getAllReservas() {
-        return ResponseEntity.ok(reservasService.getAll());
+    public String listReservas(Model model) {
+        List<ReservasDto> reservas = reservasService.getAll();
+        model.addAttribute("reservas", reservas);
+        return "reservas/list"; // Vista: templates/reservas/list.html
     }
 
+    // Ver una reserva por ID
     @GetMapping("/{id}")
-    public ResponseEntity<ReservasDto> getReservaById(@PathVariable Long id) {
-        return ResponseEntity.ok(reservasService.getById(id));
+    public String viewReserva(@PathVariable Long id, Model model) {
+        ReservasDto reserva = reservasService.getById(id);
+        model.addAttribute("reserva", reserva);
+        return "reservas/view"; // Vista: templates/reservas/view.html
     }
 
+    // Formulario para nueva reserva
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("reserva", new ReservasDto());
+        return "reservas/form"; // Vista: templates/reservas/form.html
+    }
+
+    // Guardar nueva reserva
     @PostMapping
-    public ResponseEntity<ReservasDto> createReserva(@RequestBody ReservasDto dto) {
-        return ResponseEntity.ok(reservasService.save(dto));
+    public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
+        reservasService.save(dto);
+        return "redirect:/reservas";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ReservasDto> updateReserva(@PathVariable Long id, @RequestBody ReservasDto dto) {
-        return ResponseEntity.ok(reservasService.update(id, dto));
+    // Formulario para editar reserva
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        ReservasDto reserva = reservasService.getById(id);
+        model.addAttribute("reserva", reserva);
+        return "reservas/form"; // Reutiliza la misma vista para editar
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReserva(@PathVariable Long id) {
+    // Actualizar reserva
+    @PostMapping("/update/{id}")
+    public String updateReserva(@PathVariable Long id, @ModelAttribute("reserva") ReservasDto dto) {
+        reservasService.update(id, dto);
+        return "redirect:/reservas";
+    }
+
+    // Eliminar reserva
+    @GetMapping("/delete/{id}")
+    public String deleteReserva(@PathVariable Long id) {
         reservasService.delete(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/reservas";
     }
 }

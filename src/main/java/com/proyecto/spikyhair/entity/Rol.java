@@ -14,6 +14,14 @@ import lombok.Data;
 @Table(name = "rol")
 @Data
 public class Rol {
+        public Rol() {
+    }
+
+    // ✅ Constructor con parámetros
+    public Rol(Long id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+    }
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)

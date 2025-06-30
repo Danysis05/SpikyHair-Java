@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpikyHair | Inicio</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header>
+    <h1>SpikyHair</h1>
+    <nav>
+      <a th:href="@{/auth/login}">Iniciar Sesión</a>
+      <a th:href="@{/auth/register}">Registrarse</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2>Reserva tu estilo con un clic</h2>
+  </section>
+
+  <section class="servicios">
+    <h3>Servicios Destacados</h3>
+    <div class="grid">
+      <div class="card">
+        <img th:src="@{/img/AQUI_VA_IMAGEN_1.jpg}" alt="Corte de Cabello" />
+        <h4>Corte de Cabello</h4>
+      </div>
+      <div class="card">
+        <img th:src="@{/img/AQUI_VA_IMAGEN_2.jpg}" alt="Coloración" />
+        <h4>Coloración</h4>
+      </div>
+      <div class="card">
+        <img th:src="@{/img/AQUI_VA_IMAGEN_3.jpg}" alt="Peinado para Eventos" />
+        <h4>Peinado para Eventos</h4>
+      </div>
+      <div class="card">
+        <img th:src="@{/img/AQUI_VA_IMAGEN_4.jpg}" alt="Tratamiento Capilar" />
+        <h4>Tratamiento Capilar</h4>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © 2025 SpikyHair. Todos los derechos reservados.
+  </footer>
+
+</body>
+</html>

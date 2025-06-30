@@ -1,14 +1,19 @@
 package com.proyecto.spikyhair.controller;
 
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.service.UsuarioService;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
+@Controller
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
@@ -17,38 +22,48 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
+     @GetMapping("/index")
+    public String paginaUsuario() {
+        return "usuario/index";
+    }
 
-    // GET /api/usuarios
+    // Mostrar todos los usuarios
     @GetMapping
-    public ResponseEntity<List<UsuarioDto>> getAllUsuarios() {
-        return ResponseEntity.ok(usuarioService.getAll());
+    public String listUsuarios(Model model) {
+        List<UsuarioDto> usuarios = usuarioService.getAll();
+        model.addAttribute("usuarios", usuarios);
+        return "usuarios/list"; // Vista HTML: usuarios/list.html
     }
 
-    // GET /api/usuarios/{id}
+    // Mostrar un usuario por ID
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDto> getUsuarioById(@PathVariable Long id) {
-        UsuarioDto dto = usuarioService.getById(id);
-        return ResponseEntity.ok(dto);
+    public String viewUsuario(@PathVariable Long id, Model model) {
+        UsuarioDto usuario = usuarioService.getById(id);
+        model.addAttribute("usuario", usuario);
+        return "usuarios/view"; // Vista HTML: usuarios/view.html
     }
 
-    // POST /api/usuarios
-    @PostMapping
-    public ResponseEntity<UsuarioDto> createUsuario(@RequestBody UsuarioDto usuarioDto) {
-        UsuarioDto creado = usuarioService.save(usuarioDto);
-        return ResponseEntity.ok(creado);
+
+
+    // Formulario para editar un usuario
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        UsuarioDto usuario = usuarioService.getById(id);
+        model.addAttribute("usuario", usuario);
+        return "usuarios/form"; // Reutiliza el mismo formulario
     }
 
-    // PUT /api/usuarios/{id}
-    @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDto> updateUsuario(@PathVariable Long id, @RequestBody UsuarioDto usuarioDto) {
-        UsuarioDto actualizado = usuarioService.update(id, usuarioDto);
-        return ResponseEntity.ok(actualizado);
+    // Actualizar usuario
+    @PostMapping("/update/{id}")
+    public String updateUsuario(@PathVariable Long id, @ModelAttribute("usuario") UsuarioDto usuarioDto) {
+        usuarioService.update(id, usuarioDto);
+        return "redirect:/usuarios";
     }
 
-    // DELETE /api/usuarios/{id}
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
+    // Eliminar usuario
+    @GetMapping("/delete/{id}")
+    public String deleteUsuario(@PathVariable Long id) {
         usuarioService.delete(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/usuarios";
     }
 }

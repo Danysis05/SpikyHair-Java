@@ -3,12 +3,13 @@ package com.proyecto.spikyhair.controller;
 import com.proyecto.spikyhair.DTO.RolDto;
 import com.proyecto.spikyhair.service.RolService;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/roles")
 public class RolController {
 
@@ -18,37 +19,55 @@ public class RolController {
         this.rolService = rolService;
     }
 
-    // GET /api/roles
+    // Mostrar todos los roles
     @GetMapping
-    public ResponseEntity<List<RolDto>> getAllRoles() {
-        return ResponseEntity.ok(rolService.getAll());
+    public String listRoles(Model model) {
+        List<RolDto> roles = rolService.getAll();
+        model.addAttribute("roles", roles);
+        return "roles/list"; // Vista HTML: roles/list.html
     }
 
-    // GET /api/roles/{id}
+    // Mostrar un rol por ID
     @GetMapping("/{id}")
-    public ResponseEntity<RolDto> getRolById(@PathVariable Long id) {
-        RolDto dto = rolService.getById(id);
-        return ResponseEntity.ok(dto);
+    public String viewRol(@PathVariable Long id, Model model) {
+        RolDto rol = rolService.getById(id);
+        model.addAttribute("rol", rol);
+        return "roles/view"; // Vista HTML: roles/view.html
     }
 
-    // POST /api/roles
+    // Formulario para crear nuevo rol
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("rol", new RolDto());
+        return "roles/form"; // Vista HTML: roles/form.html
+    }
+
+    // Guardar nuevo rol
     @PostMapping
-    public ResponseEntity<RolDto> createRol(@RequestBody RolDto rolDto) {
-        RolDto nuevoRol = rolService.save(rolDto);
-        return ResponseEntity.ok(nuevoRol);
+    public String createRol(@ModelAttribute("rol") RolDto rolDto) {
+        rolService.save(rolDto);
+        return "redirect:/roles";
     }
 
-    // PUT /api/roles/{id}
-    @PutMapping("/{id}")
-    public ResponseEntity<RolDto> updateRol(@PathVariable Long id, @RequestBody RolDto rolDto) {
-        RolDto actualizado = rolService.update(id, rolDto);
-        return ResponseEntity.ok(actualizado);
+    // Formulario para editar un rol
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        RolDto rol = rolService.getById(id);
+        model.addAttribute("rol", rol);
+        return "roles/form"; // Reutiliza el mismo formulario
     }
 
-    // DELETE /api/roles/{id}
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRol(@PathVariable Long id) {
+    // Actualizar rol
+    @PostMapping("/update/{id}")
+    public String updateRol(@PathVariable Long id, @ModelAttribute("rol") RolDto rolDto) {
+        rolService.update(id, rolDto);
+        return "redirect:/roles";
+    }
+
+    // Eliminar rol
+    @GetMapping("/delete/{id}")
+    public String deleteRol(@PathVariable Long id) {
         rolService.delete(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/roles";
     }
 }

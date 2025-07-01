@@ -29,7 +29,7 @@ public class LoginController {
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         return switch (role) {
             case "ROLE_ADMINISTRADOR" -> "redirect:/admin/dashboard";
-            case "ROLE_USUARIO" -> "redirect:/usuario/index";
+            case "ROLE_USUARIO" -> "redirect:/usuarios/index";
             default -> "redirect:/auth/login?error";
         };
     }

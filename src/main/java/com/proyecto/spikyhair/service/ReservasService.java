@@ -66,5 +66,9 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     public void delete(Long id) {
         reservasRepository.deleteById(id);
     }
+    @Override
+    public long count() {
+        return reservasRepository.count();
+    }
 
 }

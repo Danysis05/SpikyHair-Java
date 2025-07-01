@@ -10,5 +10,6 @@ public interface Idao<T, ID, DTO> {
     DTO save(DTO dto);
     DTO update(ID id, DTO dto);
     void delete(ID id);
+    long count();
 }
 

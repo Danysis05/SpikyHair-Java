@@ -1,14 +1,23 @@
 package com.proyecto.spikyhair.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.service.UsuarioService;
@@ -22,7 +31,8 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-     @GetMapping("/index")
+
+    @GetMapping("/index")
     public String paginaUsuario() {
         return "usuario/index";
     }
@@ -32,38 +42,100 @@ public class UsuarioController {
     public String listUsuarios(Model model) {
         List<UsuarioDto> usuarios = usuarioService.getAll();
         model.addAttribute("usuarios", usuarios);
-        return "usuarios/list"; // Vista HTML: usuarios/list.html
+        return "usuarios/list";
     }
+
 
     // Mostrar un usuario por ID
     @GetMapping("/{id}")
     public String viewUsuario(@PathVariable Long id, Model model) {
         UsuarioDto usuario = usuarioService.getById(id);
         model.addAttribute("usuario", usuario);
-        return "usuarios/view"; // Vista HTML: usuarios/view.html
+        return "usuarios/view";
     }
-
-
 
     // Formulario para editar un usuario
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         UsuarioDto usuario = usuarioService.getById(id);
         model.addAttribute("usuario", usuario);
-        return "usuarios/form"; // Reutiliza el mismo formulario
+        return "usuarios/form";
     }
 
-    // Actualizar usuario
-    @PostMapping("/update/{id}")
-    public String updateUsuario(@PathVariable Long id, @ModelAttribute("usuario") UsuarioDto usuarioDto) {
-        usuarioService.update(id, usuarioDto);
-        return "redirect:/usuarios";
+    // Guardar o actualizar usuario (unificado)
+@PostMapping("/guardar")
+public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
+                             @RequestParam(value = "imagen", required = false) MultipartFile imagen) {
+    try {
+        String rutaCarpeta = System.getProperty("user.dir") + "/uploads/";
+        File carpeta = new File(rutaCarpeta);
+        if (!carpeta.exists()) carpeta.mkdirs();
+
+        if (imagen != null && !imagen.isEmpty()) {
+            String nombreOriginal = imagen.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String nombreArchivo = UUID.randomUUID() + "_" + nombreOriginal;
+            String ruta = rutaCarpeta + nombreArchivo;
+
+            imagen.transferTo(new File(ruta));
+            usuarioDto.setImagenPerfil(nombreArchivo); // SOLO EL NOMBRE
+
+            // Eliminar imagen anterior si existe
+            if (usuarioDto.getId() != null) {
+                UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
+                if (existente.getImagenPerfil() != null && !existente.getImagenPerfil().isEmpty()) {
+                    File anterior = new File(rutaCarpeta + existente.getImagenPerfil());
+                    if (anterior.exists()) anterior.delete();
+                }
+            }
+
+        } else if (usuarioDto.getId() != null) {
+            UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
+            usuarioDto.setImagenPerfil(existente.getImagenPerfil());
+        }
+
+        if (usuarioDto.getId() == null) {
+            usuarioService.save(usuarioDto);
+        } else {
+            usuarioService.update(usuarioDto.getId(), usuarioDto);
+        }
+
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+
+    var usuario = usuarioService.getUsuarioAutenticado();
+
+    if (usuario != null && usuario.getRol().getNombre().equals("ADMINISTRADOR")) {
+        return "redirect:/admin/dashboard";
+    } else {
+        return "redirect:/usuarios/index";
+    }
+}
+@PostMapping("/cambiar-rol")
+
+@ResponseBody
+public ResponseEntity<String> cambiarRol(@RequestBody Map<String, Long> payload) {
+    Long usuarioId = payload.get("usuarioId");
+    Long rolId = payload.get("rolId");
+    usuarioService.actualizarRol(usuarioId, rolId);
+    return ResponseEntity.ok("Rol actualizado correctamente");
+}
+
 
     // Eliminar usuario
     @GetMapping("/delete/{id}")
-    public String deleteUsuario(@PathVariable Long id) {
+    @ResponseBody
+    public ResponseEntity<String> deleteUsuario(@PathVariable Long id) {
+        var usuarioAutenticado = usuarioService.getUsuarioAutenticado();
+
         usuarioService.delete(id);
-        return "redirect:/usuarios";
+
+        // Si el usuario autenticado eliminó su propia cuenta, debe cerrar sesión (redirigir al login)
+        if (usuarioAutenticado != null && usuarioAutenticado.getId().equals(id)) {
+            return ResponseEntity.status(205).body("Eliminado propio"); // 205 Reset Content (o usa otro status personalizado)
+        }
+
+        return ResponseEntity.ok("Usuario eliminado");
     }
+
 }

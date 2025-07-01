@@ -38,6 +38,10 @@ public class Usuario {
     @Column(name = "telefono", nullable = true, length = 15)
     private String telefono;
 
+    @Column(name = "imagen_perfil", nullable = true, length = 255)
+    private String imagenPerfil;
+
+
     @ManyToOne
     @JoinColumn(name = "rol_id", nullable = false)
     private Rol rol;

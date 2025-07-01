@@ -1,13 +1,21 @@
 package com.proyecto.spikyhair.controller;
 
-import com.proyecto.spikyhair.DTO.ServiciosDto;
-import com.proyecto.spikyhair.service.ServiciosService;
+import java.io.IOException;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.service.ServiciosService;
 
 @Controller
 @RequestMapping("/servicios")
@@ -43,11 +51,19 @@ public class ServicioController {
     }
 
     // Guardar nuevo servicio
-    @PostMapping
-    public String crearServicio(@ModelAttribute("servicio") ServiciosDto serviciosDTO) {
-        serviciosService.save(serviciosDTO);
-        return "redirect:/servicios";
+    @PostMapping("/create")
+    public String crearServicio(@ModelAttribute ServiciosDto servicioDto,
+                                 @RequestParam("imagenFile") MultipartFile imagenFile,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            serviciosService.guardarServicio(servicioDto, imagenFile);
+            redirectAttributes.addFlashAttribute("success", "Servicio guardado con éxito.");
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Error al guardar el servicio.");
+        }
+        return "redirect:/admin/dashboard";
     }
+
 
     // Mostrar formulario de edición
     @GetMapping("/edit/{id}")
@@ -61,23 +77,22 @@ public class ServicioController {
     }
 
     // Actualizar servicio
-    @PostMapping("/update/{id}")
-    public String actualizarServicio(@PathVariable Long id, @ModelAttribute("servicio") ServiciosDto datosNuevosDTO) {
-        ServiciosDto existenteDTO = serviciosService.getById(id);
-        if (existenteDTO == null) {
-            return "redirect:/servicios";
-        }
-
-        // Solo actualiza campos si no son null
-        if (datosNuevosDTO.getNombre() != null) existenteDTO.setNombre(datosNuevosDTO.getNombre());
-        if (datosNuevosDTO.getDuracion() != null) existenteDTO.setDuracion(datosNuevosDTO.getDuracion());
-        if (datosNuevosDTO.getDescripcion() != null) existenteDTO.setDescripcion(datosNuevosDTO.getDescripcion());
-        if (datosNuevosDTO.getPrecio() != null) existenteDTO.setPrecio(datosNuevosDTO.getPrecio());
-        if (datosNuevosDTO.getImagen() != null) existenteDTO.setImagen(datosNuevosDTO.getImagen());
-
-        serviciosService.update(id, existenteDTO);
-        return "redirect:/servicios";
+@PostMapping("/update/{id}")
+public String actualizarServicio(@PathVariable Long id,
+                                 @ModelAttribute("servicio") ServiciosDto datosNuevosDTO,
+                                 @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile,
+                                 RedirectAttributes redirectAttributes) {
+    try {
+        serviciosService.update(id, datosNuevosDTO, imagenFile);
+        redirectAttributes.addFlashAttribute("success", "Servicio actualizado con éxito.");
+    } catch (IOException e) {
+        redirectAttributes.addFlashAttribute("error", "Error al actualizar la imagen del servicio.");
     }
+    return "redirect:/admin/dashboard?seccion=servicios";
+}
+
+
+
 
     // Eliminar servicio
     @GetMapping("/delete/{id}")
@@ -86,6 +101,6 @@ public class ServicioController {
         if (servicioDto != null) {
             serviciosService.delete(id);
         }
-        return "redirect:/servicios";
+        return "redirect:/admin/dashboard?seccion=servicios";
     }
 }

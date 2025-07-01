@@ -1,0 +1,731 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #1e1e2f;
+  display: flex;
+  color: #f1f1f1;
+}
+
+.header {
+  background-color: #2e2e3f;
+  color: #f1f1f1;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: #2e2e3f;
+  color: white;
+  height: 100vh;
+  padding: 20px 0;
+  position: fixed;
+  border-right: 2px solid #3e3e50;
+}
+
+.logo {
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #2ec4b6;
+}
+
+.nav {
+  list-style: none;
+  padding: 0;
+}
+
+.nav li {
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav li:hover {
+  background-color: #3c3c5e;
+}
+
+.main {
+  margin-left: 220px;
+  padding: 20px;
+  flex: 1;
+}
+
+.panel {
+  background: #2e2e3f;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.card {
+  background-color: #2ec4b6;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  margin-top: 10px;
+  display: inline-block;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.hidden {
+  display: none;
+}
+
+.logout-button {
+  background-color: #e63946;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  margin-top: 25px;
+}
+
+.logout-button:hover {
+  background-color: #c92a3a;
+}
+.user-actions {
+  display: flex;
+  gap: 20px;   
+}
+.user-actions a{
+  color:  #ffffff;
+  font-size: 25px;
+  margin-top: 25px;
+  transition: color 0.2s ease;
+}
+.user-actions a:hover {
+  color: #a1a5a5;
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: #1e1e2f;
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  color: #f0f0f0;
+}
+
+.modal-content input {
+  width: 500px;
+  padding: 10px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  background-color: #2c2c3d;
+  color: #f0f0f0;
+  border: 1px solid #555;
+  border-radius: 8px;
+}
+
+.modal-content button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-content button:hover {
+  background-color: #a30000;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.perfil-card {
+  background: linear-gradient(to bottom, #1a1a2e, #0f3460);
+  padding: 40px 20px;
+  border-radius: 20px;
+  width: 300px;
+  text-align: center;
+  color: #f0f0f0;
+  position: relative;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+  font-family: sans-serif;
+}
+
+.perfil-header .avatar {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 10px;
+}
+
+.perfil-header .avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #444;
+  object-fit: cover;
+}
+
+.perfil-header .edit-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #222;
+  color: #ff9800;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.perfil-card h2 {
+  margin: 10px 0 5px;
+  font-size: 22px;
+}
+
+.perfil-card p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.perfil-form input {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  background-color: #2c2c3d;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+}
+
+.btn-edit {
+  background: #333;
+  color: #ff9800;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-logout {
+  background: #2b2b2b;
+  color: #ccc;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.close-button {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+.usuarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.datos-container {
+  margin-top: 20px;
+}
+
+.usuarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.usuario-card {
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.usuario-card:hover {
+  transform: scale(1.03);
+}
+
+.usuario-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+.user-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-edit {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #2980b9;
+}
+
+.btn-delete {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+}
+
+.rol-selector {
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+.rol-select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 5px;
+  font-weight: bold;
+  background-color: #ffffff22;
+  color: white;
+}
+
+.rol-label {
+  font-size: 13px;
+  margin-top: 10px;
+  color: #aaa;
+}
+
+.btn-eliminar {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background-color: crimson;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: darkred;
+}
+/* Estilo del modal oscuro que cubre toda la pantalla */
+#modalServicio {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenedor del formulario */
+.servicio-form {
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Formulario */
+#formServicio {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Inputs y Textarea */
+#formServicio input[type="text"],
+#formServicio input[type="number"],
+#formServicio input[type="file"],
+#formServicio textarea {
+  background-color: #2c2c2c;
+  color: #f1f1f1;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+#formServicio textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+#formServicio input:focus,
+#formServicio textarea:focus {
+  outline: none;
+  border-color: crimson;
+}
+
+/* Botones */
+#formServicio button[type="submit"],
+#formServicio button[type="button"] {
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#formServicio button[type="submit"] {
+  background-color: crimson;
+  color: white;
+}
+
+#formServicio button[type="submit"]:hover {
+  background-color: #e6003a;
+}
+
+#formServicio button[type="button"] {
+  background-color: #444;
+  color: #ddd;
+}
+
+#formServicio button[type="button"]:hover {
+  background-color: #666;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.servicio-form {
+  background: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  width: 400px;
+  position: relative;
+}
+
+.servicio-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.servicio-form input[type="text"],
+.servicio-form input[type="number"],
+.servicio-form textarea,
+.servicio-form input[type="file"] {
+  margin-bottom: 15px;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.servicio-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.servicio-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.servicio-form button[type="submit"] {
+  background-color: #28a745;
+  color: white;
+}
+
+.servicio-form button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+.servicio-form button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+.servicio-form button[type="button"]:hover {
+  background-color: #495057;
+}
+    .hidden {
+      display: none !important;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .servicio-form {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .servicio-form input,
+    .servicio-form textarea,
+    .servicio-form button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .servicio-form button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .servicio-form button[type="button"] {
+      background-color: #dc3545;
+    }
+    .agregarServicio {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    /* Fondo oscuro del modal */
+/* Fondo oscuro del modal */
+.modal-Servicio {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+/* Contenedor del formulario */
+.modal-content {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* Título */
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* Inputs */
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.form-textarea {
+  resize: vertical;
+  height: 80px;
+}
+
+/* Label */
+.form-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Archivo */
+.form-file {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Imagen de vista previa */
+.preview-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.imagen-preview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 1px solid #ccc;
+}
+
+/* Botones */
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-guardar {
+  background-color: crimson;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #a10023;
+}
+
+.btn-cancelar {
+  background-color: #eee;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-cancelar:hover {
+  background-color: #ddd;
+}
+
+/* Utilidad */
+.hidden {
+  display: none;
+}
+.boton-editar {
+  background-color: #3b82f6; /* Azul brillante */
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.boton-editar:hover {
+  background-color: #2563eb; /* Azul más oscuro */
+  transform: scale(1.05);
+}
+
+.boton-editar:active {
+  background-color: #1d4ed8;
+}
+
+.btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+
+

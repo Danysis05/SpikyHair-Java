@@ -19,6 +19,9 @@ public class UsuarioDto {
 
     private String telefono;
 
+    private String imagenPerfil;
+
+
     private RolDto rol;
 
 

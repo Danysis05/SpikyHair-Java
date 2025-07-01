@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,12 +49,12 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
     public UsuarioDto save(UsuarioDto dto) {
         Usuario usuario = modelMapper.map(dto, Usuario.class);
 
-        // Asignar el rol "USUARIO" por defecto
         Rol rolUsuario = rolRepository.findByNombre("USUARIO")
             .orElseThrow(() -> new RuntimeException("Rol USUARIO no encontrado"));
         usuario.setRol(rolUsuario);
 
-        // Encriptar contraseña
+        usuario.setImagenPerfil(dto.getImagenPerfil()); // 👈 AÑADIR ESTO
+
         String hashed = passwordEncoder.encode(dto.getContrasena());
         usuario.setContrasena(hashed);
 
@@ -63,24 +65,54 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
     @Override
     public UsuarioDto update(Long id, UsuarioDto dto) {
         Usuario existente = usuarioRepository.findById(id).orElseThrow();
+
         existente.setNombre(dto.getNombre());
         existente.setEmail(dto.getEmail());
 
-        // Solo encripta si se proporciona una nueva contraseña
         if (dto.getContrasena() != null && !dto.getContrasena().isBlank()) {
             String hashed = passwordEncoder.encode(dto.getContrasena());
             existente.setContrasena(hashed);
         }
+
+        existente.setImagenPerfil(dto.getImagenPerfil()); // 👈 AÑADIR ESTO
 
         Usuario actualizado = usuarioRepository.save(existente);
         return modelMapper.map(actualizado, UsuarioDto.class);
     }
 
 
+
     @Override
     public void delete(Long id) {
         usuarioRepository.deleteById(id);
     }
-
+    @Override
+    public long count() {
+        return usuarioRepository.count();
+    }
+    public Usuario getUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+        String email = auth.getName(); 
+        return usuarioRepository.findByEmail(email).orElse(null);
+    }
+public void actualizarRol(Long usuarioId, Long rolId) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+        
+    Rol nuevoRol = rolRepository.findById(rolId)
+        .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + rolId));
+        
+    usuario.setRol(nuevoRol);
+    usuarioRepository.save(usuario);
+}
 
 }
+
+
+
+
+
+

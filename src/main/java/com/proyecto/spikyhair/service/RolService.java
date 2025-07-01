@@ -54,4 +54,8 @@ public class RolService implements Idao<Rol, Long, RolDto> {
     public void delete(Long id) {
         rolRepository.deleteById(id);
     }
+    @Override
+    public long count() {
+        return rolRepository.count();
+    }
 }

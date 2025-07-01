@@ -98,16 +98,39 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
         String email = auth.getName(); 
         return usuarioRepository.findByEmail(email).orElse(null);
     }
-public void actualizarRol(Long usuarioId, Long rolId) {
-    Usuario usuario = usuarioRepository.findById(usuarioId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
-        
-    Rol nuevoRol = rolRepository.findById(rolId)
-        .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + rolId));
-        
-    usuario.setRol(nuevoRol);
-    usuarioRepository.save(usuario);
+    
+    public void actualizarRol(Long usuarioId, Long rolId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+            
+        Rol nuevoRol = rolRepository.findById(rolId)
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + rolId));
+            
+        usuario.setRol(nuevoRol);
+        usuarioRepository.save(usuario);
+    }
+
+    public void crearAdministradorInicial() {
+    String email = "admin@admin.com";
+    if (usuarioRepository.findByEmail(email).isEmpty()) {
+        Usuario admin = new Usuario();
+        admin.setNombre("Administrador");
+        admin.setEmail(email);
+        admin.setContrasena(passwordEncoder.encode("admin123")); // Contraseña hasheada
+
+        Rol rolAdmin = rolRepository.findByNombre("ADMINISTRADOR")
+                .orElseThrow(() -> new RuntimeException("Rol ADMINISTRADOR no encontrado"));
+        admin.setRol(rolAdmin);
+
+        admin.setImagenPerfil("admin.png"); // Puedes dejarlo nulo o usar una imagen por defecto
+        usuarioRepository.save(admin);
+
+        System.out.println("✅ Usuario ADMINISTRADOR creado correctamente.");
+    } else {
+        System.out.println("ℹ️ El usuario ADMINISTRADOR ya existe.");
+    }
 }
+
 
 }
 

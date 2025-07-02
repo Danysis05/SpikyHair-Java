@@ -130,6 +130,23 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
         System.out.println("ℹ️ El usuario ADMINISTRADOR ya existe.");
     }
 }
+public List<UsuarioDto> filtrarUsuarios(String nombreOEmail, String rolNombre) {
+    return usuarioRepository.findAll()
+        .stream()
+        .filter(usuario -> {
+            boolean coincideNombreOEmail = (nombreOEmail == null || nombreOEmail.isBlank()) ||
+                    usuario.getNombre().toLowerCase().contains(nombreOEmail.toLowerCase()) ||
+                    usuario.getEmail().toLowerCase().contains(nombreOEmail.toLowerCase());
+
+            boolean coincideRol = (rolNombre == null || rolNombre.isBlank()) ||
+                    (usuario.getRol() != null && usuario.getRol().getNombre().equalsIgnoreCase(rolNombre));
+
+            return coincideNombreOEmail && coincideRol;
+        })
+        .map(usuario -> modelMapper.map(usuario, UsuarioDto.class))
+        .collect(Collectors.toList());
+}
+
 
 
 }

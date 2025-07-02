@@ -114,6 +114,19 @@ private String guardarImagen(MultipartFile imagenFile, String subcarpeta) throws
 
     return subcarpeta + "/" + nombreArchivo;
 }
+public List<ServiciosDto> filtrarServicios(String nombre, Double precioMin, Double precioMax) {
+    return serviciosRepository.findAll()
+        .stream()
+        .filter(servicio -> {
+            boolean coincideNombre = (nombre == null || nombre.isBlank()) ||
+                    servicio.getNombre().toLowerCase().contains(nombre.toLowerCase());
+            boolean coincidePrecioMin = (precioMin == null) || (servicio.getPrecio() >= precioMin);
+            boolean coincidePrecioMax = (precioMax == null) || (servicio.getPrecio() <= precioMax);
+            return coincideNombre && coincidePrecioMin && coincidePrecioMax;
+        })
+        .map(servicio -> modelMapper.map(servicio, ServiciosDto.class))
+        .collect(Collectors.toList());
+}
 
 
 

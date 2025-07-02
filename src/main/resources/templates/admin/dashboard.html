@@ -37,6 +37,23 @@
     <div id="usuarios" class="panel">
       <h2>Gestión de Usuarios</h2>
       <div class="card">Total usuarios: <strong th:text="${totalUsuarios}">0</strong></div>
+      <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
+        <input type="text" name="nombreUsuario" placeholder="Buscar por nombre o email" th:value="${nombreUsuario}" />
+        <select name="rol">
+          <option value="" th:selected="${rolSeleccionado == null or rolSeleccionado == ''}">Todos</option>
+          <option value="USUARIO" th:selected="${rolSeleccionado == 'USUARIO'}">Usuario</option>
+          <option value="ADMINISTRADOR" th:selected="${rolSeleccionado == 'ADMINISTRADOR'}">Administrador</option>
+        </select>
+        <button type="submit">Filtrar</button>
+        <a th:href="@{/admin/dashboard/pdf-usuarios(
+            nombreUsuario=${nombreUsuario},
+            rol=${rolSeleccionado}
+        )}" target="_blank" class="btn-descargar">
+          Descargar PDF Usuarios
+        </a>
+
+      </form>
+
       <div class="datos-container">
         <div class="usuarios-grid">
           <div class="usuario-card" th:each="u : ${usuarios}" th:attr="data-id=${u.id}">
@@ -59,31 +76,39 @@
     <div id="servicios" class="panel hidden">
       <h2>Gestión de Servicios</h2>
       <div class="card">Servicios activos: <strong th:text="${totalServicios}">0</strong></div>
+      <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
+        <input type="text" name="nombreServicio" placeholder="Nombre del servicio" />
+        <input type="number" name="precioMin" placeholder="Precio mínimo" />
+        <input type="number" name="precioMax" placeholder="Precio máximo" />
+        <button type="submit">Filtrar</button>
+          <a th:href="@{/admin/dashboard/pdf(nombreServicio=${nombreServicio}, precioMin=${precioMin}, precioMax=${precioMax})}" 
+     class="btn-descargar" target="_blank">Descargar PDF</a>
+      </form>
+
       <button onclick="abrirModalServicio()" class="agregarServicio">Nuevo Servicio</button>
       <div class="datos-container">
         <div class="usuarios-grid">
-      <div class="usuario-card" th:each="s : ${servicios}">
-        <h3 th:text="${s.nombre}">Servicio</h3>
-        <p th:text="${s.duracion}">Duración</p>
-        <p th:text="${s.descripcion}">Descripción</p>
-        <p th:text="${s.precio}">Precio</p>
-        <!-- Mostrar imagen si existe -->
-        <img th:src="@{'/uploads/' + ${s.imagen}}" class="img-servicio" />
-        <button class="boton-editar" type="button" onclick="editarServicio(this)" 
-          th:data-id="${s.id}" 
-          th:data-nombre="${s.nombre}" 
-          th:data-duracion="${s.duracion}" 
-          th:data-descripcion="${s.descripcion}" 
-          th:data-precio="${s.precio}" 
-          th:data-imagen="${s.imagen}">
-          Editar
-        </button>
-        <a th:href="@{'/servicios/delete/' + ${s.id}}"
-          class="btn btn-danger"
-          onclick="return confirm('¿Estás seguro de que deseas eliminar este servicio?');">
-          Eliminar
-        </a>
-        </div>
+          <div class="usuario-card" th:each="s : ${servicios}">
+            <h3 th:text="${s.nombre}">Servicio</h3>
+            <p th:text="${s.duracion}">Duración</p>
+            <p th:text="${s.descripcion}">Descripción</p>
+            <p th:text="${s.precio}">Precio</p>
+            <img th:src="@{'/uploads/' + ${s.imagen}}" class="img-servicio" />
+            <button class="boton-editar" type="button" onclick="editarServicio(this)" 
+              th:data-id="${s.id}" 
+              th:data-nombre="${s.nombre}" 
+              th:data-duracion="${s.duracion}" 
+              th:data-descripcion="${s.descripcion}" 
+              th:data-precio="${s.precio}" 
+              th:data-imagen="${s.imagen}">
+              Editar
+            </button>
+            <a th:href="@{'/servicios/delete/' + ${s.id}}"
+              class="btn btn-danger"
+              onclick="return confirm('¿Estás seguro de que deseas eliminar este servicio?');">
+              Eliminar
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -128,196 +153,158 @@
   </div>
 
   <!-- MODAL SERVICIO -->
-<div id="modalServicio" class="modal-Servicio hidden">
-  <div class="modal-content">
-    <h2 class="modal-title">Servicio</h2>
+  <div id="modalServicio" class="modal-Servicio hidden">
+    <div class="modal-content">
+      <h2 class="modal-title">Servicio</h2>
 
-    <form id="formServicio" method="post" enctype="multipart/form-data" action="/servicios/create">
-      <input type="hidden" name="id" id="servicioId" />
+      <form id="formServicio" method="post" enctype="multipart/form-data" action="/servicios/create">
+        <input type="hidden" name="id" id="servicioId" />
 
-      <input type="text" name="nombre" id="nombre" placeholder="Nombre del servicio" required class="form-input" />
+        <input type="text" name="nombre" id="nombre" placeholder="Nombre del servicio" required class="form-input" />
+        <input type="text" name="duracion" id="duracion" placeholder="Duración (ej: 45 min)" required class="form-input" />
+        <textarea name="descripcion" id="descripcion" placeholder="Descripción" required class="form-textarea"></textarea>
+        <input type="number" step="0.01" name="precio" id="precio" placeholder="Precio" required class="form-input" />
 
-      <input type="text" name="duracion" id="duracion" placeholder="Duración (ej: 45 min)" required class="form-input" />
+        <label for="imagenFile" class="form-label">Imagen del servicio</label>
+        <input type="file" name="imagenFile" id="imagenFile" accept="image/*" class="form-file" />
 
-      <textarea name="descripcion" id="descripcion" placeholder="Descripción" required class="form-textarea"></textarea>
+        <div id="previewContainer" class="preview-container">
+          <img id="imagenPreview" src="" alt="Vista previa" class="imagen-preview hidden" />
+        </div>
 
-      <input type="number" step="0.01" name="precio" id="precio" placeholder="Precio" required class="form-input" />
-
-      <label for="imagenFile" class="form-label">Imagen del servicio</label>
-      <input type="file" name="imagenFile" id="imagenFile" accept="image/*" class="form-file" />
-
-      <div id="previewContainer" class="preview-container">
-        <img id="imagenPreview" src="" alt="Vista previa" class="imagen-preview hidden" />
-      </div>
-
-      <div class="form-buttons">
-        <button type="submit" class="btn-guardar">Guardar</button>
-        <button type="button" onclick="cerrarModalServicio()" class="btn-cancelar">Cancelar</button>
-      </div>
-    </form>
+        <div class="form-buttons">
+          <button type="submit" class="btn-guardar">Guardar</button>
+          <button type="button" onclick="cerrarModalServicio()" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
+  <!-- SCRIPTS -->
+ <script>
+  function navigate(seccionId) {
+    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
+    document.getElementById(seccionId).classList.remove('hidden');
+    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
+  }
 
+  // Restaurar sección activa al cargar
+  window.addEventListener('DOMContentLoaded', () => {
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
+    navigate(seccionActiva);
+  });
 
-  <script>
-    function navigate(seccionId) {
-      const secciones = document.querySelectorAll('.panel');
-      secciones.forEach(seccion => seccion.classList.add('hidden'));
-      document.getElementById(seccionId).classList.remove('hidden');
-    }
+  document.getElementById('perfilBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('modalPerfil').classList.remove('hidden');
+  });
 
-    document.getElementById('perfilBtn').addEventListener('click', function(e) {
-      e.preventDefault();
-      document.getElementById('modalPerfil').classList.remove('hidden');
-    });
+  function cerrarModal() {
+    document.getElementById('modalPerfil').classList.add('hidden');
+  }
 
-    function cerrarModal() {
-      document.getElementById('modalPerfil').classList.add('hidden');
-    }
-
-    document.getElementById('imagenPerfil').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('avatarPreview').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    function cambiarRol(selectElement) {
-      const userId = selectElement.getAttribute("data-id");
-      const nuevoRol = selectElement.value;
-      const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
-      if (!confirmado) {
-        selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-        return;
-      }
-
-      const rolMap = {
-        "ADMINISTRADOR": 1,
-        "USUARIO": 2
+  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('avatarPreview').src = e.target.result;
       };
+      reader.readAsDataURL(file);
+    }
+  });
 
-      fetch(`/usuarios/cambiar-rol`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          usuarioId: parseInt(userId),
-          rolId: rolMap[nuevoRol]
-        })
+  function cambiarRol(selectElement) {
+    const userId = selectElement.getAttribute("data-id");
+    const nuevoRol = selectElement.value;
+    const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
+    if (!confirmado) {
+      selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
+      return;
+    }
+
+    const rolMap = {
+      "ADMINISTRADOR": 1,
+      "USUARIO": 2
+    };
+
+    fetch(`/usuarios/cambiar-rol`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuarioId: parseInt(userId),
+        rolId: rolMap[nuevoRol]
       })
-      .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
-      .catch(error => {
-        console.error('Error en la solicitud:', error);
-        alert('Error al actualizar el rol');
-      });
-    }
+    })
+    .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
+    .catch(error => {
+      console.error('Error en la solicitud:', error);
+      alert('Error al actualizar el rol');
+    });
+  }
 
-    function eliminarUsuario(boton) {
-      const userId = boton.getAttribute("data-id");
-      if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
+  function eliminarUsuario(boton) {
+    const userId = boton.getAttribute("data-id");
+    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
 
-      fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
-        .then(response => {
-          if (response.status === 205) {
-            alert("Tu cuenta ha sido eliminada. Saliendo...");
-            window.location.href = "/auth/login";
-          } else if (response.ok) {
-            boton.closest(".usuario-card").remove();
-            alert("Usuario eliminado correctamente");
-          } else {
-            alert("Error al eliminar el usuario");
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
+    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
+      .then(response => {
+        if (response.status === 205) {
+          alert("Tu cuenta ha sido eliminada. Saliendo...");
+          window.location.href = "/auth/login";
+        } else if (response.ok) {
+          boton.closest(".usuario-card").remove();
+          alert("Usuario eliminado correctamente");
+        } else {
           alert("Error al eliminar el usuario");
-        });
-    }
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Error al eliminar el usuario");
+      });
+  }
 
-
-  </script>
-<script>
   function abrirModalServicio() {
     const form = document.getElementById('formServicio');
-    form.reset(); // Limpiar campos
-    form.action = '/servicios/create'; // Acción por defecto
+    form.reset();
+    form.action = '/servicios/create';
     document.getElementById('servicioId').value = '';
-
-    // Limpiar imagen previa
     const preview = document.getElementById('imagenPreview');
     preview.src = '';
     preview.classList.add('hidden');
-
     document.getElementById('modalServicio').classList.remove('hidden');
   }
 
   function editarServicio(boton) {
     const form = document.getElementById('formServicio');
-
-    // Obtener datos del botón
     const id = boton.getAttribute('data-id');
     const nombre = boton.getAttribute('data-nombre');
     const duracion = boton.getAttribute('data-duracion');
     const descripcion = boton.getAttribute('data-descripcion');
     const precio = boton.getAttribute('data-precio');
-    const imagen = boton.getAttribute('data-imagen'); // nombre de archivo
-
-    // Llenar campos
+    const imagen = boton.getAttribute('data-imagen');
     document.getElementById('servicioId').value = id;
     document.getElementById('nombre').value = nombre;
     document.getElementById('duracion').value = duracion;
     document.getElementById('descripcion').value = descripcion;
     document.getElementById('precio').value = precio;
-
-    // Cambiar acción del formulario
     form.action = '/servicios/update/' + id;
-
-    // Mostrar imagen actual
     const preview = document.getElementById('imagenPreview');
     if (imagen) {
-      preview.src = '/uploads/servicios/' + imagen; // Ajusta si usas otra ruta
+      preview.src = '/uploads/servicios/' + imagen;
       preview.classList.remove('hidden');
     } else {
       preview.src = '';
       preview.classList.add('hidden');
     }
-
     document.getElementById('modalServicio').classList.remove('hidden');
   }
 
   function cerrarModalServicio() {
     document.getElementById('modalServicio').classList.add('hidden');
   }
-
-  // Cerrar modal si se hace clic fuera
-  window.addEventListener('click', function (e) {
-    const modal = document.getElementById('modalServicio');
-    if (e.target === modal) {
-      cerrarModalServicio();
-    }
-  });
-
-// Vista previa al seleccionar nueva imagen
-document.getElementById('imagenFile').addEventListener('change', function (e) {
-  const preview = document.getElementById('imagenPreview');
-  const file = e.target.files[0];
-
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      preview.src = event.target.result;
-      preview.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-  }
-});
 </script>
-
-
 
 </body>
 </html>

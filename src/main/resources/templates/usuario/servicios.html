@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SpikyHair | Inicio</title>
-  <link rel="stylesheet" th:href="@{/css/index.css}" />
-   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta charset="UTF-8">
+    <title>Servicios - SpikyHair</title>
+    <link rel="stylesheet" th:href="@{/css/servicios.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-  <header>
+    <header>
 <div class="menu">
             <div class="contenedor"></div>
             <img src="/uploads/logox.jpg" alt="" class="menu-icono">
             <nav>
                 <ul class="lista-menu">
                     <li>
-                        <a href="#" th:href="@{/servicios/mostrar}">servicios</a>
+                        <a href="#" th:href="@{/usuarios/index}">Inicio</a>
                     </li>
                     <li>
-                        <a th:href="@{/reservas/mostrar}">Reservas</a>
+                        <a href="#" th:href="@{/reservas/mostrar}">Reservas</a>
                     </li>
-
+                    <li>
+                        
+                    </li>
                     <div class="user-actions">
                             <a href="#" id="perfilBtn"><img id="avatarIcon"
               th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
@@ -35,60 +35,44 @@
                         </div>
                 </ul>
             </nav>
-
-
         </div>
         <div class="tex">
-            <h1>SpikyHair</h1>
-            <h1>Reserva tu a Estilo</h1>
-            <a href="//" id="botonHead">Reservar</a>
+            <h1>Tus reservas</h1>
+            <h1>Nuestros Servicios</h1>
+            
         </div>
   </header>
 
+              <section>
+                <div class="separacion"></div>
+                <div class="contenedor2">
+                    <div class="servicios">
+                            <div class="servicio" th:each="servicio : ${servicios}">
+                                <img th:src="@{'/uploads/' + ${servicio.imagen}}" alt="Imagen del servicio" class="servicio-imagen">
+                                <h2 th:text="${servicio.nombre}">nombre</h2>
+                                <p><strong>Duración:</strong> <span th:text="${servicio.duracion}">30 minutos</span></p>
+                                <p><strong>Descripción:</strong> <span th:text="${servicio.descripcion}">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</span></p>
+                                <p><strong>Precio:</strong> <span th:text="${servicio.precio}">$precio</span></p>
+                                <button type="button"
+                                        th:attr="onclick=|abrirModalReserva(${servicio.id}, '${servicio.nombre}')|">
+                                  Reservar cita
+                                </button>
+
+                            </div>
+                    </div>
+                </div>
+            </section>
   <div class="separacion"></div>
     <main>
-        <section id="nosotros">
-            <div class="dentro">
-                <img src="/uploads/nosotros.jpg" alt="">
-                <div class="info">
-                    <h1>Nosotros</h1>
-                    <h4>Lorem ipsum dolor sit amet consectetur adipisicing elit.</h4>
-                    <p>Nuestra peluquería ha sido un pilar en la comunidad desde hace más de 10 años, ofreciendo servicios de calidad y atención personalizada. Nos comprometemos a realzar la belleza de cada cliente, guiados por nuestra misión de brindar una experiencia única y memorable.</p>
-                </div>
-            </div>
-
-        </section>
-
-        <div class="separacion"></div>
-        <section id="galeria">
-            <div class="container-fluid">
-                <h3 id="sax2">¿Qué te ofrecemos?</h3>
-                <div id="estable" class="separacion"></div>
-                <div class="row">
-                    <div class="columna-33 columna-mobile-50">
-                        <div class="cuadrado-perfecto">
-                            <a href="#" th:href="@{/servicios/mostrar}">
-                                <img src="/uploads/servicios.jpg" alt="">
-                                <h4>Servicios</h4>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="columna-33">
-                            <h1>Ecuentra el mejor servicio para ti</h1>
-                            <p>Ofrecemos servicios de peluquería especializados en cambio de imagen, brindando cortes, coloración, tratamientos capilares y asesoría personalizada para resaltar tu estilo y renovar tu apariencia.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+         
         <div class="separacion"></div>
 
         <section id="last">
             <div class="obso">
                 <h1>¡Reserva tu cita hoy mismo!</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae voluptatum facere ratione aliquam perferendis</p>
-                <div class="botones">
-                    <a href="#" th:href="@{/servicios/mostrar}">Reservar</a>
-                </div>
+                <p>Los mejores servicios que encontraras</p>
+
+
             </div>
         </section>
         <div class="separacion"></div>
@@ -124,16 +108,49 @@
       <span class="close-button" onclick="cerrarModal()">&times;</span>
     </div>
   </div>
+  <!-- MODAL RESERVA -->
+
+<div id="modalReserva" class="modal hidden">
+  <form id="formReserva" method="post" th:action="@{/reservas/crear}">
+    
+
+
+    <!-- Opción 1: Servicio precargado -->
+    <div id="campoServicioFijo" class="hidden">
+      <input type="text" id="nombreServicio" readonly />
+      <input type="hidden" name="servicioId" id="servicioIdFijo" />
+    </div>
+
+    <!-- Opción 2: Seleccionar servicio manual -->
+    <div id="campoServicioSelect" class="hidden">
+      <select name="servicioId" id="servicioSelect">
+        <option value="">Seleccionar servicio</option>
+        <option th:each="servicio : ${listaServicios}"
+                th:value="${servicio.id}"
+                th:text="${servicio.nombre}"></option>
+      </select>
+    </div>
+
+    <!-- Otros campos de la reserva, por ejemplo fecha -->
+    <input type="date" name="fecha" required />
+
+    <!-- Botón de envío -->
+    <button type="submit">Reservar</button>
+
+  </form>
+</div>
+
+
 
 <footer>
     <div class="contenedor-footer">
         <div class="nav-footer">
             <ul>
                 <li>
-                    <a href="#" th:href="@{/servicios/mostrar}">Servicios</a>
+                    <a href="#" th:href="@{/usuarios/index}">Inicio</a>
                 </li>
                 <li>
-                    <a th:href="@{/reservas/mostrar}">Reservas</a>
+                    <a href="#" th:href="@{/reservas/mostrar}">Reservas</a>
                 </li>
                 <li>
                     |
@@ -156,8 +173,8 @@
     </div>
     <div class="footer-last"><p>© SpikyHair 2025</p></div>
 </footer>
-<script>
-  function navigate(seccionId) {
+<script>// Seleccionar elementos
+ function navigate(seccionId) {
     document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
     document.getElementById(seccionId).classList.remove('hidden');
     localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
@@ -240,46 +257,46 @@
       });
   }
 
-  function abrirModalServicio() {
-    const form = document.getElementById('formServicio');
-    form.reset();
-    form.action = '/servicios/create';
-    document.getElementById('servicioId').value = '';
-    const preview = document.getElementById('imagenPreview');
-    preview.src = '';
-    preview.classList.add('hidden');
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
+  function abrirModalReserva(servicioId, nombreServicio) {
+  const modal = document.getElementById('modalReserva');
+  modal.classList.remove('hidden');
 
-  function editarServicio(boton) {
-    const form = document.getElementById('formServicio');
-    const id = boton.getAttribute('data-id');
-    const nombre = boton.getAttribute('data-nombre');
-    const duracion = boton.getAttribute('data-duracion');
-    const descripcion = boton.getAttribute('data-descripcion');
-    const precio = boton.getAttribute('data-precio');
-    const imagen = boton.getAttribute('data-imagen');
-    document.getElementById('servicioId').value = id;
-    document.getElementById('nombre').value = nombre;
-    document.getElementById('duracion').value = duracion;
-    document.getElementById('descripcion').value = descripcion;
-    document.getElementById('precio').value = precio;
-    form.action = '/servicios/update/' + id;
-    const preview = document.getElementById('imagenPreview');
-    if (imagen) {
-      preview.src = '/uploads/servicios/' + imagen;
-      preview.classList.remove('hidden');
-    } else {
-      preview.src = '';
-      preview.classList.add('hidden');
-    }
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
+  document.getElementById('campoServicioFijo').classList.remove('hidden');
+  document.getElementById('campoServicioSelect').classList.add('hidden');
 
-  function cerrarModalServicio() {
-    document.getElementById('modalServicio').classList.add('hidden');
-  }
+  document.getElementById('nombreServicio').value = nombreServicio;
+  document.getElementById('servicioIdFijo').value = servicioId;
+  document.getElementById('servicioIdFijo').disabled = false;
+  document.getElementById('servicioSelect').disabled = true;
+
+  // ✅ Tomar el usuarioId desde el input oculto
+  const usuarioId = document.getElementById('usuarioIdActual').value;
+  document.querySelector('input[name="usuarioId"]').value = usuarioId;
+}
+
+function abrirModalReservaGeneral() {
+  const modal = document.getElementById('modalReserva');
+  modal.classList.remove('hidden');
+
+  document.getElementById('campoServicioSelect').classList.remove('hidden');
+  document.getElementById('campoServicioFijo').classList.add('hidden');
+
+  document.getElementById('servicioSelect').value = "";
+  document.getElementById('servicioIdFijo').value = "";
+  document.getElementById('servicioSelect').disabled = false;
+  document.getElementById('servicioIdFijo').disabled = true;
+
+  // ✅ Tomar el usuarioId desde el input oculto
+  const usuarioId = document.getElementById('usuarioIdActual').value;
+  document.querySelector('input[name="usuarioId"]').value = usuarioId;
+}
+
+
+
+
+
+
+
 </script>
-
 </body>
 </html>

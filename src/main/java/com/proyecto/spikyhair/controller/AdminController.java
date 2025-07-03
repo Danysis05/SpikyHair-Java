@@ -59,14 +59,19 @@ public class AdminController {
             @RequestParam(required = false) String nombreServicio,
             @RequestParam(required = false) Double precioMin,
             @RequestParam(required = false) Double precioMax,
+            @RequestParam(required = false) String estado,
             Model model) {
 
         Usuario usuario = usuarioService.getUsuarioAutenticado();
+            if (nombreUsuario != null && nombreUsuario.trim().isEmpty()) nombreUsuario = null;
+    if (rol != null && rol.trim().isEmpty()) rol = null;
+    if (nombreServicio != null && nombreServicio.trim().isEmpty()) nombreServicio = null;
+    if (estado != null && estado.trim().isEmpty()) estado = null;
 
         // FILTROS
         List<UsuarioDto> usuarios = usuarioService.filtrarUsuarios(nombreUsuario, rol);
         List<ServiciosDto> servicios = serviciosService.filtrarServicios(nombreServicio, precioMin, precioMax);
-        List<ReservasDto> reservas = reservasService.getAll();
+        List<ReservasDto> reservas = reservasService.filtrarReservas(nombreUsuario, nombreServicio, estado);
 
         long totalUsuarios = usuarioRepository.count();
         long totalServicios = serviciosService.count();
@@ -88,6 +93,7 @@ public class AdminController {
         model.addAttribute("nombreServicio", nombreServicio);
         model.addAttribute("precioMin", precioMin);
         model.addAttribute("precioMax", precioMax);
+        model.addAttribute("estado", estado);
 
         return "admin/dashboard";
     }
@@ -118,13 +124,12 @@ public class AdminController {
         table.setWidthPercentage(100);
         table.setWidths(new float[] {3, 2, 4, 2});
 
-        Stream.of("Nombre", "Duración", "Descripción", "Precio")
-                .forEach(header -> {
-                    PdfPCell cell = new PdfPCell(new Phrase(header));
-                    cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    cell.setPadding(5);
-                    table.addCell(cell);
-                });
+        Stream.of("Nombre", "Duración", "Descripción", "Precio").forEach(header -> {
+            PdfPCell cell = new PdfPCell(new Phrase(header));
+            cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            cell.setPadding(5);
+            table.addCell(cell);
+        });
 
         for (ServiciosDto servicio : servicios) {
             table.addCell(servicio.getNombre());
@@ -138,47 +143,110 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard/pdf-usuarios")
-public void generarPdfUsuarios(
-    @RequestParam(required = false) String nombreUsuario,
-    @RequestParam(required = false) String rol,
-    HttpServletResponse response) throws IOException, DocumentException {
+    public void generarPdfUsuarios(
+            @RequestParam(required = false) String nombreUsuario,
+            @RequestParam(required = false) String rol,
+            HttpServletResponse response) throws IOException, DocumentException {
 
-    List<UsuarioDto> usuarios = usuarioService.filtrarUsuarios(nombreUsuario, rol);
+        List<UsuarioDto> usuarios = usuarioService.filtrarUsuarios(nombreUsuario, rol);
 
-    response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "attachment; filename=usuarios.pdf");
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=usuarios.pdf");
 
-    Document document = new Document();
-    PdfWriter.getInstance(document, response.getOutputStream());
-    document.open();
+        Document document = new Document();
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
 
-    Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-    Paragraph title = new Paragraph("Reporte de Usuarios", titleFont);
-    title.setAlignment(Element.ALIGN_CENTER);
-    title.setSpacingAfter(20);
-    document.add(title);
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+        Paragraph title = new Paragraph("Reporte de Usuarios", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(20);
+        document.add(title);
 
-    PdfPTable table = new PdfPTable(4); // Nombre, Email, Teléfono, Rol
-    table.setWidthPercentage(100);
-    table.setWidths(new float[] {3, 4, 3, 2});
+        PdfPTable table = new PdfPTable(4); // Nombre, Email, Teléfono, Rol
+        table.setWidthPercentage(100);
+        table.setWidths(new float[] {3, 4, 3, 2});
 
-    Stream.of("Nombre", "Email", "Teléfono", "Rol")
-        .forEach(header -> {
+        Stream.of("Nombre", "Email", "Teléfono", "Rol").forEach(header -> {
             PdfPCell cell = new PdfPCell(new Phrase(header));
             cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
             cell.setPadding(5);
             table.addCell(cell);
         });
 
-    for (UsuarioDto usuario : usuarios) {
-        table.addCell(usuario.getNombre());
-        table.addCell(usuario.getEmail());
-        table.addCell(usuario.getTelefono());
-        table.addCell(usuario.getRol().getNombre()); // Asegúrate que RolDto tenga getNombre()
+        for (UsuarioDto usuario : usuarios) {
+            table.addCell(usuario.getNombre());
+            table.addCell(usuario.getEmail());
+            table.addCell(usuario.getTelefono());
+            table.addCell(usuario.getRol().getNombre());
+        }
+
+        document.add(table);
+        document.close();
     }
 
-    document.add(table);
-    document.close();
+    @GetMapping("/dashboard/pdf-reservas")
+public void generarPdfReservas(
+        @RequestParam(required = false) String nombreUsuario,
+        @RequestParam(required = false) String nombreServicio,
+        @RequestParam(required = false) String estado,
+        HttpServletResponse response) throws IOException, DocumentException {
+
+    // Limpiar filtros vacíos
+    if (nombreUsuario != null && nombreUsuario.trim().isEmpty()) nombreUsuario = null;
+    if (nombreServicio != null && nombreServicio.trim().isEmpty()) nombreServicio = null;
+    if (estado != null && estado.trim().isEmpty()) estado = null;
+
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment; filename=reservas.pdf");
+
+    try {
+        List<ReservasDto> reservas = reservasService.filtrarReservas(nombreUsuario, nombreServicio, estado);
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+        Paragraph title = new Paragraph("Reporte de Reservas", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(20);
+        document.add(title);
+
+        if (reservas == null || reservas.isEmpty()) {
+            document.add(new Paragraph("No se encontraron reservas para los filtros seleccionados."));
+        } else {
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{3, 3, 2, 2});
+
+            Stream.of("Usuario", "Servicio", "Fecha", "Estado").forEach(header -> {
+                PdfPCell cell = new PdfPCell(new Phrase(header));
+                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setPadding(5);
+                table.addCell(cell);
+            });
+
+            for (ReservasDto reserva : reservas) {
+                table.addCell(reserva.getUsuario() != null ? reserva.getUsuario().getNombre() : "N/A");
+                table.addCell(reserva.getServicio() != null ? reserva.getServicio().getNombre() : "N/A");
+                table.addCell(reserva.getFecha() != null ? reserva.getFecha() : "N/A");
+                table.addCell(reserva.getEstado() != null ? reserva.getEstado() : "N/A");
+            }
+
+            document.add(table);
+        }
+
+        document.close();
+    } catch (Exception e) {
+        // Para evitar respuesta corrupta
+        Document errorDoc = new Document();
+        PdfWriter.getInstance(errorDoc, response.getOutputStream());
+        errorDoc.open();
+        errorDoc.add(new Paragraph("Error al generar el reporte: " + e.getMessage()));
+        errorDoc.close();
+    }
 }
+
 
 }

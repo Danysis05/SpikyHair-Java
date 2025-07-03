@@ -1,31 +1,71 @@
 package com.proyecto.spikyhair.controller;
 
-import com.proyecto.spikyhair.DTO.ReservasDto;
-import com.proyecto.spikyhair.service.ReservasService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import com.proyecto.spikyhair.DTO.ReservasDto;
+import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.DTO.UsuarioDto;
+import com.proyecto.spikyhair.entity.Reserva;
+import com.proyecto.spikyhair.entity.Usuario;
+import com.proyecto.spikyhair.enums.Estado;
+import com.proyecto.spikyhair.repository.ReservasRepository;
+import com.proyecto.spikyhair.service.ReservasService;
+import com.proyecto.spikyhair.service.ServiciosService;
+import com.proyecto.spikyhair.service.UsuarioService;
+
 
 @Controller
 @RequestMapping("/reservas")
 public class ReservaController {
 
     private final ReservasService reservasService;
+    private final UsuarioService usuarioService;
+    private final ServiciosService serviciosService;
+    private final ReservasRepository ReservasRepository;
 
-    public ReservaController(ReservasService reservasService) {
+    public ReservaController(ReservasService reservasService, UsuarioService usuarioService,
+                             ServiciosService serviciosService, ReservasRepository reservasRepository) {
         this.reservasService = reservasService;
+        this.usuarioService = usuarioService;
+        this.serviciosService = serviciosService;
+        this.ReservasRepository = reservasRepository;
     }
 
     // Mostrar todas las reservas
-    @GetMapping
-    public String listReservas(Model model) {
-        List<ReservasDto> reservas = reservasService.getAll();
-        model.addAttribute("reservas", reservas);
-        return "reservas/list"; // Vista: templates/reservas/list.html
-    }
+@GetMapping("/mostrar")
+public String listReservas(Model model) {
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+
+    // Obtenemos reservas del usuario
+    List<Reserva> reservasEntidad = ReservasRepository.findByUsuarioId(usuario.getId());
+
+    // Convertimos cada Reserva a ReservasDto
+    List<ReservasDto> reservas = reservasEntidad.stream()
+        .map(ReservasDto::new)
+        .collect(Collectors.toList());
+
+    model.addAttribute("usuario", usuario);
+    model.addAttribute("reservas", reservas);
+    return "usuario/reservas";
+}
+
+
+
 
     // Ver una reserva por ID
     @GetMapping("/{id}")
@@ -43,11 +83,28 @@ public class ReservaController {
     }
 
     // Guardar nueva reserva
-    @PostMapping
-    public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
-        reservasService.save(dto);
-        return "redirect:/reservas";
-    }
+@PostMapping("/crear")
+public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+    if (usuario == null) throw new RuntimeException("Usuario no autenticado");
+
+    // Convertir Usuario a UsuarioDto
+    UsuarioDto usuarioDto = new UsuarioDto();
+    usuarioDto.setId(usuario.getId());
+    usuarioDto.setNombre(usuario.getNombre()); // si tienes más campos relevantes
+    dto.setUsuario(usuarioDto);
+
+    ServiciosDto servicio = serviciosService.getById(dto.getServicioId());
+    dto.setServicio(servicio);
+    dto.setDuracion(servicio.getDuracion());
+    dto.setEstado(Estado.PENDIENTE.name());
+
+    reservasService.save(dto);
+
+    return "redirect:/reservas/mostrar"; // Redirige a la lista de reservas
+}
+
+
 
     // Formulario para editar reserva
     @GetMapping("/edit/{id}")
@@ -65,9 +122,49 @@ public class ReservaController {
     }
 
     // Eliminar reserva
-    @GetMapping("/delete/{id}")
-    public String deleteReserva(@PathVariable Long id) {
-        reservasService.delete(id);
-        return "redirect:/reservas";
+@PostMapping("/eliminar/{id}")
+public String eliminarReserva(@PathVariable Long id, Authentication authentication) {
+    reservasService.delete(id);
+
+    if (authentication != null && authentication.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"))) {
+        return "redirect:/admin/dashboard";
+    } else {
+        return "redirect:/reservas/mostrar"; // Asegúrate de que esta ruta exista
     }
+}
+
+// En tu controlador (ej: DashboardController o ReservaController)
+@PostMapping("/cambiar-estado/{id}")
+@ResponseBody
+public ResponseEntity<Map<String, String>> cambiarEstado(@PathVariable Long id) {
+    Map<String, String> response = new HashMap<>();
+    try {
+        Reserva reserva = reservasService.getReservaById(id);
+
+        if (reserva == null) {
+            response.put("error", "Reserva no encontrada");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        Estado nuevoEstado = reserva.getEstado() == Estado.PENDIENTE ? Estado.REALIZADA : Estado.PENDIENTE;
+        reserva.setEstado(nuevoEstado);
+        reservasService.saveReserva(reserva);
+
+        response.put("estado", nuevoEstado.name());
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        e.printStackTrace(); // Imprime error en consola del backend
+        response.put("error", "Error interno: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+}
+
+
+
+
+
+
+
 }

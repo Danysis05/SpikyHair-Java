@@ -1,6 +1,7 @@
 package com.proyecto.spikyhair.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,8 @@ import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.repository.RolRepository;
 import com.proyecto.spikyhair.repository.UsuarioRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
@@ -147,7 +150,29 @@ public List<UsuarioDto> filtrarUsuarios(String nombreOEmail, String rolNombre) {
         .collect(Collectors.toList());
 }
 
+@PostConstruct
+public void initRoles() {
+    // Crear ADMINISTRADOR primero
+    Optional<Rol> admin = rolRepository.findByNombre("ADMINISTRADOR");
+    if (admin.isEmpty()) {
+        Rol rolAdmin = new Rol();
+        rolAdmin.setNombre("ADMINISTRADOR");
+        rolRepository.save(rolAdmin);
+        System.out.println("✅ Rol ADMINISTRADOR creado correctamente.");
+    }
 
+    // Crear USUARIO después
+    Optional<Rol> user = rolRepository.findByNombre("USUARIO");
+    if (user.isEmpty()) {
+        Rol rolUsuario = new Rol();
+        rolUsuario.setNombre("USUARIO");
+        rolRepository.save(rolUsuario);
+        System.out.println("✅ Rol USUARIO creado correctamente.");
+    }
+}
+
+
+    
 
 }
 

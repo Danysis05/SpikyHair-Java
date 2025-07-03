@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservas - SpikyHair</title>
+    <link rel="stylesheet" th:href="@{/css/reservas.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+<div class="menu">
+            <div class="contenedor"></div>
+            <img src="/uploads/logox.jpg" alt="" class="menu-icono">
+            <nav>
+                <ul class="lista-menu">
+                    <li>
+                        <a href="#" th:href="@{/usuarios/index}">Inicio</a>
+                    </li>
+                    <li>
+                        <a href="#" th:href="@{/servicios/mostrar}">Servicios</a>
+                    </li>
+                    <li>
+                        
+                    </li>
+                    <div class="user-actions">
+                            <a href="#" id="perfilBtn"><img id="avatarIcon"
+              th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
+              alt="Avatar"></a>
+                            <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
+                            </form>
+                        </div>
+                </ul>
+            </nav>
+        </div>
+        <div class="tex">
+            
+            <h1 th:text="${usuario.nombre}"></h1>
+            
+        </div>
+  </header>
+
+<section class="reservas-fichas">
+    <h2 class="titulo-seccion">Tus Reservas</h2>
+    <div class="contenedor-fichas">
+        <div th:each="reserva : ${reservas}" class="ficha-reserva">
+            <h3 th:text="${reserva.servicioNombre}">Servicio</h3>
+            <p><strong>Fecha:</strong> <span th:text="${reserva.fecha}">2025-07-02</span></p>
+
+            <p><strong>Estado:</strong> <span th:text="${reserva.estado}">Confirmada</span></p>
+            <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta reserva?')">
+                <button type="submit" class="btn-eliminar">Eliminar</button>
+            </form>
+
+        </div>
+    </div>
+</section>
+
+  <div class="separacion"></div>
+    <main>
+         
+        <div class="separacion"></div>
+
+
+        
+    </main>
+    <!-- MODAL PERFIL -->
+  <div id="modalPerfil" class="modal hidden">
+    <div class="perfil-card">
+      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+        <div class="perfil-header">
+          <div class="avatar">
+            <img id="avatarPreview"
+              th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
+              alt="Avatar">
+            <label for="imagenPerfil" class="edit-icon" title="Cambiar imagen">
+              <i class="fa-solid fa-camera"></i>
+            </label>
+            <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*">
+          </div>
+          <h2 th:text="${usuario.nombre}">Your Name</h2>
+          <p th:text="${usuario.email}">your.name@gmail.com</p>
+        </div>
+
+        <input type="hidden" name="id" th:value="${usuario.id}">
+        <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required>
+        <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required>
+        <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}">
+        <button type="submit" class="btn-edit">Editar Perfil</button>
+      </form>
+
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn-logout">LOG OUT</button>
+      </form>
+      <span class="close-button" onclick="cerrarModal()">&times;</span>
+    </div>
+  </div>
+ 
+
+
+
+
+
+<footer>
+    <div class="contenedor-footer">
+        <div class="nav-footer">
+            <ul>
+                <li>
+                    <a href="#" th:href="@{/usuarios/index}">Inicio</a>
+                </li>
+                <li>
+                    <a href="#" th:href="@{/servicios/mostrar}">Servicios</a>
+                </li>
+                <li>
+                    |
+                </li>
+                <li>
+                    <form th:action="@{/logout}" method="POST" id="logout-form">
+                        <button type="submit">LogOut</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+        <div class="listas-footer">
+            <ul>
+                <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+                <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
+                <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
+                <li><a href="#"><i class="fa-brands fa-tiktok"></i></a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-last"><p>© SpikyHair 2025</p></div>
+</footer>
+<script>// Seleccionar elementos
+ function navigate(seccionId) {
+    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
+    document.getElementById(seccionId).classList.remove('hidden');
+    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
+  }
+
+  // Restaurar sección activa al cargar
+  window.addEventListener('DOMContentLoaded', () => {
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
+    navigate(seccionActiva);
+  });
+
+  document.getElementById('perfilBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('modalPerfil').classList.remove('hidden');
+  });
+
+  function cerrarModal() {
+    document.getElementById('modalPerfil').classList.add('hidden');
+  }
+
+  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('avatarPreview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+</body>
+</html>

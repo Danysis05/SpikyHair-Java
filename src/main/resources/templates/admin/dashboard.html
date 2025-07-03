@@ -9,7 +9,10 @@
 </head>
 <body>
   <div class="sidebar">
-    <div class="logo">SPIKYHAIR</div>
+    <div class="logo">
+      <img src="/uploads/Logo.png" alt="">
+      SPIKYHAIR
+    </div>
     <ul class="nav">
       <li onclick="navigate('usuarios')">Usuarios</li>
       <li onclick="navigate('servicios')">Servicios</li>
@@ -116,8 +119,64 @@
     <!-- PANEL RESERVAS -->
     <div id="reservas" class="panel hidden">
       <h2>Reservas Pendientes</h2>
+
+
+<form method="get" action="/admin/dashboard" class="filtros-form">
+  <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
+  <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
+
+<select name="estado">
+  <option value="" th:selected="${estado == null}">Todos</option>
+  <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
+  <option value="REALIZADA" th:selected="${estado == 'REALIZADA'}">Realizada</option>
+</select>
+
+  <button type="submit">Filtrar</button>
+
+<a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
+   class="btn btn-pdf" target="_blank">
+   Descargar PDF
+</a>
+
+</form>
+
+
+
+
       <div class="card">Pendientes de aprobación: <strong th:text="${totalReservas}">0</strong></div>
+      <div th:if="${#lists.isEmpty(reservas)}" class="card-empty">
+        No hay reservas pendientes.
+      </div>
+
+      <!-- Tarjetas de reservas -->
+      <div th:each="r : ${reservas}" class="reserva-card">
+        <p class="usuario" th:text="${r.usuario.nombre}">Nombre Usuario</p>
+        <p class="servicio" th:text="${r.servicioNombre}">Nombre Servicio</p>
+        <p th:text="${r.estado}"
+          th:class="'estado ' + ${r.estado.toLowerCase()}">
+          Estado
+        </p>
+        <p class="fecha"   th:text="${r.fecha}">01/01/2025 10:00</p>
+
+          <button class="btn-cambiar-estado"
+                  th:data-id="${r.id}"
+                  th:data-estado="${r.estado}"
+                  onclick="cambiarEstado(this)">
+            Cambiar Estado
+          </button>
+
+
+
+        <form th:action="@{'/reservas/eliminar/' + ${r.id}}" method="post" class="form-eliminar">
+          <button type="submit" class="btn-eliminar">Eliminar</button>
+        </form>
+
+      </div>
+
     </div>
+
+ 
+  </div>
   </div>
 
   <!-- MODAL PERFIL -->
@@ -305,6 +364,44 @@
     document.getElementById('modalServicio').classList.add('hidden');
   }
 </script>
+
+<script>
+  function cambiarEstado(button) {
+    const id = button.dataset.id;
+    const estadoActual = button.dataset.estado;
+    const nuevoEstado = estadoActual === 'PENDIENTE' ? 'REALIZADA' : 'PENDIENTE';
+
+    if (confirm(`¿Estás seguro de cambiar el estado a "${nuevoEstado}"?`)) {
+      fetch(`/reservas/cambiar-estado/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'X-CSRF-TOKEN': csrfToken // Si usas Spring Security, agregamos esto
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Error en el servidor");
+        return response.json();
+      })
+      .then(data => {
+        if (data.estado) {
+          // Actualizar estado en el DOM
+          const estadoElemento = button.closest('.reserva-card').querySelector('.estado');
+          estadoElemento.textContent = data.estado;
+          button.dataset.estado = data.estado;
+        } else {
+          alert("Error: " + data.error);
+        }
+      })
+      .catch(error => {
+        alert("Ocurrió un error: " + error);
+      });
+      location.reload();
+    }
+  }
+</script>
+
+
 
 </body>
 </html>

@@ -2,7 +2,6 @@ package com.proyecto.spikyhair.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.proyecto.spikyhair.DTO.UsuarioDto;
+import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.UsuarioService;
 
 @Controller
@@ -33,17 +33,14 @@ public class UsuarioController {
     }
 
     @GetMapping("/index")
-    public String paginaUsuario() {
+    public String paginaUsuario(Model model) {
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+        model.addAttribute("usuario", usuario);
         return "usuario/index";
     }
 
     // Mostrar todos los usuarios
-    @GetMapping
-    public String listUsuarios(Model model) {
-        List<UsuarioDto> usuarios = usuarioService.getAll();
-        model.addAttribute("usuarios", usuarios);
-        return "usuarios/list";
-    }
+
 
 
     // Mostrar un usuario por ID

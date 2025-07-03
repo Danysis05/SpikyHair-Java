@@ -15,25 +15,31 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.ServiciosService;
+import com.proyecto.spikyhair.service.UsuarioService;
 
 @Controller
 @RequestMapping("/servicios")
 public class ServicioController {
 
     private final ServiciosService serviciosService;
+    private final UsuarioService usuarioService;
 
-    public ServicioController(ServiciosService serviciosService) {
+    public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService) {
         this.serviciosService = serviciosService;
+        this.usuarioService = usuarioService;
     }
 
     // Mostrar todos los servicios
-    @GetMapping
-    public String listarServicios(Model model) {
-        List<ServiciosDto> servicios = serviciosService.getAll();
-        model.addAttribute("servicios", servicios);
-        return "servicios/list"; // Vista: templates/servicios/list.html
-    }
+        @GetMapping("/mostrar")
+            public String listarServicios(Model model) {
+                Usuario usuario = usuarioService.getUsuarioAutenticado();
+                List<ServiciosDto> servicios = serviciosService.getAll();
+                model.addAttribute("servicios", servicios);
+                model.addAttribute("usuario", usuario);
+                return "usuario/servicios"; // Vista: templates/servicios/list.html
+            }
 
     // Ver un servicio por ID
     @GetMapping("/{id}")

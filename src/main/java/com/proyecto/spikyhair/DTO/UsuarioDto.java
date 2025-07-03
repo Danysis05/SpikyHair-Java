@@ -1,5 +1,7 @@
 package com.proyecto.spikyhair.DTO;
 
+import com.proyecto.spikyhair.entity.Usuario;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +25,18 @@ public class UsuarioDto {
 
 
     private RolDto rol;
+
+    public UsuarioDto(Usuario usuario) {
+    this.id = usuario.getId();
+    this.nombre = usuario.getNombre();
+    this.email = usuario.getEmail();
+    this.telefono = usuario.getTelefono();
+
+    // Asume que RolDto tiene un constructor que recibe un Rol
+    if (usuario.getRol() != null) {
+        this.rol = new RolDto(usuario.getRol());
+    }
+}
 
 
 }

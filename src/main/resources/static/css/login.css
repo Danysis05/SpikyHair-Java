@@ -1,70 +1,186 @@
+/* --- FUENTES Y FONDO --- */
 body {
-    background-color: #1e1e1e;
-    color: #fff;
-    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('/uploads/fondo2.jpg') no-repeat center center fixed;
+    background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    overflow: hidden;
+    position: relative; /* necesario para que ::before se posicione bien */
+    z-index: 0;
 }
 
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* oscurece el fondo */
+    z-index: -1; /* lo envía detrás del contenido */
+}
+
+
+/* --- ANIMACIONES --- */
+
+/* Formulario aparece suavemente desde arriba */
+@keyframes fadeInSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mensajes aparecen suavemente */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- CONTENEDOR DEL LOGIN --- */
 .login-container {
-    background-color: #2c2c2c;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 0 10px #000;
+    animation: fadeInSlide 0.8s ease forwards;
+    opacity: 0;
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     width: 100%;
     max-width: 400px;
-}
-
-h2 {
     text-align: center;
-    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
-input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: none;
-    border-radius: 8px;
-    background-color: #3c3c3c;
-    color: #fff;
-}
-
-input::placeholder {
-    color: #bbb;
-}
-
-button {
-    width: 100%;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 8px;
-    background-color: crimson;
-    color: white;
+/* --- TÍTULO --- */
+.login-container h2 {
+    margin-bottom: 24px;
+    color: crimson;
     font-weight: bold;
+}
+
+/* --- INPUTS --- */
+.login-container input[type="email"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: crimson;
+}
+
+/* --- BOTÓN --- */
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: crimson;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #a30000;
+/* Hover */
+.login-container button:hover {
+    background-color: #a1001a;
+    transform: scale(1.03);
 }
 
+/* --- EFECTO RIPPLE --- */
+.login-container button::after {
+    content: "";
+    position: absolute;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    transform: scale(0);
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+    pointer-events: none;
+    animation: none;
+}
+
+/* Cuando el botón es clicado, se activa el efecto */
+.login-container button:active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+/* Ripple keyframes */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* --- MENSAJES DE ERROR Y LOGOUT --- */
 .error-message,
 .logout-message {
-    text-align: center;
-    margin-bottom: 1rem;
-    font-weight: bold;
+    margin-bottom: 16px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    animation: fadeIn 0.6s ease;
 }
 
 .error-message {
+    background-color: #ffd6d6;
     color: crimson;
 }
 
 .logout-message {
-    color: lightgreen;
+    background-color: #d6ffd6;
+    color: #008000;
 }
+
+/* --- ENLACE DE REGISTRO --- */
+.register-link {
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.register-link a {
+    color: crimson;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+/* --- LOGO DEL FORMULARIO --- */
+.logo-login {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50px;
+    margin-bottom: 16px;
+    border: 3px solid crimson;
+    box-shadow: 0 0 10px rgba(220, 20, 60, 0.4);
+    animation: fadeIn 1s ease;
+}
+

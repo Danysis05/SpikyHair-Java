@@ -172,10 +172,16 @@ public void initRoles() {
 }
 
 
+
+    public long countAdmins() {
+        return usuarioRepository.countByRol_Id(1L);
+    }
+
+    public long countUsers() {
+        return usuarioRepository.countByRol_Id(2L);
+    }
     
-
 }
-
 
 
 

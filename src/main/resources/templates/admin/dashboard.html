@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,8 +39,24 @@
     <!-- PANEL USUARIOS -->
     <div id="usuarios" class="panel">
       <h2>Gestión de Usuarios</h2>
-      <div class="card">Total usuarios: <strong th:text="${totalUsuarios}">0</strong></div>
-      <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Total Usuarios</h5>
+            <h2 th:text="${totalUsuarios}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Administradores</h5>
+            <h2 th:text="${totalAdmins}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Usuarios</h5>
+            <h2 th:text="${totalUsers}">0</h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="usuariosChart" height="200"></canvas>
+        </div>
+              <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
         <input type="text" name="nombreUsuario" placeholder="Buscar por nombre o email" th:value="${nombreUsuario}" />
         <select name="rol">
           <option value="" th:selected="${rolSeleccionado == null or rolSeleccionado == ''}">Todos</option>
@@ -78,7 +94,23 @@
     <!-- PANEL SERVICIOS -->
     <div id="servicios" class="panel hidden">
       <h2>Gestión de Servicios</h2>
-      <div class="card">Servicios activos: <strong th:text="${totalServicios}">0</strong></div>
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Servicios Activos</h5>
+            <h2 th:text="${totalServicios}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Precio Promedio</h5>
+            <h2>$<span th:text="${precioPromedio}">0</span></h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Servicio Más Caro</h5>
+            <h2 th:text="${servicioMasCaro}">0</h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="serviciosChart" height="200"></canvas>
+        </div>
       <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
         <input type="text" name="nombreServicio" placeholder="Nombre del servicio" />
         <input type="number" name="precioMin" placeholder="Precio mínimo" />
@@ -86,6 +118,11 @@
         <button type="submit">Filtrar</button>
           <a th:href="@{/admin/dashboard/pdf(nombreServicio=${nombreServicio}, precioMin=${precioMin}, precioMax=${precioMax})}" 
      class="btn-descargar" target="_blank">Descargar PDF</a>
+      </form>
+      <h3>Importar Servicios</h3>
+      <form th:action="@{/servicios/importar}" method="post" enctype="multipart/form-data" class="importar-form">
+        <input type="file" name="file" accept=".csv" required />
+        <button type="submit" class="btn-importar">Importar CSV</button>
       </form>
 
       <button onclick="abrirModalServicio()" class="agregarServicio">Nuevo Servicio</button>
@@ -119,26 +156,46 @@
     <!-- PANEL RESERVAS -->
     <div id="reservas" class="panel hidden">
       <h2>Reservas Pendientes</h2>
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Total Reservas</h5>
+            <h2 th:text="${totalReservas}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Pendientes</h5>
+            <h2 th:text="${reservasPendientes}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Realizadas</h5>
+            <h2 th:text="${reservasRealizadas}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Ingresos Totales</h5>
+            <h2>$<span th:text="${ingresosTotales}">0</span></h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="reservasChart" height="200"></canvas>
+        </div>
 
+    <form method="get" action="/admin/dashboard" class="filtros-form">
+      <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
+      <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
 
-<form method="get" action="/admin/dashboard" class="filtros-form">
-  <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
-  <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
+    <select name="estado">
+      <option value="" th:selected="${estado == null}">Todos</option>
+      <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
+      <option value="REALIZADA" th:selected="${estado == 'REALIZADA'}">Realizada</option>
+    </select>
 
-<select name="estado">
-  <option value="" th:selected="${estado == null}">Todos</option>
-  <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
-  <option value="REALIZADA" th:selected="${estado == 'REALIZADA'}">Realizada</option>
-</select>
+      <button type="submit">Filtrar</button>
 
-  <button type="submit">Filtrar</button>
+    <a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
+      class="btn btn-pdf" target="_blank">
+      Descargar PDF
+    </a>
 
-<a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
-   class="btn btn-pdf" target="_blank">
-   Descargar PDF
-</a>
-
-</form>
+    </form>
 
 
 
@@ -365,41 +422,70 @@
   }
 </script>
 
-<script>
-  function cambiarEstado(button) {
-    const id = button.dataset.id;
-    const estadoActual = button.dataset.estado;
-    const nuevoEstado = estadoActual === 'PENDIENTE' ? 'REALIZADA' : 'PENDIENTE';
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Datos Thymeleaf
+  var meses = /*[[${meses}]]*/ [];
+  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
 
-    if (confirm(`¿Estás seguro de cambiar el estado a "${nuevoEstado}"?`)) {
-      fetch(`/reservas/cambiar-estado/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // 'X-CSRF-TOKEN': csrfToken // Si usas Spring Security, agregamos esto
-        }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Error en el servidor");
-        return response.json();
-      })
-      .then(data => {
-        if (data.estado) {
-          // Actualizar estado en el DOM
-          const estadoElemento = button.closest('.reserva-card').querySelector('.estado');
-          estadoElemento.textContent = data.estado;
-          button.dataset.estado = data.estado;
-        } else {
-          alert("Error: " + data.error);
-        }
-      })
-      .catch(error => {
-        alert("Ocurrió un error: " + error);
-      });
-      location.reload();
-    }
+  // USUARIOS
+  var uCanvas = document.getElementById('usuariosChart');
+  if (uCanvas) {
+    new Chart(uCanvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: meses,
+        datasets: [{
+          label: 'Usuarios Nuevos',
+          data: [5,10,3,7], // <-- aquí pondrías tus datos reales
+          backgroundColor: 'rgba(54,162,235,0.7)'
+        }]
+      }
+    });
   }
+
+  // SERVICIOS
+  var sCanvas = document.getElementById('serviciosChart');
+  if (sCanvas) {
+    new Chart(sCanvas.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: ["Corte", "Tinte", "Peinado"],
+        datasets: [{
+          label: 'Servicios más usados',
+          data: [12,19,7], // <-- tus datos desde backend
+          backgroundColor: [
+            'rgba(220,53,69,0.7)',
+            'rgba(40,167,69,0.7)',
+            'rgba(255,193,7,0.7)'
+          ]
+        }]
+      }
+    });
+  }
+
+  // RESERVAS
+  var rCanvas = document.getElementById('reservasChart');
+  if (rCanvas) {
+    new Chart(rCanvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: meses,
+        datasets: [{
+          label: 'Reservas',
+          data: reservasPorMes,
+          borderColor: 'rgba(220,53,69,0.7)',
+          fill: false,
+          tension: 0.3
+        }]
+      }
+    });
+  }
+/*]]>*/
 </script>
+
+
 
 
 

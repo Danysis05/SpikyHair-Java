@@ -77,20 +77,22 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     }
 
     @Override
-    public ReservasDto update(Long id, ReservasDto dto) {
-        Reserva existente = reservasRepository.findById(id).orElseThrow();
 
+public ReservasDto update(Long id, ReservasDto dto) {
+    Reserva existente = reservasRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("No existe la reserva con id " + id));
+
+    // Solo actualizar lo que el usuario puede modificar
+    if (dto.getFecha() != null) {
         existente.setFecha(dto.getFecha());
-
-        Usuario usuario = modelMapper.map(dto.getUsuario(), Usuario.class);
-        existente.setUsuario(usuario);
-
-        Servicios servicios = modelMapper.map(dto.getServicio(), Servicios.class);
-        existente.setServicios(servicios);
-
-        Reserva actualizada = reservasRepository.save(existente);
-        return new ReservasDto(actualizada); // CORREGIDO
     }
+
+    // No tocar usuario ni servicio, porque no los mandas desde el formulario
+
+    Reserva actualizada = reservasRepository.save(existente);
+    return new ReservasDto(actualizada);
+}
+
     public List<ReservasDto> filtrarReservas(String nombreUsuario, String nombreServicio, String estado) {
     return reservasRepository.findAll().stream()
         .filter(r -> nombreUsuario == null || r.getUsuario().getNombre().toLowerCase().contains(nombreUsuario.toLowerCase()))
@@ -117,5 +119,22 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
 public void saveReserva(Reserva reserva) {
     reservasRepository.save(reserva);
 }
+public List<String> obtenerMeses() {
+    return List.of("Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+}
+
+public List<Long> obtenerReservasPorMes() {
+    // Aquí deberías consultar el repositorio y agrupar por mes
+    return List.of(10L, 20L, 15L, 8L, 30L, 25L, 12L, 18L, 22L, 14L, 9L, 5L);
+}
+public long contarPendientes() {
+    return reservasRepository.countByEstado(Estado.PENDIENTE);
+}
+public long contarRealizadas() {
+    return reservasRepository.countByEstado(Estado.REALIZADA);
+}
+
+
 
 }

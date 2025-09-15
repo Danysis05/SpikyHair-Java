@@ -11,5 +11,7 @@ import com.proyecto.spikyhair.entity.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
     Optional<Usuario> findByNombre(String nombre);
     Optional<Usuario> findByEmail(String email);
+        long countByRol_Id(Long rolId);
     
-}
+    }
+

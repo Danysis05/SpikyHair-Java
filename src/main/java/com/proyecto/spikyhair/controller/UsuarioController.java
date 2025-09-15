@@ -69,7 +69,8 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         if (!carpeta.exists()) carpeta.mkdirs();
 
         if (imagen != null && !imagen.isEmpty()) {
-            String nombreOriginal = imagen.getOriginalFilename().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            String originalFilename = imagen.getOriginalFilename();
+            String nombreOriginal = (originalFilename != null) ? originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_") : "archivo_sin_nombre";
             String nombreArchivo = UUID.randomUUID() + "_" + nombreOriginal;
             String ruta = rutaCarpeta + nombreArchivo;
 
@@ -133,6 +134,14 @@ public ResponseEntity<String> cambiarRol(@RequestBody Map<String, Long> payload)
         }
 
         return ResponseEntity.ok("Usuario eliminado");
+    }
+    @GetMapping("/count")
+    public String countUsuarios(Model model) {
+        long totalUsuarios = usuarioService.countUsers();
+        long totalAdmins = usuarioService.countAdmins();
+        model.addAttribute("totalUsuarios", totalUsuarios);
+        model.addAttribute("totalAdmins", totalAdmins);
+        return "usuarios/count"; // Asegúrate de tener una vista para mostrar estos datos
     }
 
 }

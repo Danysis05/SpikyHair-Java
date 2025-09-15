@@ -3,6 +3,7 @@ package com.proyecto.spikyhair.controller;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.ServiciosDto;
 import com.proyecto.spikyhair.entity.Usuario;
+import com.proyecto.spikyhair.service.CsvServicioService;
 import com.proyecto.spikyhair.service.ServiciosService;
 import com.proyecto.spikyhair.service.UsuarioService;
 
@@ -25,10 +27,12 @@ public class ServicioController {
 
     private final ServiciosService serviciosService;
     private final UsuarioService usuarioService;
+    private final CsvServicioService csvServicioService;
 
-    public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService) {
+    public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService, CsvServicioService csvServicioService) {
         this.serviciosService = serviciosService;
         this.usuarioService = usuarioService;
+        this.csvServicioService = csvServicioService;
     }
 
     // Mostrar todos los servicios
@@ -83,19 +87,19 @@ public class ServicioController {
     }
 
     // Actualizar servicio
-@PostMapping("/update/{id}")
-public String actualizarServicio(@PathVariable Long id,
-                                 @ModelAttribute("servicio") ServiciosDto datosNuevosDTO,
-                                 @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile,
-                                 RedirectAttributes redirectAttributes) {
-    try {
-        serviciosService.update(id, datosNuevosDTO, imagenFile);
-        redirectAttributes.addFlashAttribute("success", "Servicio actualizado con éxito.");
-    } catch (IOException e) {
-        redirectAttributes.addFlashAttribute("error", "Error al actualizar la imagen del servicio.");
+    @PostMapping("/update/{id}")
+    public String actualizarServicio(@PathVariable Long id,
+                                    @ModelAttribute("servicio") ServiciosDto datosNuevosDTO,
+                                    @RequestParam(value = "imagenFile", required = false) MultipartFile imagenFile,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            serviciosService.update(id, datosNuevosDTO, imagenFile);
+            redirectAttributes.addFlashAttribute("success", "Servicio actualizado con éxito.");
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar la imagen del servicio.");
+        }
+        return "redirect:/admin/dashboard?seccion=servicios";
     }
-    return "redirect:/admin/dashboard?seccion=servicios";
-}
 
 
 
@@ -109,5 +113,20 @@ public String actualizarServicio(@PathVariable Long id,
             serviciosService.delete(id);
         }
         return "redirect:/admin/dashboard?seccion=servicios";
+    }
+
+    @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
+        if (file == null || file.isEmpty()) {
+            ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
+            return "redirect:/admin/dashboard#servicios";
+        }
+        try {
+            int n = csvServicioService.cargarServiciosDesdeCsv(file);
+            ra.addFlashAttribute("success", "Importación exitosa: " + n + " servicios.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
+        }
+        return "redirect:/admin/dashboard#servicios";
     }
 }

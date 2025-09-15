@@ -42,9 +42,12 @@ public class AdminController {
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
 
-    public AdminController(UsuarioService usuarioService, ServiciosService serviciosService,
-                           ReservasService reservasService, UsuarioRepository usuarioRepository,
-                           RolRepository rolRepository) {
+    public AdminController(
+            UsuarioService usuarioService,
+            ServiciosService serviciosService,
+            ReservasService reservasService,
+            UsuarioRepository usuarioRepository,
+            RolRepository rolRepository) {
         this.usuarioService = usuarioService;
         this.serviciosService = serviciosService;
         this.reservasService = reservasService;
@@ -62,41 +65,59 @@ public class AdminController {
             @RequestParam(required = false) String estado,
             Model model) {
 
-        Usuario usuario = usuarioService.getUsuarioAutenticado();
-            if (nombreUsuario != null && nombreUsuario.trim().isEmpty()) nombreUsuario = null;
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+
+    // Normalizar filtros vacíos
+    if (nombreUsuario != null && nombreUsuario.trim().isEmpty()) nombreUsuario = null;
     if (rol != null && rol.trim().isEmpty()) rol = null;
     if (nombreServicio != null && nombreServicio.trim().isEmpty()) nombreServicio = null;
     if (estado != null && estado.trim().isEmpty()) estado = null;
 
-        // FILTROS
-        List<UsuarioDto> usuarios = usuarioService.filtrarUsuarios(nombreUsuario, rol);
-        List<ServiciosDto> servicios = serviciosService.filtrarServicios(nombreServicio, precioMin, precioMax);
-        List<ReservasDto> reservas = reservasService.filtrarReservas(nombreUsuario, nombreServicio, estado);
+    // FILTROS
+    List<UsuarioDto> usuarios = usuarioService.filtrarUsuarios(nombreUsuario, rol);
+    List<ServiciosDto> servicios = serviciosService.filtrarServicios(nombreServicio, precioMin, precioMax);
+    List<ReservasDto> reservas = reservasService.filtrarReservas(nombreUsuario, nombreServicio, estado);
 
-        long totalUsuarios = usuarioRepository.count();
-        long totalServicios = serviciosService.count();
-        long totalReservas = reservasService.count();
+    long totalUsuarios = usuarioRepository.count();
+    long totalServicios = serviciosService.count();
+    long totalReservas = reservasService.count();
+    long reservasRealizadas = reservasService.contarRealizadas();
+    long reservasPendientes = reservasService.contarPendientes();
+    long totalUsuariosSistema = usuarioService.countUsers();
+    long totalAdmins = usuarioService.countAdmins();
 
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("servicios", servicios);
-        model.addAttribute("reservas", reservas);
-        model.addAttribute("totalUsuarios", totalUsuarios);
-        model.addAttribute("totalServicios", totalServicios);
-        model.addAttribute("totalReservas", totalReservas);
-        model.addAttribute("servicio", new ServiciosDto());
-        model.addAttribute("roles", rolRepository.findAll());
+    // === RESERVAS POR MES ===
+    List<String> meses = reservasService.obtenerMeses(); // ["Enero", "Febrero", ...]
+    List<Long> reservasPorMes = reservasService.obtenerReservasPorMes(); // [10, 20, 15, ...]
 
-        // Conserva valores filtrados en el formulario
-        model.addAttribute("nombreUsuario", nombreUsuario);
-        model.addAttribute("rolSeleccionado", rol);
-        model.addAttribute("nombreServicio", nombreServicio);
-        model.addAttribute("precioMin", precioMin);
-        model.addAttribute("precioMax", precioMax);
-        model.addAttribute("estado", estado);
+    model.addAttribute("usuario", usuario);
+    model.addAttribute("usuarios", usuarios);
+    model.addAttribute("totalAdmins", totalAdmins);
+    model.addAttribute("totalUsers", totalUsuariosSistema);
+    model.addAttribute("servicios", servicios);
+    model.addAttribute("reservas", reservas);
+    model.addAttribute("totalUsuarios", totalUsuarios);
+    model.addAttribute("totalServicios", totalServicios);
+    model.addAttribute("totalReservas", totalReservas);
+    model.addAttribute("servicio", new ServiciosDto());
+    model.addAttribute("roles", rolRepository.findAll());
 
-        return "admin/dashboard";
-    }
+    // Datos para los gráficos
+    model.addAttribute("meses", meses);
+    model.addAttribute("reservasPorMes", reservasPorMes);
+
+    // Conserva valores filtrados en el formulario
+    model.addAttribute("nombreUsuario", nombreUsuario);
+    model.addAttribute("rolSeleccionado", rol);
+    model.addAttribute("nombreServicio", nombreServicio);
+    model.addAttribute("precioMin", precioMin);
+    model.addAttribute("precioMax", precioMax);
+    model.addAttribute("estado", estado);
+    model.addAttribute("reservasRealizadas", reservasRealizadas);
+    model.addAttribute("reservasPendientes", reservasPendientes);
+
+    return "admin/dashboard";
+}
 
     @GetMapping("/dashboard/pdf")
     public void generarPdfServicios(
@@ -238,7 +259,7 @@ public void generarPdfReservas(
         }
 
         document.close();
-    } catch (Exception e) {
+    } catch (IOException | DocumentException e) {
         // Para evitar respuesta corrupta
         Document errorDoc = new Document();
         PdfWriter.getInstance(errorDoc, response.getOutputStream());

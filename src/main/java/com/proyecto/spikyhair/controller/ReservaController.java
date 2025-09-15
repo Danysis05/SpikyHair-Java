@@ -88,7 +88,6 @@ public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
     Usuario usuario = usuarioService.getUsuarioAutenticado();
     if (usuario == null) throw new RuntimeException("Usuario no autenticado");
 
-    // Convertir Usuario a UsuarioDto
     UsuarioDto usuarioDto = new UsuarioDto();
     usuarioDto.setId(usuario.getId());
     usuarioDto.setNombre(usuario.getNombre()); // si tienes más campos relevantes
@@ -109,17 +108,23 @@ public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
     // Formulario para editar reserva
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
+        
         ReservasDto reserva = reservasService.getById(id);
+
         model.addAttribute("reserva", reserva);
         return "reservas/form"; // Reutiliza la misma vista para editar
     }
 
     // Actualizar reserva
-    @PostMapping("/update/{id}")
-    public String updateReserva(@PathVariable Long id, @ModelAttribute("reserva") ReservasDto dto) {
-        reservasService.update(id, dto);
-        return "redirect:/reservas";
+@PostMapping("/editar")
+public String editReserva(@ModelAttribute("reserva") ReservasDto dto) {
+    if (dto.getId() == null) {
+        throw new IllegalArgumentException("El ID de la reserva es requerido para editar");
     }
+
+    reservasService.update(dto.getId(), dto);
+    return "redirect:/reservas/mostrar";
+}
 
     // Eliminar reserva
 @PostMapping("/eliminar/{id}")
@@ -155,11 +160,24 @@ public ResponseEntity<Map<String, String>> cambiarEstado(@PathVariable Long id) 
         return ResponseEntity.ok(response);
 
     } catch (Exception e) {
-        e.printStackTrace(); // Imprime error en consola del backend
+        // Logger can be used instead of printStackTrace
+        // Example: logger.error("Error interno", e);
         response.put("error", "Error interno: " + e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
+    // Contar reservas por estado
+    @GetMapping("/contar")
+    @ResponseBody
+    public Map<String, Long> contarReservasPorEstado() {
+        long pendientes = reservasService.contarPendientes();
+        long realizadas = reservasService.contarRealizadas();
+
+        Map<String, Long> conteo = new HashMap<>();
+        conteo.put("PENDIENTE", pendientes);
+        conteo.put("REALIZADA", realizadas);
+        return conteo;
+    }
 
 
 

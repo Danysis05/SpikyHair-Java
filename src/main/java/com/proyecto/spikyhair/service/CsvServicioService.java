@@ -35,6 +35,7 @@ public class CsvServicioService {
     /** Importar servicios desde un CSV */
     public int cargarServiciosDesdeCsv(MultipartFile file) {
         int importados = 0;
+        int duplicados = 0;
 
         try (BufferedInputStream bis = new BufferedInputStream(file.getInputStream())) {
             bis.mark(2_000_000);
@@ -82,6 +83,16 @@ public class CsvServicioService {
                         log.warn("Precio inválido '{}', fila ignorada: {}", precioRaw, (Object) row);
                         continue;
                     }
+
+                    boolean existe = serviciosRepository.findByNombre(nombre).isPresent();
+                if (existe) {
+                    duplicados++;
+                    log.info("Servicio duplicado ignorado: {}", nombre);
+                    continue;
+                }
+
+                String resultado = "Servicios importados: " + importados + ", duplicados ignorados: " + duplicados;
+
 
                     Servicios servicio = new Servicios();
                     servicio.setNombre(nombre);
@@ -150,4 +161,6 @@ public class CsvServicioService {
         String d = row[3].toLowerCase();
         return a.contains("nombre") && b.contains("duracion") && c.contains("descripcion") && d.contains("precio");
     }
+
+    
 }

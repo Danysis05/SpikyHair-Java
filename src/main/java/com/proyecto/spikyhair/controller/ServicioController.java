@@ -1,7 +1,11 @@
 package com.proyecto.spikyhair.controller;
 
+
 import java.io.IOException;
+
+
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -16,20 +20,24 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.entity.Servicios;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.CsvServicioService;
 import com.proyecto.spikyhair.service.ServiciosService;
 import com.proyecto.spikyhair.service.UsuarioService;
+import com.proyecto.spikyhair.repository.ServiciosRepository;
 
 @Controller
 @RequestMapping("/servicios")
 public class ServicioController {
+    private final ServiciosRepository serviciosRepository;
 
     private final ServiciosService serviciosService;
     private final UsuarioService usuarioService;
     private final CsvServicioService csvServicioService;
 
     public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService, CsvServicioService csvServicioService) {
+        this.serviciosRepository = null;
         this.serviciosService = serviciosService;
         this.usuarioService = usuarioService;
         this.csvServicioService = csvServicioService;
@@ -116,17 +124,36 @@ public class ServicioController {
     }
 
     @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
-        if (file == null || file.isEmpty()) {
-            ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
-            return "redirect:/admin/dashboard#servicios";
-        }
-        try {
-            int n = csvServicioService.cargarServiciosDesdeCsv(file);
-            ra.addFlashAttribute("success", "Importación exitosa: " + n + " servicios.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
-        }
+public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
+    if (file == null || file.isEmpty()) {
+        ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
         return "redirect:/admin/dashboard#servicios";
     }
+    try {
+        int resultado = csvServicioService.cargarServiciosDesdeCsv(file);
+        ra.addFlashAttribute("success", resultado);
+    } catch (Exception e) {
+        ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
+    }
+    return "redirect:/admin/dashboard#servicios";
 }
+
+@PostMapping("/servicios/save")
+public String guardarServicio(@ModelAttribute Servicios servicio,RedirectAttributes ra) {
+    Optional<Servicios> existente = serviciosRepository.findByNombre(servicio.getNombre());
+
+    if (existente.isPresent()) {
+        ra.addFlashAttribute("error", "⚠️ El servicio '" + servicio.getNombre() + "' ya existe.");
+        return "redirect:/admin/dashboard#servicios";
+    }
+
+    serviciosRepository.save(servicio);
+    ra.addFlashAttribute("success", "✅ Servicio guardado correctamente.");
+    return "redirect:/admin/dashboard#servicios";
+}
+
+
+
+}
+
+

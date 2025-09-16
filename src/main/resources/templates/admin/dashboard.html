@@ -94,6 +94,13 @@
     <!-- PANEL SERVICIOS -->
     <div id="servicios" class="panel hidden">
       <h2>Gestión de Servicios</h2>
+      <!-- MENSAJES DE ALERTA -->
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${success}" class="alert alert-success">
+        <p th:text="${success}"></p>
+      </div>
+
         <div class="row g-4 mb-4">
           <div class="card shadow-sm text-center p-3">
             <h5>Servicios Activos</h5>

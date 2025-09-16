@@ -140,4 +140,9 @@ public List<ServiciosDto> filtrarServicios(String nombre, Double precioMin, Doub
     public ServiciosDto update(Long id, ServiciosDto dto) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public boolean existePorNombre(String nombre) {
+    return serviciosRepository.findByNombre(nombre).isPresent();
+}
+
 }

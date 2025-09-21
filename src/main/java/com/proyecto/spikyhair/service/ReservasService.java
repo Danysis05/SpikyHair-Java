@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
+import com.proyecto.spikyhair.service.EmailService;
+import jakarta.mail.MessagingException;
 import com.proyecto.spikyhair.DTO.ReservasDto;
 import com.proyecto.spikyhair.entity.Reserva;
 import com.proyecto.spikyhair.entity.Servicios;
@@ -31,14 +32,17 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     private final ModelMapper modelMapper = new ModelMapper();
     private final ServiciosRepository serviciosRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
 
     public ReservasService(ReservasRepository reservasRepository,
-                           ServiciosRepository serviciosRepository,
-                           UsuarioRepository usuarioRepository) {
-        this.reservasRepository = reservasRepository;
-        this.serviciosRepository = serviciosRepository;
-        this.usuarioRepository = usuarioRepository;
-    }
+                       ServiciosRepository serviciosRepository,
+                       UsuarioRepository usuarioRepository,
+                       EmailService emailService) {
+    this.reservasRepository = reservasRepository;
+    this.serviciosRepository = serviciosRepository;
+    this.usuarioRepository = usuarioRepository;
+    this.emailService = emailService;
+}
 
     @Override
     public List<ReservasDto> getAll() {
@@ -81,8 +85,24 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
         reserva.setUsuario(usuario);
 
         Reserva guardada = reservasRepository.save(reserva);
-        return new ReservasDto(guardada); // CORREGIDO
+
+        try {
+        emailService.enviarCorreoReserva(
+            usuario.getEmail(),   // o getEmail() según tu entidad Usuario
+            usuario.getNombre(),
+             servicio.getNombre(),
+            reserva.getFecha().toString()
+);
+
+    } catch (MessagingException e) {
+        System.out.println("⚠ Error enviando correo: " + e.getMessage());
     }
+
+    return new ReservasDto(guardada);
+}
+    
+
+    
 
     @Override
 

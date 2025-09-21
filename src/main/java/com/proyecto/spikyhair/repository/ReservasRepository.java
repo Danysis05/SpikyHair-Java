@@ -11,7 +11,7 @@ import com.proyecto.spikyhair.enums.Estado;
 
 @Repository
 public interface ReservasRepository extends JpaRepository<Reserva, Long> { 
-
+    List<Reserva> findByEstado(Estado estado);
     List<Reserva> findByUsuarioId(Long usuarioId);
     long countByEstado(Estado estado);
 

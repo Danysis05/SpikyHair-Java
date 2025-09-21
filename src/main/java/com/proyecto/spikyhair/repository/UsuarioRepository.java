@@ -21,5 +21,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
            "GROUP BY MONTH(u.fechaRegistro) " +
            "ORDER BY MONTH(u.fechaRegistro)")
     List<Object[]> countUsuariosByMonth(@Param("year") int year);
-
+    
 }

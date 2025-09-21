@@ -1,6 +1,10 @@
 package com.proyecto.spikyhair.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -180,6 +184,35 @@ public void initRoles() {
     public long countUsers() {
         return usuarioRepository.countByRol_Id(2L);
     }
+
+    
+public List<String> obtenerMesesUsuarios() {
+    return Arrays.asList(
+        "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+        "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+    );
+}
+
+
+public List<Long> obtenerUsuariosPorMes(int year) {
+    List<Object[]> rows = usuarioRepository.countUsuariosByMonth(year);
+    Map<Integer, Long> map = new HashMap<>();
+    for (Object[] row : rows) {
+        Integer mes = ((Number) row[0]).intValue(); // 1..12
+        Long total = ((Number) row[1]).longValue();
+        map.put(mes, total);
+    }
+
+    // Rellenar lista con 12 posiciones (0 si no hay usuarios en el mes)
+    List<Long> resultados = new ArrayList<>();
+    for (int m = 1; m <= 12; m++) {
+        resultados.add(map.getOrDefault(m, 0L));
+    }
+    return resultados;
+}
+
+
+
     
 }
 

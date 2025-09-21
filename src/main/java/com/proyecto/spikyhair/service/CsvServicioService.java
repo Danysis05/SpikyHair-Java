@@ -33,101 +33,91 @@ public class CsvServicioService {
     }
 
     /** Importar servicios desde un CSV */
-    public int cargarServiciosDesdeCsv(MultipartFile file) {
-        int importados = 0;
+   /** Importar servicios desde un CSV */
+public int cargarServiciosDesdeCsv(MultipartFile file) {
+    int importados = 0;
+    int repetidos = 0; // contador de duplicados
 
-        try (BufferedInputStream bis = new BufferedInputStream(file.getInputStream())) {
-            bis.mark(2_000_000);
-            String probe = new String(bis.readNBytes(4096), StandardCharsets.UTF_8);
-            char sep = contar(probe, ';') > contar(probe, ',') ? ';' : ',';
-            bis.reset();
+    try (BufferedInputStream bis = new BufferedInputStream(file.getInputStream())) {
+        bis.mark(2_000_000);
+        String probe = new String(bis.readNBytes(4096), StandardCharsets.UTF_8);
+        char sep = contar(probe, ';') > contar(probe, ',') ? ';' : ',';
+        bis.reset();
 
-            CSVParser parser = new CSVParserBuilder()
-                    .withSeparator(sep)
-                    .withIgnoreQuotations(false)
-                    .build();
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(sep)
+                .withIgnoreQuotations(false)
+                .build();
 
-            try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(bis, StandardCharsets.UTF_8))
-                    .withCSVParser(parser)
-                    .build()) {
+        try (CSVReader reader = new CSVReaderBuilder(new InputStreamReader(bis, StandardCharsets.UTF_8))
+                .withCSVParser(parser)
+                .build()) {
 
-                String[] row;
-                boolean first = true;
+            String[] row;
+            boolean first = true;
 
-                while ((row = reader.readNext()) != null) {
-                    if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty())) continue;
+            while ((row = reader.readNext()) != null) {
+                if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty())) continue;
 
-                    if (first && row[0] != null) row[0] = removeBom(row[0]);
-                    if (first && esCabecera(row)) {
-                        first = false;
-                        continue;
-                    }
+                if (first && row[0] != null) row[0] = removeBom(row[0]);
+                if (first && esCabecera(row)) {
                     first = false;
-
-                    if (row.length < 4) {
-                        log.warn("Fila ignorada (columnas < 4): {}", (Object) row);
-                        continue;
-                    }
-
-                    String nombre = safe(row[0]);
-                    String duracion = safe(row[1]);
-                    String descripcion = safe(row[2]);
-                    String precioRaw = safe(row[3]);
-
-                    String precioNorm = precioRaw.replace("$", "").replace(".", "").replace(",", ".").trim();
-                    double precio;
-                    try {
-                        precio = Double.parseDouble(precioNorm);
-                    } catch (NumberFormatException nfe) {
-                        log.warn("Precio inválido '{}', fila ignorada: {}", precioRaw, (Object) row);
-                        continue;
-                    }
-
-                    Servicios servicio = new Servicios();
-                    servicio.setNombre(nombre);
-                    servicio.setDuracion(duracion);
-                    servicio.setDescripcion(descripcion);
-                    servicio.setPrecio(precio);
-
-                    serviciosRepository.save(servicio);
-                    importados++;
+                    continue;
                 }
-            }
-        } catch (Exception e) {
-            log.error("Error al procesar CSV con OpenCSV", e);
-            throw new RuntimeException("Error al procesar CSV con OpenCSV: " + e.getMessage(), e);
-        }
+                first = false;
 
-        log.info("Servicios importados: {}", importados);
-        return importados;
+                if (row.length < 4) {
+                    log.warn("Fila ignorada (columnas < 4): {}", (Object) row);
+                    continue;
+                }
+
+                String nombre = safe(row[0]);
+                String duracion = safe(row[1]);
+                String descripcion = safe(row[2]);
+                String precioRaw = safe(row[3]);
+
+                String precioNorm = precioRaw.replace("$", "").replace(".", "").replace(",", ".").trim();
+                double precio;
+                try {
+                    precio = Double.parseDouble(precioNorm);
+                } catch (NumberFormatException nfe) {
+                    log.warn("Precio inválido '{}', fila ignorada: {}", precioRaw, (Object) row);
+                    continue;
+                }
+
+                // 🚨 Verificar si ya existe un servicio con el mismo nombre
+                boolean existe = serviciosRepository.existsByNombreIgnoreCase(nombre);
+                if (existe) {
+                    repetidos++;
+                    log.info("Servicio repetido ignorado: {}", nombre);
+                    continue;
+                }
+
+                Servicios servicio = new Servicios();
+                servicio.setNombre(nombre);
+                servicio.setDuracion(duracion);
+                servicio.setDescripcion(descripcion);
+                servicio.setPrecio(precio);
+
+                serviciosRepository.save(servicio);
+                importados++;
+            }
+        }
+    } catch (Exception e) {
+        log.error("Error al procesar CSV con OpenCSV", e);
+        throw new RuntimeException("Error al procesar CSV con OpenCSV: " + e.getMessage(), e);
     }
 
-    /** Exportar servicios a CSV */
-    public void exportarServiciosCsv(HttpServletResponse response) {
-        try {
-            response.setContentType("text/csv; charset=UTF-8");
-            response.setHeader("Content-Disposition", "attachment; filename=servicios.csv");
+    log.info("Servicios importados: {}, repetidos: {}", importados, repetidos);
 
-            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
-                // Cabecera
-                writer.writeNext(new String[]{"Nombre", "Duración", "Descripción", "Precio"});
-
-                // Datos
-                List<Servicios> lista = serviciosRepository.findAll();
-                for (Servicios s : lista) {
-                    writer.writeNext(new String[]{
-                            s.getNombre(),
-                            s.getDuracion(),
-                            s.getDescripcion(),
-                            String.valueOf(s.getPrecio())
-                    });
-                }
-            }
-        } catch (IOException e) {
-            log.error("Error al exportar CSV", e);
-            throw new RuntimeException("Error al exportar CSV: " + e.getMessage(), e);
-        }
+    // 👉 Lanzamos excepción controlada con ambos resultados para mostrar en el controlador
+    if (repetidos > 0) {
+        throw new RuntimeException("Importación parcial: " + importados + " nuevos, " + repetidos + " repetidos.");
     }
+
+    return importados;
+}
+
 
     // Helpers
     private static long contar(String s, char c) {

@@ -115,18 +115,23 @@ public class ServicioController {
         return "redirect:/admin/dashboard?seccion=servicios";
     }
 
-    @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
-        if (file == null || file.isEmpty()) {
-            ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
-            return "redirect:/admin/dashboard#servicios";
-        }
-        try {
-            int n = csvServicioService.cargarServiciosDesdeCsv(file);
-            ra.addFlashAttribute("success", "Importación exitosa: " + n + " servicios.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
-        }
+@PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
+    if (file == null || file.isEmpty()) {
+        ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
         return "redirect:/admin/dashboard#servicios";
     }
+    try {
+        int n = csvServicioService.cargarServiciosDesdeCsv(file);
+        ra.addFlashAttribute("success", "Importación exitosa: " + n + " servicios nuevos.");
+    } catch (RuntimeException e) {
+        if (e.getMessage().startsWith("Importación parcial")) {
+            ra.addFlashAttribute("warning", e.getMessage());
+        } else {
+            ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
+        }
+    }
+    return "redirect:/admin/dashboard#servicios";
+}
+
 }

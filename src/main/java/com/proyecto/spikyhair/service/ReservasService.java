@@ -1,6 +1,14 @@
 package com.proyecto.spikyhair.service;
 
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -119,15 +127,7 @@ public ReservasDto update(Long id, ReservasDto dto) {
 public void saveReserva(Reserva reserva) {
     reservasRepository.save(reserva);
 }
-public List<String> obtenerMeses() {
-    return List.of("Enero","Febrero","Marzo","Abril","Mayo","Junio",
-                   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
-}
 
-public List<Long> obtenerReservasPorMes() {
-    // Aquí deberías consultar el repositorio y agrupar por mes
-    return List.of(10L, 20L, 15L, 8L, 30L, 25L, 12L, 18L, 22L, 14L, 9L, 5L);
-}
 public long contarPendientes() {
     return reservasRepository.countByEstado(Estado.PENDIENTE);
 }
@@ -135,6 +135,95 @@ public long contarRealizadas() {
     return reservasRepository.countByEstado(Estado.REALIZADA);
 }
 
+public Map<String, List<?>> obtenerEstadisticasServicios() {
+    List<Object[]> resultados = reservasRepository.contarReservasPorServicio();
 
+    List<String> labels = new ArrayList<>();
+    List<Long> values = new ArrayList<>();
 
+    for (Object[] fila : resultados) {
+        labels.add((String) fila[0]);                // nombre del servicio
+        values.add(((Number) fila[1]).longValue()); // cantidad de reservas
+    }
+
+    Map<String, List<?>> datos = new HashMap<>();
+    datos.put("labels", labels);
+    datos.put("values", values);
+
+    return datos;
 }
+public List<String> obtenerMeses() {
+        List<String> meses = new ArrayList<>();
+        List<Object[]> resultados = reservasRepository.contarReservasPorMes();
+
+        for (Object[] fila : resultados) {
+            Integer mes = (Integer) fila[0];
+            String nombreMes = Month.of(mes).getDisplayName(TextStyle.FULL, new Locale("es"));
+            meses.add(nombreMes.substring(0, 1).toUpperCase() + nombreMes.substring(1));
+        }
+        return meses;
+    }
+
+    public List<Long> obtenerReservasPorMes() {
+        List<Long> valores = new ArrayList<>();
+        List<Object[]> resultados = reservasRepository.contarReservasPorMes();
+
+        for (Object[] fila : resultados) {
+            valores.add((Long) fila[1]);
+        }
+        return valores;
+    }
+
+    public Double calcularIngresosTotales() {
+        Double total = reservasRepository.obtenerIngresosTotales();
+        return total != null ? total : 0.0;
+    }
+    public Map<String, Long> obtenerConteoPorServicio() {
+    return reservasRepository.findAll().stream()
+            .collect(Collectors.groupingBy(r -> r.getServicios().getNombre(), Collectors.counting()));
+}
+public List<Double> obtenerIngresosPorMes(int year) {
+    List<Double> ingresosPorMes = new ArrayList<>(Collections.nCopies(12, 0.0));
+
+    List<Reserva> reservas = reservasRepository.findAll();
+    for (Reserva reserva : reservas) {
+        if (reserva.getFecha() != null && reserva.getFecha().getYear() == year) {
+            int mesIndex = reserva.getFecha().getMonthValue() - 1; // enero = 0
+            if (reserva.getServicios() != null && reserva.getServicios().getPrecio() != null) {
+                ingresosPorMes.set(mesIndex,
+                        ingresosPorMes.get(mesIndex) + reserva.getServicios().getPrecio());
+            }
+        }
+    }
+    return ingresosPorMes;
+}
+
+
+
+
+
+
+
+
+
+    public Map<String, Long> obtenerClientesTop() {
+        Map<String, Long> conteoClientes = reservasRepository.findAll().stream()
+                .filter(r -> r.getUsuario() != null)
+                .collect(Collectors.groupingBy(r -> r.getUsuario().getNombre(), Collectors.counting()));
+
+        // Ordenar de mayor a menor
+        return conteoClientes.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(10) // opcional: mostrar solo top 10
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+    }
+}
+
+
+
+

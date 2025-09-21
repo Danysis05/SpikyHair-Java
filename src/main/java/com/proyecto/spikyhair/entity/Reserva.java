@@ -1,6 +1,8 @@
 package com.proyecto.spikyhair.entity;
 
 
+import java.time.LocalDate;
+
 import com.proyecto.spikyhair.enums.Estado;
 
 import jakarta.persistence.Column;
@@ -26,11 +28,12 @@ public class Reserva {
     private Long id;
 
     @Column(name = "fecha", nullable = false, length = 50)
-    private String fecha;
+    private LocalDate fecha;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
-    private Estado estado;
+    private Estado estado = Estado.PENDIENTE; // Valor inicial
+
 
     @Column(name = "duracion", nullable = false, length = 50)
     private String duracion;

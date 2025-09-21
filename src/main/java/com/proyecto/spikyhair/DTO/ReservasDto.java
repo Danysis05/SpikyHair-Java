@@ -1,5 +1,8 @@
 package com.proyecto.spikyhair.DTO;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.proyecto.spikyhair.entity.Reserva;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +16,8 @@ import lombok.NoArgsConstructor;
 public class ReservasDto {
 
     private Long id;
-    private String fecha;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fecha;
     private String estado;
     private String duracion;
     private Long servicioId; 

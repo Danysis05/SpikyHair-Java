@@ -1,5 +1,6 @@
 package com.proyecto.spikyhair.entity;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -12,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "usuario")
@@ -41,6 +43,13 @@ public class Usuario {
     @Column(name = "imagen_perfil", nullable = true, length = 255)
     private String imagenPerfil;
 
+    @Column(name = "fecha_registro")
+    private LocalDate fechaRegistro;
+
+    @PrePersist
+    private void prePersist() {
+        this.fechaRegistro = LocalDate.now();
+    }
 
     @ManyToOne
     @JoinColumn(name = "rol_id", nullable = false)

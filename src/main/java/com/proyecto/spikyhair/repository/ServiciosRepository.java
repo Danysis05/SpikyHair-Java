@@ -8,5 +8,7 @@ import com.proyecto.spikyhair.entity.Servicios;
 @Repository
 public interface ServiciosRepository extends JpaRepository<Servicios, Long> {
     // Aquí puedes agregar métodos personalizados si es necesario
+    boolean existsByNombreIgnoreCase(String nombre);
+
 
 }

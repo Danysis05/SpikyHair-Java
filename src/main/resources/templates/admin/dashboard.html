@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Dashboard Admin</title>
   <link rel="stylesheet" href="/css/dashboard.css">
   <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
@@ -93,19 +94,23 @@
 
     <!-- PANEL SERVICIOS -->
     <div id="servicios" class="panel hidden">
+      <div th:if="${success}" class="alert alert-success" role="alert">
+    <span th:text="${success}"></span>
+</div>
+
+<div th:if="${warning}" class="alert alert-warning" role="alert">
+    <span th:text="${warning}"></span>
+</div>
+
+<div th:if="${error}" class="alert alert-danger" role="alert">
+    <span th:text="${error}"></span>
+</div>
+
       <h2>Gestión de Servicios</h2>
         <div class="row g-4 mb-4">
           <div class="card shadow-sm text-center p-3">
             <h5>Servicios Activos</h5>
             <h2 th:text="${totalServicios}">0</h2>
-          </div>
-          <div class="card shadow-sm text-center p-3">
-            <h5>Precio Promedio</h5>
-            <h2>$<span th:text="${precioPromedio}">0</span></h2>
-          </div>
-          <div class="card shadow-sm text-center p-3">
-            <h5>Servicio Más Caro</h5>
-            <h2 th:text="${servicioMasCaro}">0</h2>
           </div>
         </div>
         <div style="width:100%; max-width:800px; margin:20px auto;">
@@ -178,27 +183,15 @@
           <canvas id="reservasChart" height="200"></canvas>
         </div>
 
-    <form method="get" action="/admin/dashboard" class="filtros-form">
-      <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
-      <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
-
-    <select name="estado">
-      <option value="" th:selected="${estado == null}">Todos</option>
-      <option value="PENDIENTE" th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
-      <option value="REALIZADA" th:selected="${estado == 'REALIZADA'}">Realizada</option>
-    </select>
-
-      <button type="submit">Filtrar</button>
-
-    <a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
-      class="btn btn-pdf" target="_blank">
-      Descargar PDF
-    </a>
-
-    </form>
-
-
-
+            <form method="get" action="/admin/dashboard" class="filtros-form">
+              <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
+              <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
+              <button type="submit">Filtrar</button>
+              <a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
+                class="btn btn-pdf" target="_blank">
+                Descargar PDF
+              </a>
+            </form>
 
       <div class="card">Pendientes de aprobación: <strong th:text="${totalReservas}">0</strong></div>
       <div th:if="${#lists.isEmpty(reservas)}" class="card-empty">
@@ -214,22 +207,18 @@
           Estado
         </p>
         <p class="fecha"   th:text="${r.fecha}">01/01/2025 10:00</p>
-
-          <button class="btn-cambiar-estado"
-                  th:data-id="${r.id}"
-                  th:data-estado="${r.estado}"
-                  onclick="cambiarEstado(this)">
-            Cambiar Estado
-          </button>
-
+<button class="btn-cambiar-estado"
+        th:data-id="${r.id}"
+        th:data-estado="${r.estado}"
+        onclick="cambiarEstadoReserva(this)">
+  Cambiar Estado
+</button>
 
 
         <form th:action="@{'/reservas/eliminar/' + ${r.id}}" method="post" class="form-eliminar">
           <button type="submit" class="btn-eliminar">Eliminar</button>
         </form>
-
       </div>
-
     </div>
 
  
@@ -430,64 +419,149 @@
   var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
 
   // USUARIOS
-  var uCanvas = document.getElementById('usuariosChart');
-  if (uCanvas) {
-    new Chart(uCanvas.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: meses,
-        datasets: [{
-          label: 'Usuarios Nuevos',
-          data: [5,10,3,7], // <-- aquí pondrías tus datos reales
-          backgroundColor: 'rgba(54,162,235,0.7)'
-        }]
+  var mesesUsuarios = /*[[${mesesUsuarios}]]*/ [];
+var usuariosPorMes = /*[[${usuariosPorMes}]]*/ [];
+
+var uCanvas = document.getElementById('usuariosChart');
+if (uCanvas) {
+  new Chart(uCanvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: mesesUsuarios,
+      datasets: [{
+        label: 'Usuarios Nuevos',
+        data: usuariosPorMes,
+        backgroundColor: 'rgba(54,162,235,0.7)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
       }
-    });
-  }
+    }
+  });
+}
 
   // SERVICIOS
-  var sCanvas = document.getElementById('serviciosChart');
-  if (sCanvas) {
-    new Chart(sCanvas.getContext('2d'), {
-      type: 'pie',
-      data: {
-        labels: ["Corte", "Tinte", "Peinado"],
-        datasets: [{
-          label: 'Servicios más usados',
-          data: [12,19,7], // <-- tus datos desde backend
-          backgroundColor: [
-            'rgba(220,53,69,0.7)',
-            'rgba(40,167,69,0.7)',
-            'rgba(255,193,7,0.7)'
-          ]
-        }]
-      }
-    });
-  }
+
+    var serviciosLabels = /*[[${serviciosLabels}]]*/ [];
+    var serviciosValues = /*[[${serviciosValues}]]*/ [];
+
+    console.log("Labels:", serviciosLabels);
+    console.log("Values:", serviciosValues);
+
+    var sCanvas = document.getElementById('serviciosChart');
+    if (sCanvas) {
+        new Chart(sCanvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: serviciosLabels,
+                datasets: [{
+                    label: 'Servicios más usados',
+                    data: serviciosValues,
+                    backgroundColor: [
+                        'rgba(220,53,69,0.7)',
+                        'rgba(40,167,69,0.7)',
+                        'rgba(255,193,7,0.7)'
+                    ]
+                }]
+            }
+        });
+    }
+  
+
+
 
   // RESERVAS
-  var rCanvas = document.getElementById('reservasChart');
-  if (rCanvas) {
-    new Chart(rCanvas.getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: meses,
-        datasets: [{
-          label: 'Reservas',
-          data: reservasPorMes,
-          borderColor: 'rgba(220,53,69,0.7)',
-          fill: false,
-          tension: 0.3
-        }]
-      }
+var meses = /*[[${meses}]]*/ [];
+  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var rCanvas = document.getElementById('reservasChart');
+
+    if (rCanvas) {
+      var ctx = rCanvas.getContext('2d');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: meses,
+          datasets: [{
+            label: 'Reservas',
+            data: reservasPorMes,
+            borderColor: 'rgba(220,53,69,0.9)',
+            backgroundColor: 'rgba(220,53,69,0.3)',
+            pointBackgroundColor: '#fff',
+            pointBorderColor: 'rgba(220,53,69,1)',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: {
+              display: true,
+              text: '📈 Reservas por Mes',
+              font: { size: 18, weight: 'bold' }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+  });
+
+  function cambiarEstadoReserva(boton) {
+    const id = boton.getAttribute("data-id");
+    const estadoActual = boton.getAttribute("data-estado");
+    const nuevoEstado = estadoActual === "PENDIENTE" ? "REALIZADA" : "PENDIENTE";
+
+    // Confirmación
+    if (!confirm(`¿Deseas cambiar el estado a "${nuevoEstado}"?`)) return;
+
+    fetch(`/reservas/cambiar-estado/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Error al actualizar el estado');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualiza la tarjeta sin recargar
+            const estadoP = boton.closest('.reserva-card').querySelector('.estado');
+            if (estadoP) {
+                estadoP.innerText = data.estado; // nuevo estado
+                estadoP.className = 'estado ' + data.estado.toLowerCase(); // clases CSS
+            }
+            boton.setAttribute('data-estado', data.estado); // actualizar atributo
+            alert('Estado actualizado correctamente');
+        } else {
+            alert('Error: ' + (data.message || data.error));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error en el servidor');
     });
-  }
-/*]]>*/
+}
+
+
+
 </script>
-
-
-
-
-
 </body>
 </html>

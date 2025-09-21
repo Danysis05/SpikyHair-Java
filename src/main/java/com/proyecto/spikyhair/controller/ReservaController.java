@@ -142,30 +142,31 @@ public String eliminarReserva(@PathVariable Long id, Authentication authenticati
 // En tu controlador (ej: DashboardController o ReservaController)
 @PostMapping("/cambiar-estado/{id}")
 @ResponseBody
-public ResponseEntity<Map<String, String>> cambiarEstado(@PathVariable Long id) {
-    Map<String, String> response = new HashMap<>();
-    try {
-        Reserva reserva = reservasService.getReservaById(id);
+public ResponseEntity<Map<String, Object>> cambiarEstado(@PathVariable Long id) {
+    Map<String, Object> response = new HashMap<>();
+    Reserva reserva = reservasService.getReservaById(id);
 
-        if (reserva == null) {
-            response.put("error", "Reserva no encontrada");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-
-        Estado nuevoEstado = reserva.getEstado() == Estado.PENDIENTE ? Estado.REALIZADA : Estado.PENDIENTE;
-        reserva.setEstado(nuevoEstado);
-        reservasService.saveReserva(reserva);
-
-        response.put("estado", nuevoEstado.name());
-        return ResponseEntity.ok(response);
-
-    } catch (Exception e) {
-        // Logger can be used instead of printStackTrace
-        // Example: logger.error("Error interno", e);
-        response.put("error", "Error interno: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    if(reserva == null) {
+        response.put("success", false);
+        response.put("error", "Reserva no encontrada");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    // Alternar estado
+    Estado nuevoEstado = (reserva.getEstado() == Estado.PENDIENTE)
+            ? Estado.REALIZADA
+            : Estado.PENDIENTE;
+    reserva.setEstado(nuevoEstado);
+
+    reservasService.saveReserva(reserva);
+
+    response.put("success", true);
+    response.put("estado", nuevoEstado.name());
+    return ResponseEntity.ok(response);
 }
+
+
+
     // Contar reservas por estado
     @GetMapping("/contar")
     @ResponseBody

@@ -20,6 +20,7 @@ public class ReservasDto {
     private LocalDate fecha;
     private String estado;
     private String duracion;
+    private String hora;
     private Long servicioId; 
     private ServiciosDto servicio;  
 
@@ -30,6 +31,7 @@ public class ReservasDto {
 public ReservasDto(Reserva reserva) {
     this.id = reserva.getId();
     this.fecha = reserva.getFecha();
+    this.hora = reserva.getHora();
     this.duracion = reserva.getDuracion();
     this.estado = reserva.getEstado().toString();
     this.usuario = new UsuarioDto(reserva.getUsuario()); // Asegúrate de tener este constructor

@@ -26,9 +26,15 @@
                         
                     </li>
                     <div class="user-actions">
-                            <a href="#" id="perfilBtn"><img id="avatarIcon"
-              th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
-              alt="Avatar"></a>
+                    <a href="#" id="perfilBtn">
+                      <span th:if="${usuario.imagenPerfil == null}">
+                        <i class="fa-solid fa-user"></i>
+                      </span>
+                      <img th:if="${usuario.imagenPerfil != null}"
+                          th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}"
+                          alt="Avatar">
+                    </a>
+
                             <form th:action="@{/logout}" method="post">
                             <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
                             </form>
@@ -37,9 +43,12 @@
             </nav>
         </div>
         <div class="tex">
-            <h1>Tus reservas</h1>
             <h1>Nuestros Servicios</h1>
-            
+
+            <h4>Horario de atención:</h4>
+            <p>Lunes a Viernes: 9:00 AM - 8:00 PM</p>
+            <p>Sábados: 10:00 AM - 6:00 PM</p>
+           
         </div>
   </header>
 
@@ -78,40 +87,41 @@
         <div class="separacion"></div>
     </main>
     <!-- MODAL PERFIL -->
-  <div id="modalPerfil" class="modal hidden">
-    <div class="perfil-card">
-      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
-        <div class="perfil-header">
-          <div class="avatar">
-            <img id="avatarPreview"
-              th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
-              alt="Avatar">
-            <label for="imagenPerfil" class="edit-icon" title="Cambiar imagen">
-              <i class="fa-solid fa-camera"></i>
-            </label>
-            <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*">
-          </div>
-          <h2 th:text="${usuario.nombre}">Your Name</h2>
-          <p th:text="${usuario.email}">your.name@gmail.com</p>
+  <div id="modalPerfil" class="modal hidden" onclick="cerrarModalExterior(event)">
+  <div class="perfil-card" onclick="event.stopPropagation()">
+    <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+      <div class="perfil-header">
+        <div class="avatar">
+          <img id="avatarPreview"
+            th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
+            alt="Avatar">
+          <label for="imagenPerfil" class="edit-icon" title="Cambiar imagen">
+            <i class="fa-solid fa-camera"></i>
+          </label>
+          <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*">
         </div>
+        <h2 th:text="${usuario.nombre}">Your Name</h2>
+        <p th:text="${usuario.email}">your.name@gmail.com</p>
+      </div>
 
-        <input type="hidden" name="id" th:value="${usuario.id}">
-        <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required>
-        <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required>
-        <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}">
-        <button type="submit" class="btn-edit">Editar Perfil</button>
-      </form>
+      <input type="hidden" name="id" th:value="${usuario.id}">
+      <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required>
+      <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required>
+      <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}">
+      <button type="submit" class="btn-edit">Editar Perfil</button>
+    </form>
 
-      <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn-logout">LOG OUT</button>
-      </form>
-      <span class="close-button" onclick="cerrarModal()">&times;</span>
-    </div>
+    <form th:action="@{/logout}" method="post">
+      <button type="submit" class="btn-logout">LOG OUT</button>
+    </form>
+    <span class="close-button" onclick="cerrarModal()">&times;</span>
   </div>
+</div>
+
   <!-- MODAL RESERVA -->
 
 <div id="modalReserva" class="modal hidden">
-  <form id="formReserva" method="post" th:action="@{/reservas/crear}">
+  <form id="formReserva" method="post" th:action="@{/reservas/crear}" onsubmit="return validacionesReserva()">
     
 
 
@@ -125,7 +135,7 @@
     <div id="campoServicioSelect" class="hidden">
       <select name="servicioId" id="servicioSelect">
         <option value="">Seleccionar servicio</option>
-        <option th:each="servicio : ${listaServicios}"
+        <option th:each="servicio : ${Servicios}"
                 th:value="${servicio.id}"
                 th:text="${servicio.nombre}"></option>
       </select>
@@ -133,9 +143,11 @@
 
     <!-- Otros campos de la reserva, por ejemplo fecha -->
     <input type="date" name="fecha" required />
+    <input type="time" name="hora" required />
 
     <!-- Botón de envío -->
-    <button type="submit">Reservar</button>
+    <button type="submit" >Reservar</button>
+    <button type="button" onclick="cerrarModal('modalReserva')">Cancelar</button>
 
   </form>
 </div>
@@ -173,130 +185,159 @@
     </div>
     <div class="footer-last"><p>© SpikyHair 2025</p></div>
 </footer>
-<script>// Seleccionar elementos
- function navigate(seccionId) {
-    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
-    document.getElementById(seccionId).classList.remove('hidden');
-    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
-  }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-  // Restaurar sección activa al cargar
-  window.addEventListener('DOMContentLoaded', () => {
+  // helper seguro para agregar listeners
+  const safe = {
+    el: id => document.getElementById(id),
+    on: (id, evt, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(evt, fn); }
+  };
+
+  // Restaurar sección activa
+  (function restoreSection(){
     const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
-    navigate(seccionActiva);
-  });
+    document.querySelectorAll('.panel').forEach(s => s.classList.add('hidden'));
+    const el = document.getElementById(seccionActiva);
+    if (el) el.classList.remove('hidden');
+  })();
 
-  document.getElementById('perfilBtn').addEventListener('click', function (e) {
+  // Exponer funciones al window (si usas atributos inline en HTML)
+  window.cerrarModal = function(modalId) {
+    const id = modalId || 'modalPerfil';
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('hidden');
+  };
+
+  window.cerrarModalExterior = function(event) {
+    const modal = document.getElementById('modalPerfil');
+    if (event.target === modal) {
+      window.cerrarModal('modalPerfil');
+    }
+  };
+
+  // abrir modal perfil (boton perfil)
+  safe.on('perfilBtn', 'click', function (e) {
     e.preventDefault();
-    document.getElementById('modalPerfil').classList.remove('hidden');
+    const modal = document.getElementById('modalPerfil');
+    if (modal) modal.classList.remove('hidden');
   });
 
-  function cerrarModal() {
-    document.getElementById('modalPerfil').classList.add('hidden');
-  }
+  // manejar click en overlay para cerrar (si usas onclick en HTML también está bien)
+  safe.on('modalPerfil', 'click', window.cerrarModalExterior);
 
-  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
-    const file = event.target.files[0];
+  // Previsualizar imagen
+  safe.on('imagenPerfil', 'change', function (event) {
+    const file = event.target.files && event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = function (e) {
-        document.getElementById('avatarPreview').src = e.target.result;
+        const avatar = document.getElementById('avatarPreview');
+        if (avatar) avatar.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
   });
 
-  function cambiarRol(selectElement) {
-    const userId = selectElement.getAttribute("data-id");
-    const nuevoRol = selectElement.value;
-    const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
-    if (!confirmado) {
-      selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-      return;
+  // abrir modal reserva para servicio fijo
+  window.abrirModalReserva = function(servicioId, nombreServicio) {
+    const modal = document.getElementById('modalReserva');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const campoFijo = document.getElementById('campoServicioFijo');
+    const campoSelect = document.getElementById('campoServicioSelect');
+    if (campoFijo) campoFijo.classList.remove('hidden');
+    if (campoSelect) campoSelect.classList.add('hidden');
+
+    const nombre = document.getElementById('nombreServicio');
+    const servicioFijo = document.getElementById('servicioIdFijo');
+    const servicioSelect = document.getElementById('servicioSelect');
+
+    if (nombre) nombre.value = nombreServicio || '';
+    if (servicioFijo) { servicioFijo.value = servicioId || ''; servicioFijo.disabled = false; }
+    if (servicioSelect) servicioSelect.disabled = true;
+
+    const usuarioIdActual = document.getElementById('usuarioIdActual');
+    if (usuarioIdActual) {
+      const inputUsuario = document.querySelector('input[name="usuarioId"]');
+      if (inputUsuario) inputUsuario.value = usuarioIdActual.value;
+    }
+  };
+
+  // abrir modal reserva general (elegir servicio)
+  window.abrirModalReservaGeneral = function() {
+    const modal = document.getElementById('modalReserva');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const campoSelect = document.getElementById('campoServicioSelect');
+    const campoFijo = document.getElementById('campoServicioFijo');
+    if (campoSelect) campoSelect.classList.remove('hidden');
+    if (campoFijo) campoFijo.classList.add('hidden');
+
+    const servicioSelect = document.getElementById('servicioSelect');
+    const servicioFijo = document.getElementById('servicioIdFijo');
+
+    if (servicioSelect) { servicioSelect.value = ""; servicioSelect.disabled = false; }
+    if (servicioFijo) { servicioFijo.value = ""; servicioFijo.disabled = true; }
+
+    const usuarioIdActual = document.getElementById('usuarioIdActual');
+    if (usuarioIdActual) {
+      const inputUsuario = document.querySelector('input[name="usuarioId"]');
+      if (inputUsuario) inputUsuario.value = usuarioIdActual.value;
+    }
+  };
+
+  // validaciones (devuelve true/false)
+  window.validacionesReserva = function() {
+    const servicioSelect = document.getElementById('servicioSelect');
+    const fechaInput = document.querySelector('input[name="fecha"]');
+    const horaInput = document.querySelector('input[name="hora"]');
+
+    if (servicioSelect && !servicioSelect.disabled && servicioSelect.value === "") {
+      alert("Por favor, selecciona un servicio.");
+      return false;
+    }
+    if (!fechaInput || fechaInput.value === "") {
+      alert("Por favor, selecciona una fecha.");
+      return false;
+    }
+    if (!horaInput || horaInput.value === "" || !/^\d{2}:\d{2}$/.test(horaInput.value)) {
+      alert("Por favor, selecciona una hora válida.");
+      return false;
     }
 
-    const rolMap = {
-      "ADMINISTRADOR": 1,
-      "USUARIO": 2
-    };
+    const fechaSeleccionada = new Date(fechaInput.value);
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    if (fechaSeleccionada < hoy) { alert("La fecha seleccionada no puede ser en el pasado."); return false; }
 
-    fetch(`/usuarios/cambiar-rol`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuarioId: parseInt(userId),
-        rolId: rolMap[nuevoRol]
-      })
-    })
-    .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
-    .catch(error => {
-      console.error('Error en la solicitud:', error);
-      alert('Error al actualizar el rol');
+    const dia = fechaSeleccionada.getDay();
+    const hora = parseInt(horaInput.value.split(':')[0], 10);
+
+    if (dia === 0) { alert("No estamos abiertos los domingos."); return false; }
+    if (dia === 6 && (hora < 10 || hora >= 18)) { alert("El sábado estamos abiertos de 10:00 am a 6:00 pm."); return false; }
+    if (dia >= 1 && dia <= 5 && (hora < 9 || hora >= 20)) { alert("De lunes a viernes estamos abiertos de 9:00 am a 8:00 pm."); return false; }
+
+    const ahora = new Date();
+    const fechaHoraSeleccionada = new Date(`${fechaInput.value}T${horaInput.value}`);
+    if (fechaHoraSeleccionada < ahora) { alert("No puedes reservar en una hora que ya pasó."); return false; }
+
+    return confirm("¿Confirmas la reserva?");
+  };
+
+  // interceptar submit del form para asegurar validación (mejor que inline onclick)
+  const form = document.getElementById('formReserva');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (!window.validacionesReserva()) {
+        e.preventDefault();
+      }
     });
   }
 
-  function eliminarUsuario(boton) {
-    const userId = boton.getAttribute("data-id");
-    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
-
-    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
-      .then(response => {
-        if (response.status === 205) {
-          alert("Tu cuenta ha sido eliminada. Saliendo...");
-          window.location.href = "/auth/login";
-        } else if (response.ok) {
-          boton.closest(".usuario-card").remove();
-          alert("Usuario eliminado correctamente");
-        } else {
-          alert("Error al eliminar el usuario");
-        }
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("Error al eliminar el usuario");
-      });
-  }
-
-  function abrirModalReserva(servicioId, nombreServicio) {
-  const modal = document.getElementById('modalReserva');
-  modal.classList.remove('hidden');
-
-  document.getElementById('campoServicioFijo').classList.remove('hidden');
-  document.getElementById('campoServicioSelect').classList.add('hidden');
-
-  document.getElementById('nombreServicio').value = nombreServicio;
-  document.getElementById('servicioIdFijo').value = servicioId;
-  document.getElementById('servicioIdFijo').disabled = false;
-  document.getElementById('servicioSelect').disabled = true;
-
-  // ✅ Tomar el usuarioId desde el input oculto
-  const usuarioId = document.getElementById('usuarioIdActual').value;
-  document.querySelector('input[name="usuarioId"]').value = usuarioId;
-}
-
-function abrirModalReservaGeneral() {
-  const modal = document.getElementById('modalReserva');
-  modal.classList.remove('hidden');
-
-  document.getElementById('campoServicioSelect').classList.remove('hidden');
-  document.getElementById('campoServicioFijo').classList.add('hidden');
-
-  document.getElementById('servicioSelect').value = "";
-  document.getElementById('servicioIdFijo').value = "";
-  document.getElementById('servicioSelect').disabled = false;
-  document.getElementById('servicioIdFijo').disabled = true;
-
-  // ✅ Tomar el usuarioId desde el input oculto
-  const usuarioId = document.getElementById('usuarioIdActual').value;
-  document.querySelector('input[name="usuarioId"]').value = usuarioId;
-}
-
-
-
-
-
-
-
+}); // fin DOMContentLoaded
 </script>
+
 </body>
 </html>

@@ -42,8 +42,9 @@
   <div class="contenedor-fichas">
     <div th:each="reserva : ${reservas}" class="ficha-reserva">
       <h3 th:text="${reserva.servicioNombre}">Servicio</h3>
-      <p><strong>Fecha:</strong> <span th:text="${reserva.fecha}">2025-07-02</span></p>
-      <p><strong>Estado:</strong> <span th:text="${reserva.estado}">Confirmada</span></p>
+      <p><strong>Fecha:</strong> <span th:text="${reserva.fecha}"></span></p>
+      <p><strong>Estado:</strong> <span th:text="${reserva.estado}"></span></p>
+      <p><strong>Hora:</strong> <span th:text="${reserva.hora}"></span></p>
 
       <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post"
             onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta reserva?')">

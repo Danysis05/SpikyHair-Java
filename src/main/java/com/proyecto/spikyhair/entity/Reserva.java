@@ -30,6 +30,9 @@ public class Reserva {
     @Column(name = "fecha", nullable = false, length = 50)
     private LocalDate fecha;
 
+    @Column(name = "hora", nullable = false, length = 50)
+    private String hora;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private Estado estado = Estado.PENDIENTE; // Valor inicial

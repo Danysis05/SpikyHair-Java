@@ -1109,3 +1109,29 @@ select option {
     border-radius: 50%;
     object-fit: cover;
 }
+
+ .ubicacion {
+    text-align: center;
+    margin: 50px auto;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .ubicacion h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #c2185b; /* crimson elegante */
+  }
+
+  .map-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  #map {
+    height: 400px;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 3px solid #c2185b;
+  }

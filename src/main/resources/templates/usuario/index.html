@@ -7,8 +7,12 @@
   <link rel="stylesheet" th:href="@{/css/index.css}" />
    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+
 </head>
 <body>
 
@@ -52,7 +56,7 @@
                 <img src="/uploads/nosotros.jpg" alt="">
                 <div class="info">
                     <h1>Nosotros</h1>
-                    <h4>Lorem ipsum dolor sit amet consectetur adipisicing elit.</h4>
+                    <h4>Tu salón de confianza</h4>
                     <p>Nuestra peluquería ha sido un pilar en la comunidad desde hace más de 10 años, ofreciendo servicios de calidad y atención personalizada. Nos comprometemos a realzar la belleza de cada cliente, guiados por nuestra misión de brindar una experiencia única y memorable.</p>
                 </div>
             </div>
@@ -80,12 +84,18 @@
                 </div>
             </div>
         </section>
+<section class="ubicacion">
+  <h3 id="sax2">📍 Encuéntranos aquí</h3>
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
+</section>
         <div class="separacion"></div>
 
         <section id="last">
             <div class="obso">
                 <h1>¡Reserva tu cita hoy mismo!</h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae voluptatum facere ratione aliquam perferendis</p>
+                <p>Encuentra el servicio que se adapte a tus necesidades y agenda tu cita de manera fácil y rápida.</p>
                 <div class="botones">
                     <a href="#" th:href="@{/servicios/mostrar}">Reservar</a>
                 </div>
@@ -279,7 +289,27 @@
   function cerrarModalServicio() {
     document.getElementById('modalServicio').classList.add('hidden');
   }
+
+
 </script>
+<script>
+  // Coordenadas de Calle 109 #16-42, Bogotá
+  const ubicacion = [4.693099, -74.050772]; 
+
+  // Crear mapa
+  const map = L.map('map').setView(ubicacion, 16);
+
+  // Cargar tiles de OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Agregar marcador
+  L.marker(ubicacion).addTo(map)
+    .bindPopup("<b>Calle 109 #16-42</b><br>Bogotá, Colombia")
+    .openPopup();
+</script>
+
 
 </body>
 </html>

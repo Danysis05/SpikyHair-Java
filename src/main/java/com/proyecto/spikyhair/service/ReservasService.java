@@ -72,6 +72,7 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
 
         reserva.setFecha(dto.getFecha());
         reserva.setDuracion(dto.getDuracion());
+        reserva.setHora(dto.getHora());
 
         // Estado por defecto si no viene del formulario
         reserva.setEstado(dto.getEstado() != null ? Estado.valueOf(dto.getEstado()) : Estado.PENDIENTE);
@@ -90,9 +91,10 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
         emailService.enviarCorreoReserva(
             usuario.getEmail(),   // o getEmail() según tu entidad Usuario
             usuario.getNombre(),
-             servicio.getNombre(),
-            reserva.getFecha().toString()
-);
+            servicio.getNombre(),
+            reserva.getFecha().toString(),
+            reserva.getHora()
+        );
 
     } catch (MessagingException e) {
         System.out.println("⚠ Error enviando correo: " + e.getMessage());

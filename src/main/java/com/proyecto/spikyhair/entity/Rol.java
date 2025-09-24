@@ -14,18 +14,21 @@ import lombok.Data;
 @Table(name = "rol")
 @Data
 public class Rol {
-        public Rol() {
+    public Rol() {
     }
 
-    // ✅ Constructor con parámetros
     public Rol(Long id, String nombre) {
         this.id = id;
         this.nombre = nombre;
     }
 
+    // Constructor extra para crear rol solo con nombre
+    public Rol(String nombre) {
+        this.nombre = nombre;
+    }
+
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-
     @Column(name = "id", unique=true, nullable=false, length=10)
     private Long id;
 
@@ -35,4 +38,16 @@ public class Rol {
     @OneToMany(mappedBy = "rol")
     private List<Usuario> usuarios;
 
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 }

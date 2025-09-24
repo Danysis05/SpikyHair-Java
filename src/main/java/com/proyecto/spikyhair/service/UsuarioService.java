@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -20,8 +19,6 @@ import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.repository.RolRepository;
 import com.proyecto.spikyhair.repository.UsuarioRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
-
-import jakarta.annotation.PostConstruct;
 
 @Service
 public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
@@ -153,7 +150,7 @@ public List<UsuarioDto> filtrarUsuarios(String nombreOEmail, String rolNombre) {
         .map(usuario -> modelMapper.map(usuario, UsuarioDto.class))
         .collect(Collectors.toList());
 }
-
+/* 
 @PostConstruct
 public void initRoles() {
     // Crear ADMINISTRADOR primero
@@ -174,6 +171,7 @@ public void initRoles() {
         System.out.println("✅ Rol USUARIO creado correctamente.");
     }
 }
+    */
 
 
 

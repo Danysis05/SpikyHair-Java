@@ -1,4 +1,5 @@
 package com.proyecto.spikyhair;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +17,13 @@ public class DataLoader implements CommandLineRunner {
         this.rolesSingleton = rolesSingleton;
     }
 
-@Override
-public void run(String... args) {
-    if (rolRepository.findByNombre("ADMINISTRADOR").isEmpty()) {
-        rolRepository.save(new Rol("ADMINISTRADOR"));
-        System.out.println("Rol ADMINISTRADOR creado");
+    @Override
+    public void run(String... args) {
+        rolesSingleton.getRolesBase().forEach(nombreRol -> {
+            if (rolRepository.findByNombre(nombreRol).isEmpty()) {
+                rolRepository.save(new Rol(nombreRol));
+                System.out.println("Rol " + nombreRol + " creado");
+            }
+        });
     }
-    if (rolRepository.findByNombre("USUARIO").isEmpty()) {
-        rolRepository.save(new Rol("USUARIO"));
-        System.out.println("Rol USUARIO creado");
-    }
-}
-
 }

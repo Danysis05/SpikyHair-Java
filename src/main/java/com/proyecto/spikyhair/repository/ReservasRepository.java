@@ -14,6 +14,7 @@ public interface ReservasRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByEstado(Estado estado);
     List<Reserva> findByUsuarioId(Long usuarioId);
     long countByEstado(Estado estado);
+    List<Reserva> findByPeluqueriaId(Long peluqueriaId);
 
     @Query("SELECT r.servicios.nombre, COUNT(r) FROM Reserva r GROUP BY r.servicios.nombre")
     List<Object[]> contarReservasPorServicio();

@@ -29,6 +29,7 @@ public class LoginController {
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         return switch (role) {
             case "ROLE_ADMINISTRADOR" -> "redirect:/admin/dashboard";
+            case "ROLE_DUEÑO" -> "redirect:/owners/dashboard";
             case "ROLE_USUARIO" -> "redirect:/usuarios/index";
             default -> "redirect:/auth/login?error";
         };
@@ -40,10 +41,10 @@ public class LoginController {
         return "register"; // Retorna la vista de registro
     }
     @PostMapping("/register")
-    public String registerUser(UsuarioDto usuarioDto) {
-    
+    public String registerUser( UsuarioDto usuarioDto) {
+
         usuarioService.save(usuarioDto);
-        return "redirect:/auth/login"; // Redirigir a la página de login después de registrar
+        return "redirect:/auth/login?registroExitoso=true"; // Redirigir a la página de login después de registrar
     }
 
     

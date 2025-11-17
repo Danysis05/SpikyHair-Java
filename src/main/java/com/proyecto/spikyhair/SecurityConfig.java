@@ -19,38 +19,40 @@ import com.proyecto.spikyhair.service.UsuarioDetailsService;
 public class SecurityConfig {
 
     private final UsuarioDetailsService usuarioDetailsService;
-    
 
     public SecurityConfig(UsuarioDetailsService usuarioDetailsService) {
         this.usuarioDetailsService = usuarioDetailsService;
-        
     }
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/", "/index", "/inicio").permitAll()
+            .requestMatchers("/auth/**").permitAll()
+            .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
+            .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+            .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+            .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
+            .anyRequest().authenticated()
+        )
+        .formLogin(form -> form
+            .loginPage("/auth/login")
+            .loginProcessingUrl("/login")
+            .defaultSuccessUrl("/", true)
+            .failureUrl("/auth/login?error")
+            .permitAll()
+        )
+        .logout(logout -> logout
+            .logoutSuccessUrl("/")
+            .permitAll()
+        );
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/css/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-                .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR")
-                .requestMatchers("/uploads/**").permitAll() 
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/auth/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/auth/logueo", true)
-                .failureUrl("/auth/login?error")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/auth/login?logout")
-                .permitAll()
-            );
+    return http.build();
+}
 
-        return http.build();
-    }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -69,6 +71,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-  
-
 }

@@ -109,8 +109,8 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         return "redirect:/usuarios/index";
     }
 }
-@PostMapping("/cambiar-rol")
 
+@PostMapping("/cambiar-rol")
 @ResponseBody
 public ResponseEntity<String> cambiarRol(@RequestBody Map<String, Long> payload) {
     Long usuarioId = payload.get("usuarioId");

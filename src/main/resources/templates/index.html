@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpikyHair | Inicio</title>
+
+    <link rel="stylesheet" th:href="@{/css/index.css}" />
+
+    <!-- Fuentes e íconos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<header>
+    <div class="menu">
+        <img src="/uploads/logox.jpg" alt="logo" class="menu-icono">
+
+        <nav>
+           
+        </nav>
+    </div>
+
+    <div class="tex">
+        <h1>SpikyHair</h1>
+        <h1>Reserva tu Estilo</h1>
+        
+    </div>
+</header>
+
+<div class="separacion"></div>
+
+<main>
+
+    <!-- NOSOTROS -->
+    <section id="nosotros">
+        <div class="dentro">
+            <img src="/uploads/nosotros.jpg" alt="">
+            <div class="info">
+                <h1>Nosotros</h1>
+                <h4>Tu salón de confianza</h4>
+                <p>
+                    Nuestra peluquería ha sido un pilar en la comunidad por más de 10 años, 
+                    ofreciendo servicios de calidad y atención personalizada.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="separacion"></div>
+
+    <!-- GALERÍA -->
+    <section id="galeria">
+        <div class="container-fluid">
+            <h3 id="sax2">¿Qué te ofrecemos?</h3>
+
+            <div class="separacion"></div>
+
+            <div class="row">
+                <div class="columna-33 columna-mobile-50">
+                    <div class="cuadrado-perfecto">
+                        <a th:href="@{/servicios/mostrar}">
+                            <img src="/uploads/servicios.jpg" alt="">
+                            <h4>Servicios</h4>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="columna-33">
+                    <h1>Encuentra el mejor servicio para ti</h1>
+                    <p>
+                        Ofrecemos servicios especializados en cortes, coloración, tratamientos capilares 
+                        y asesoría personalizada para resaltar tu estilo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UBICACIÓN -->
+    <section class="ubicacion">
+        <h3 id="sax2">📍 Encuéntranos aquí</h3>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <div class="separacion"></div>
+
+    <!-- CTA FINAL -->
+
+
+    <div class="separacion"></div>
+</main>
+
+<!-- MODAL PERFIL -->
+<div id="modalPerfil" class="modal hidden">
+    <div class="perfil-card">
+
+
+
+
+        <span class="close-button" onclick="cerrarModal()">&times;</span>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="contenedor-footer">
+        <div class="nav-footer">
+            <ul>
+                <li><a th:href="@{/servicios/mostrar}">Servicios</a></li>
+                <li><a th:href="@{/reservas/mostrar}">Reservas</a></li>
+                <li>|</li>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="listas-footer">
+            <ul>
+                <li><a><i class="fa-brands fa-instagram"></i></a></li>
+                <li><a><i class="fa-brands fa-facebook"></i></a></li>
+                <li><a><i class="fa-brands fa-twitter"></i></a></li>
+                <li><a><i class="fa-brands fa-tiktok"></i></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-last"><p>© SpikyHair 2025</p></div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+    document.getElementById('perfilBtn').onclick = e => {
+        e.preventDefault();
+        document.getElementById('modalPerfil').classList.remove('hidden');
+    };
+
+    function cerrarModal() {
+        document.getElementById('modalPerfil').classList.add('hidden');
+    }
+
+    document.getElementById('imagenPerfil').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => document.getElementById('avatarPreview').src = ev.target.result;
+        reader.readAsDataURL(file);
+    });
+
+    // Mapa Leaflet
+    const ubicacion = [4.693099, -74.050772];
+    const map = L.map('map').setView(ubicacion, 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.marker(ubicacion).addTo(map).bindPopup("<b>Calle 109 #16-42</b><br>Bogotá, Colombia");
+</script>
+
+</body>
+</html>

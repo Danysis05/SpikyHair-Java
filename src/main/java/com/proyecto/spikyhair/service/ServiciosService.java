@@ -140,4 +140,11 @@ public List<ServiciosDto> filtrarServicios(String nombre, Double precioMin, Doub
     public ServiciosDto update(Long id, ServiciosDto dto) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public List<ServiciosDto> getByPeluqueriaId(Long peluqueriaId) {
+        return serviciosRepository.findByPeluqueriaId(peluqueriaId)
+                .stream()
+                .map(servicio -> modelMapper.map(servicio, ServiciosDto.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -49,5 +49,12 @@ public class Reserva {
     @JoinColumn(name = "servicios_id",nullable = false)
     private Servicios servicios;
 
+    @ManyToOne
+    @JoinColumn(name = "estilista_id", nullable = false)
+    private Estilista estilista;
+
+    @ManyToOne
+    @JoinColumn(name = "peluqueria_id", nullable = false)
+    private Peluqueria peluqueria;
 
 }

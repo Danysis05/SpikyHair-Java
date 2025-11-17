@@ -64,9 +64,6 @@ public String listReservas(Model model) {
     return "usuario/reservas";
 }
 
-
-
-
     // Ver una reserva por ID
     @GetMapping("/{id}")
     public String viewReserva(@PathVariable Long id, Model model) {

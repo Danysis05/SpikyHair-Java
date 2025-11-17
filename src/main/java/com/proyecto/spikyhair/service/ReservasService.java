@@ -13,8 +13,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import com.proyecto.spikyhair.service.EmailService;
-import jakarta.mail.MessagingException;
+
 import com.proyecto.spikyhair.DTO.ReservasDto;
 import com.proyecto.spikyhair.entity.Reserva;
 import com.proyecto.spikyhair.entity.Servicios;
@@ -24,6 +23,8 @@ import com.proyecto.spikyhair.repository.ReservasRepository;
 import com.proyecto.spikyhair.repository.ServiciosRepository;
 import com.proyecto.spikyhair.repository.UsuarioRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
+
+import jakarta.mail.MessagingException;
 
 @Service
 public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
@@ -220,14 +221,6 @@ public List<Double> obtenerIngresosPorMes(int year) {
     return ingresosPorMes;
 }
 
-
-
-
-
-
-
-
-
     public Map<String, Long> obtenerClientesTop() {
         Map<String, Long> conteoClientes = reservasRepository.findAll().stream()
                 .filter(r -> r.getUsuario() != null)
@@ -243,6 +236,13 @@ public List<Double> obtenerIngresosPorMes(int year) {
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
+    }
+
+    public List<ReservasDto> findByPeluqueriaId(Long peluqueriaId) {
+    return reservasRepository.findByPeluqueriaId(peluqueriaId)
+            .stream()
+            .map(reserva -> new ReservasDto(reserva))
+            .collect(Collectors.toList());
     }
 }
 

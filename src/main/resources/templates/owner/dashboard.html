@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard Admin</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <img src="/uploads/Logo.png" alt="">
+      SPIKYHAIR
+    </div>
+    <ul class="nav">
+      <li onclick="navigate('usuarios')">Usuarios</li>
+      <li onclick="navigate('servicios')">Servicios</li>
+      <li onclick="navigate('reservas')">Reservas</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div>
+        <h1>Bienvenido, Administrador</h1>
+        <p th:text="${usuario.nombre}">Nombre de Usuario</p>
+      </div>
+      <div class="user-actions">
+        <a href="#" id="perfilBtn"><i class="fa-solid fa-user"></i></a>
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </form>
+      </div>
+    </div>
+
+    <h1>Panel de Administración</h1>
+
+    <!-- PANEL USUARIOS -->
+    <div id="usuarios" class="panel">
+      <h2>Gestión de Usuarios</h2>
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Total Usuarios</h5>
+            <h2 th:text="${totalUsuarios}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Administradores</h5>
+            <h2 th:text="${totalAdmins}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Usuarios</h5>
+            <h2 th:text="${totalUsers}">0</h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="usuariosChart" height="200"></canvas>
+        </div>
+              <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
+        <input type="text" name="nombreUsuario" placeholder="Buscar por nombre o email" th:value="${nombreUsuario}" />
+        <select name="rol">
+          <option value="" th:selected="${rolSeleccionado == null or rolSeleccionado == ''}">Todos</option>
+          <option value="USUARIO" th:selected="${rolSeleccionado == 'USUARIO'}">Usuario</option>
+          <option value="ADMINISTRADOR" th:selected="${rolSeleccionado == 'ADMINISTRADOR'}">Administrador</option>
+        </select>
+        <button type="submit">Filtrar</button>
+        <a th:href="@{/admin/dashboard/pdf-usuarios(
+            nombreUsuario=${nombreUsuario},
+            rol=${rolSeleccionado}
+        )}" target="_blank" class="btn-descargar">
+          Descargar PDF Usuarios
+        </a>
+
+      </form>
+
+      <div class="datos-container">
+        <div class="usuarios-grid">
+          <div class="usuario-card" th:each="u : ${usuarios}" th:attr="data-id=${u.id}">
+            <img th:src="${u.imagenPerfil != null} ? @{/uploads/{img}(img=${u.imagenPerfil})} : @{/images/default-avatar.png}" alt="Avatar">
+            <h3 th:text="${u.nombre}">Nombre Usuario</h3>
+            <p th:text="${u.email}">email@ejemplo.com</p>
+            <p th:text="${u.telefono}">000000000</p>
+            <p class="rol-label">Rol actual:</p>
+            <select class="rol-select" onchange="cambiarRol(this)" th:data-id="${u.id}">
+              <option value="ADMINISTRADOR" th:selected="${u.rol.nombre == 'ADMINISTRADOR'}">ADMINISTRADOR</option>
+              <option value="USUARIO" th:selected="${u.rol.nombre == 'USUARIO'}">USUARIO</option>
+            </select>
+            <button class="btn-eliminar" onclick="eliminarUsuario(this)" th:data-id="${u.id}">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL SERVICIOS -->
+    <div id="servicios" class="panel hidden">
+      <div th:if="${success}" class="alert alert-success" role="alert">
+    <span th:text="${success}"></span>
+</div>
+
+<div th:if="${warning}" class="alert alert-warning" role="alert">
+    <span th:text="${warning}"></span>
+</div>
+
+<div th:if="${error}" class="alert alert-danger" role="alert">
+    <span th:text="${error}"></span>
+</div>
+
+      <h2>Gestión de Servicios</h2>
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Servicios Activos</h5>
+            <h2 th:text="${totalServicios}">0</h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="serviciosChart" height="200"></canvas>
+        </div>
+      <form method="get" th:action="@{/admin/dashboard}" class="filtros-form">
+        <input type="text" name="nombreServicio" placeholder="Nombre del servicio" />
+        <input type="number" name="precioMin" placeholder="Precio mínimo" />
+        <input type="number" name="precioMax" placeholder="Precio máximo" />
+        <button type="submit">Filtrar</button>
+          <a th:href="@{/admin/dashboard/pdf(nombreServicio=${nombreServicio}, precioMin=${precioMin}, precioMax=${precioMax})}" 
+     class="btn-descargar" target="_blank">Descargar PDF</a>
+      </form>
+      <h3>Importar Servicios</h3>
+      <form th:action="@{/servicios/importar}" method="post" enctype="multipart/form-data" class="importar-form">
+        <input type="file" name="file" accept=".csv" required />
+        <button type="submit" class="btn-importar">Importar CSV</button>
+      </form>
+
+      <button onclick="abrirModalServicio()" class="agregarServicio">Nuevo Servicio</button>
+      <div class="datos-container">
+        <div class="usuarios-grid">
+          <div class="usuario-card" th:each="s : ${servicios}">
+            <h3 th:text="${s.nombre}">Servicio</h3>
+            <p th:text="${s.duracion}">Duración</p>
+            <p th:text="${s.descripcion}">Descripción</p>
+            <p th:text="${s.precio}">Precio</p>
+            <img th:src="@{'/uploads/' + ${s.imagen}}" class="img-servicio" />
+            <button class="boton-editar" type="button" onclick="editarServicio(this)" 
+              th:data-id="${s.id}" 
+              th:data-nombre="${s.nombre}" 
+              th:data-duracion="${s.duracion}" 
+              th:data-descripcion="${s.descripcion}" 
+              th:data-precio="${s.precio}" 
+              th:data-imagen="${s.imagen}">
+              Editar
+            </button>
+            <a th:href="@{'/servicios/delete/' + ${s.id}}"
+              class="btn btn-danger"
+              onclick="return confirm('¿Estás seguro de que deseas eliminar este servicio?');">
+              Eliminar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL RESERVAS -->
+    <div id="reservas" class="panel hidden">
+      <h2>Reservas Pendientes</h2>
+        <div class="row g-4 mb-4">
+          <div class="card shadow-sm text-center p-3">
+            <h5>Total Reservas</h5>
+            <h2 th:text="${totalReservas}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Pendientes</h5>
+            <h2 th:text="${reservasPendientes}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Realizadas</h5>
+            <h2 th:text="${reservasRealizadas}">0</h2>
+          </div>
+          <div class="card shadow-sm text-center p-3">
+            <h5>Ingresos Totales</h5>
+            <h2>$<span th:text="${ingresosTotales}">0</span></h2>
+          </div>
+        </div>
+        <div style="width:100%; max-width:800px; margin:20px auto;">
+          <canvas id="reservasChart" height="200"></canvas>
+        </div>
+
+            <form method="get" action="/admin/dashboard" class="filtros-form">
+              <input type="text" name="nombreUsuario" placeholder="Nombre del Usuario" th:value="${nombreUsuario}">
+              <input type="text" name="nombreServicio" placeholder="Nombre del Servicio" th:value="${nombreServicio}">
+              <button type="submit">Filtrar</button>
+              <a th:href="@{'/admin/dashboard/pdf-reservas'(nombreUsuario=${nombreUsuario}, nombreServicio=${nombreServicio}, estado=${estado})}" 
+                class="btn btn-pdf" target="_blank">
+                Descargar PDF
+              </a>
+            </form>
+
+      <div class="card">Pendientes de aprobación: <strong th:text="${totalReservas}">0</strong></div>
+      <div th:if="${#lists.isEmpty(reservas)}" class="card-empty">
+        No hay reservas pendientes.
+      </div>
+
+      <!-- Tarjetas de reservas -->
+      <div th:each="r : ${reservas}" class="reserva-card">
+        <p class="usuario" th:text="${r.usuario.nombre}">Nombre Usuario</p>
+        <p class="servicio" th:text="${r.servicioNombre}">Nombre Servicio</p>
+        <p th:text="${r.estado}"
+          th:class="'estado ' + ${r.estado.toLowerCase()}">
+          Estado
+        </p>
+        <p class="fecha"   th:text="${r.fecha}">01/01/2025 10:00</p>
+<button class="btn-cambiar-estado"
+        th:data-id="${r.id}"
+        th:data-estado="${r.estado}"
+        onclick="cambiarEstadoReserva(this)">
+  Cambiar Estado
+</button>
+
+
+        <form th:action="@{'/reservas/eliminar/' + ${r.id}}" method="post" class="form-eliminar">
+          <button type="submit" class="btn-eliminar">Eliminar</button>
+        </form>
+      </div>
+    </div>
+
+ 
+  </div>
+  </div>
+
+  <!-- MODAL PERFIL -->
+  <div id="modalPerfil" class="modal hidden">
+    <div class="perfil-card">
+      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+        <div class="perfil-header">
+          <div class="avatar">
+            <img id="avatarPreview"
+              th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
+              alt="Avatar">
+            <label for="imagenPerfil" class="edit-icon" title="Cambiar imagen">
+              <i class="fa-solid fa-camera"></i>
+            </label>
+            <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*">
+          </div>
+          <h2 th:text="${usuario.nombre}">Your Name</h2>
+          <p th:text="${usuario.email}">your.name@gmail.com</p>
+        </div>
+
+        <input type="hidden" name="id" th:value="${usuario.id}">
+        <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required>
+        <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required>
+        <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}">
+        <button type="submit" class="btn-edit">Editar Perfil</button>
+      </form>
+
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn-logout">LOG OUT</button>
+      </form>
+      <span class="close-button" onclick="cerrarModal()">&times;</span>
+    </div>
+  </div>
+
+  <!-- MODAL SERVICIO -->
+  <div id="modalServicio" class="modal-Servicio hidden">
+    <div class="modal-content">
+      <h2 class="modal-title">Servicio</h2>
+
+      <form id="formServicio" method="post" enctype="multipart/form-data" action="/servicios/create">
+        <input type="hidden" name="id" id="servicioId" />
+
+        <input type="text" name="nombre" id="nombre" placeholder="Nombre del servicio" required class="form-input" />
+        <input type="text" name="duracion" id="duracion" placeholder="Duración (ej: 45 min)" required class="form-input" />
+        <textarea name="descripcion" id="descripcion" placeholder="Descripción" required class="form-textarea"></textarea>
+        <input type="number" step="0.01" name="precio" id="precio" placeholder="Precio" required class="form-input" />
+
+        <label for="imagenFile" class="form-label">Imagen del servicio</label>
+        <input type="file" name="imagenFile" id="imagenFile" accept="image/*" class="form-file" />
+
+        <div id="previewContainer" class="preview-container">
+          <img id="imagenPreview" src="" alt="Vista previa" class="imagen-preview hidden" />
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-guardar">Guardar</button>
+          <button type="button" onclick="cerrarModalServicio()" class="btn-cancelar">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+ <script>
+  function navigate(seccionId) {
+    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
+    document.getElementById(seccionId).classList.remove('hidden');
+    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
+  }
+
+  // Restaurar sección activa al cargar
+  window.addEventListener('DOMContentLoaded', () => {
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
+    navigate(seccionActiva);
+  });
+
+  document.getElementById('perfilBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('modalPerfil').classList.remove('hidden');
+  });
+
+  function cerrarModal() {
+    document.getElementById('modalPerfil').classList.add('hidden');
+  }
+
+  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('avatarPreview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  function cambiarRol(selectElement) {
+    const userId = selectElement.getAttribute("data-id");
+    const nuevoRol = selectElement.value;
+    const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
+    if (!confirmado) {
+      selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
+      return;
+    }
+
+    const rolMap = {
+      "ADMINISTRADOR": 1,
+      "USUARIO": 2
+    };
+
+    fetch(`/usuarios/cambiar-rol`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuarioId: parseInt(userId),
+        rolId: rolMap[nuevoRol]
+      })
+    })
+    .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
+    .catch(error => {
+      console.error('Error en la solicitud:', error);
+      alert('Error al actualizar el rol');
+    });
+  }
+
+  function eliminarUsuario(boton) {
+    const userId = boton.getAttribute("data-id");
+    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
+
+    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
+      .then(response => {
+        if (response.status === 205) {
+          alert("Tu cuenta ha sido eliminada. Saliendo...");
+          window.location.href = "/auth/login";
+        } else if (response.ok) {
+          boton.closest(".usuario-card").remove();
+          alert("Usuario eliminado correctamente");
+        } else {
+          alert("Error al eliminar el usuario");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Error al eliminar el usuario");
+      });
+  }
+
+  function abrirModalServicio() {
+    const form = document.getElementById('formServicio');
+    form.reset();
+    form.action = '/servicios/create';
+    document.getElementById('servicioId').value = '';
+    const preview = document.getElementById('imagenPreview');
+    preview.src = '';
+    preview.classList.add('hidden');
+    document.getElementById('modalServicio').classList.remove('hidden');
+  }
+
+  function editarServicio(boton) {
+    const form = document.getElementById('formServicio');
+    const id = boton.getAttribute('data-id');
+    const nombre = boton.getAttribute('data-nombre');
+    const duracion = boton.getAttribute('data-duracion');
+    const descripcion = boton.getAttribute('data-descripcion');
+    const precio = boton.getAttribute('data-precio');
+    const imagen = boton.getAttribute('data-imagen');
+    document.getElementById('servicioId').value = id;
+    document.getElementById('nombre').value = nombre;
+    document.getElementById('duracion').value = duracion;
+    document.getElementById('descripcion').value = descripcion;
+    document.getElementById('precio').value = precio;
+    form.action = '/servicios/update/' + id;
+    const preview = document.getElementById('imagenPreview');
+    if (imagen) {
+      preview.src = '/uploads/servicios/' + imagen;
+      preview.classList.remove('hidden');
+    } else {
+      preview.src = '';
+      preview.classList.add('hidden');
+    }
+    document.getElementById('modalServicio').classList.remove('hidden');
+  }
+
+  function cerrarModalServicio() {
+    document.getElementById('modalServicio').classList.add('hidden');
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // Datos Thymeleaf
+  var meses = /*[[${meses}]]*/ [];
+  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
+
+  // USUARIOS
+  var mesesUsuarios = /*[[${mesesUsuarios}]]*/ [];
+var usuariosPorMes = /*[[${usuariosPorMes}]]*/ [];
+
+var uCanvas = document.getElementById('usuariosChart');
+if (uCanvas) {
+  new Chart(uCanvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: mesesUsuarios,
+      datasets: [{
+        label: 'Usuarios Nuevos',
+        data: usuariosPorMes,
+        backgroundColor: 'rgba(54,162,235,0.7)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  });
+}
+
+  // SERVICIOS
+
+    var serviciosLabels = /*[[${serviciosLabels}]]*/ [];
+    var serviciosValues = /*[[${serviciosValues}]]*/ [];
+
+    console.log("Labels:", serviciosLabels);
+    console.log("Values:", serviciosValues);
+
+    var sCanvas = document.getElementById('serviciosChart');
+    if (sCanvas) {
+        new Chart(sCanvas.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: serviciosLabels,
+                datasets: [{
+                    label: 'Servicios más usados',
+                    data: serviciosValues,
+                    backgroundColor: [
+                        'rgba(220,53,69,0.7)',
+                        'rgba(40,167,69,0.7)',
+                        'rgba(255,193,7,0.7)'
+                    ]
+                }]
+            }
+        });
+    }
+  
+
+
+
+  // RESERVAS
+var meses = /*[[${meses}]]*/ [];
+  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var rCanvas = document.getElementById('reservasChart');
+
+    if (rCanvas) {
+      var ctx = rCanvas.getContext('2d');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: meses,
+          datasets: [{
+            label: 'Reservas',
+            data: reservasPorMes,
+            borderColor: 'rgba(220,53,69,0.9)',
+            backgroundColor: 'rgba(220,53,69,0.3)',
+            pointBackgroundColor: '#fff',
+            pointBorderColor: 'rgba(220,53,69,1)',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: {
+              display: true,
+              text: '📈 Reservas por Mes',
+              font: { size: 18, weight: 'bold' }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+  });
+
+  function cambiarEstadoReserva(boton) {
+    const id = boton.getAttribute("data-id");
+    const estadoActual = boton.getAttribute("data-estado");
+    const nuevoEstado = estadoActual === "PENDIENTE" ? "REALIZADA" : "PENDIENTE";
+
+    // Confirmación
+    if (!confirm(`¿Deseas cambiar el estado a "${nuevoEstado}"?`)) return;
+
+    fetch(`/reservas/cambiar-estado/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Error al actualizar el estado');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualiza la tarjeta sin recargar
+            const estadoP = boton.closest('.reserva-card').querySelector('.estado');
+            if (estadoP) {
+                estadoP.innerText = data.estado; // nuevo estado
+                estadoP.className = 'estado ' + data.estado.toLowerCase(); // clases CSS
+            }
+            boton.setAttribute('data-estado', data.estado); // actualizar atributo
+            alert('Estado actualizado correctamente');
+        } else {
+            alert('Error: ' + (data.message || data.error));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error en el servidor');
+    });
+}
+
+
+
+</script>
+</body>
+</html>

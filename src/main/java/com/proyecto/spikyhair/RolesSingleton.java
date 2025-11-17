@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RolesSingleton {
 
-    private final List<String> rolesBase = List.of("ADMINISTRADOR", "USUARIO");
+    private final List<String> rolesBase = List.of("ADMINISTRADOR", "USUARIO", "DUEÑO");
 
     public List<String> getRolesBase() {
         return rolesBase;

@@ -19,37 +19,40 @@
 </head>
 
 <body>
-
-<header>
+<header class="hero">
     <div class="menu">
         <img src="/uploads/logox.jpg" alt="logo" class="menu-icono">
 
         <nav>
-           
+            <ul class="lista-menu">
+                <li><a th:href="@{/auth/login}">Inicia Sesión</a></li>
+                <li><a th:href="@{/auth/new}" class="btn-register">Regístrate</a></li>
+            </ul>
         </nav>
     </div>
 
-    <div class="tex">
-        <h1>SpikyHair</h1>
-        <h1>Reserva tu Estilo</h1>
-        
+    <div class="hero-content">
+        <h1 class="title">SpikyHair</h1>
+        <h2 class="subtitle">Reserva tu Estilo</h2>
+        <p class="tagline">Tu próximo look está a un clic.</p>
     </div>
 </header>
 
 <div class="separacion"></div>
-
 <main>
 
     <!-- NOSOTROS -->
-    <section id="nosotros">
+    <section id="nosotros" class="reveal">
         <div class="dentro">
-            <img src="/uploads/nosotros.jpg" alt="">
+            <img src="/uploads/nosotros.jpg" alt="Imagen de salón de belleza">
             <div class="info">
                 <h1>Nosotros</h1>
-                <h4>Tu salón de confianza</h4>
+                <h4>Tu estilo, tu espacio, tu elección</h4>
                 <p>
-                    Nuestra peluquería ha sido un pilar en la comunidad por más de 10 años, 
-                    ofreciendo servicios de calidad y atención personalizada.
+                    En SpikyHair reunimos los mejores salones de belleza de la ciudad 
+                    para que encuentres el lugar ideal según tu estilo. 
+                    Explora, compara y elige la peluquería que más se adapte a ti, 
+                    disfrutando una experiencia moderna, fácil y diseñada para tu comodidad.
                 </p>
             </div>
         </div>
@@ -58,68 +61,73 @@
     <div class="separacion"></div>
 
     <!-- GALERÍA -->
-    <section id="galeria">
-        <div class="container-fluid">
-            <h3 id="sax2">¿Qué te ofrecemos?</h3>
+    <section id="galeria" class="reveal">
+        <div class="container">
+            <h3 class="titulo-seccion">¿Qué te ofrecemos?</h3>
+            <div class="separador"></div>
 
-            <div class="separacion"></div>
+            <div class="galeria-grid">
 
-            <div class="row">
-                <div class="columna-33 columna-mobile-50">
-                    <div class="cuadrado-perfecto">
-                        <a th:href="@{/servicios/mostrar}">
-                            <img src="/uploads/servicios.jpg" alt="">
-                            <h4>Servicios</h4>
-                        </a>
-                    </div>
+                <!-- Tarjeta de servicio -->
+                <div class="tarjeta-servicio">
+                    <a th:href="@{/salones/listar}">
+                        <div class="tarjeta-img">
+                            <img src="/uploads/fondo2.jpg" alt="">
+                        </div>
+                        <div class="tarjeta-info">
+                            <h4>Salones de Belleza</h4>
+                        </div>
+                    </a>
                 </div>
 
-                <div class="columna-33">
-                    <h1>Encuentra el mejor servicio para ti</h1>
+                <!-- Texto descriptivo -->
+                <div class="galeria-descripcion" >
+                    <h1>Encuentra el salón perfecto para ti</h1>
                     <p>
-                        Ofrecemos servicios especializados en cortes, coloración, tratamientos capilares 
-                        y asesoría personalizada para resaltar tu estilo.
+                        Explora una amplia variedad de salones de belleza cerca de ti. 
+                        Compara estilos, especialidades, ubicaciones y disponibilidad para 
+                        elegir el lugar ideal donde cuidar tu imagen y vivir una experiencia única.
                     </p>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <!-- UBICACIÓN -->
-    <section class="ubicacion">
-        <h3 id="sax2">📍 Encuéntranos aquí</h3>
-        <div class="map-container">
-            <div id="map"></div>
+
+    <div class="separacion"></div>
+    <!-- BENEFICIOS -->
+    <section id="beneficios" class="reveal">
+        <h3>Beneficios de SpikyHair</h3>
+        <div class="beneficio">
+            <i class="fa-solid fa-calendar-check"></i>
+            <p>Reserva en segundos</p>
+        </div>
+        <div class="beneficio">
+            <i class="fa-solid fa-scissors"></i>
+            <p>Variedad de salones</p>
+        </div>
+        <div class="beneficio">
+            <i class="fa-solid fa-location-dot"></i>
+            <p>Cerca de ti</p>
         </div>
     </section>
 
-    <div class="separacion"></div>
+    <section class="cta-final reveal" >
+        <h2>¿Listo para encontrar tu nuevo look?</h2>
+        <p>Crea tu cuenta y empieza a explorar los mejores salones de belleza.</p>
+        <a th:href="@{/auth/new}" class="btn-cta">Crear cuenta</a>
+    </section>
 
-    <!-- CTA FINAL -->
-
-
-    <div class="separacion"></div>
 </main>
-
-<!-- MODAL PERFIL -->
-<div id="modalPerfil" class="modal hidden">
-    <div class="perfil-card">
-
-
-
-
-        <span class="close-button" onclick="cerrarModal()">&times;</span>
-    </div>
-</div>
-
 <!-- FOOTER -->
 <footer>
     <div class="contenedor-footer">
-        <div class="nav-footer">
+        <div class="lista-menu">
             <ul>
-                <li><a th:href="@{/servicios/mostrar}">Servicios</a></li>
-                <li><a th:href="@{/reservas/mostrar}">Reservas</a></li>
-                <li>|</li>
+                <li><a th:href="@{/auth/login}">Inicia Sesión</a></li>
+                <li><a th:href="@{/auth/new}">Regístrate</a></li>
+
 
                 </li>
             </ul>
@@ -139,31 +147,27 @@
 </footer>
 
 <!-- SCRIPTS -->
-<script>
-    document.getElementById('perfilBtn').onclick = e => {
-        e.preventDefault();
-        document.getElementById('modalPerfil').classList.remove('hidden');
-    };
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const elements = document.querySelectorAll(".reveal");
 
-    function cerrarModal() {
-        document.getElementById('modalPerfil').classList.add('hidden');
-    }
+        const options = {
+            threshold: 0.2
+        };
 
-    document.getElementById('imagenPerfil').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => document.getElementById('avatarPreview').src = ev.target.result;
-        reader.readAsDataURL(file);
+        const revealOnScroll = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                }
+            });
+        }, options);
+
+        elements.forEach(el => revealOnScroll.observe(el));
     });
+    </script>
 
-    // Mapa Leaflet
-    const ubicacion = [4.693099, -74.050772];
-    const map = L.map('map').setView(ubicacion, 16);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    L.marker(ubicacion).addTo(map).bindPopup("<b>Calle 109 #16-42</b><br>Bogotá, Colombia");
-</script>
 
 </body>
 </html>

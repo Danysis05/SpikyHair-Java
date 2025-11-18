@@ -32,7 +32,7 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @GetMapping("/index")
+    @GetMapping("/home")
     public String paginaUsuario(Model model) {
         Usuario usuario = usuarioService.getUsuarioAutenticado();
         model.addAttribute("usuario", usuario);
@@ -106,7 +106,7 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
     if (usuario != null && usuario.getRol().getNombre().equals("ADMINISTRADOR")) {
         return "redirect:/admin/dashboard";
     } else {
-        return "redirect:/usuarios/index";
+        return "redirect:/usuarios/home";
     }
 }
 

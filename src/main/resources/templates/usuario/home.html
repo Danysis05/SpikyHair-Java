@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SpikyHair | Inicio</title>
-  <link rel="stylesheet" th:href="@{/css/index.css}" />
+  <link rel="stylesheet" th:href="@{/css/home.css}" />
    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -15,8 +15,22 @@
 
 </head>
 <body>
+<header>
+    <div class="menu">
+        <img src="/uploads/logox.jpg" alt="logo" class="menu-icono">
 
-
-
+        <nav>
+            <ul class="lista-menu">
+                <li><a th:href="@{/usuarios/home}">Inicio</a></li>
+                <a href=""> <img src="" alt=""></a>
+                <li>
+                  <form th:action="@{/logout}" method="post">
+                     <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
+                  </form>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
 </body>
 </html>

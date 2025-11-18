@@ -36,7 +36,7 @@ public class UsuarioController {
     public String paginaUsuario(Model model) {
         Usuario usuario = usuarioService.getUsuarioAutenticado();
         model.addAttribute("usuario", usuario);
-        return "usuario/index";
+        return "usuario/home";
     }
 
     // Mostrar todos los usuarios

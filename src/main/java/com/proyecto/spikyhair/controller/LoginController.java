@@ -30,7 +30,7 @@ public class LoginController {
         return switch (role) {
             case "ROLE_ADMINISTRADOR" -> "redirect:/admin/dashboard";
             case "ROLE_DUEÑO" -> "redirect:/owners/dashboard";
-            case "ROLE_USUARIO" -> "redirect:/usuarios/index";
+            case "ROLE_USUARIO" -> "redirect:/usuarios/home";
             default -> "redirect:/auth/login?error";
         };
     }
@@ -46,9 +46,4 @@ public class LoginController {
         usuarioService.save(usuarioDto);
         return "redirect:/auth/login?registroExitoso=true"; // Redirigir a la página de login después de registrar
     }
-
-    
-
- 
-  
 }

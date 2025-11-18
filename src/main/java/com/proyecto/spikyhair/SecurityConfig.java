@@ -23,36 +23,35 @@ public class SecurityConfig {
     public SecurityConfig(UsuarioDetailsService usuarioDetailsService) {
         this.usuarioDetailsService = usuarioDetailsService;
     }
-@Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/index", "/inicio").permitAll()
-            .requestMatchers("/auth/**").permitAll()
-            .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-            .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-            .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
-            .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
-            .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
-            .anyRequest().authenticated()
-        )
-        .formLogin(form -> form
-            .loginPage("/auth/login")
-            .loginProcessingUrl("/login")
-            .defaultSuccessUrl("/", true)
-            .failureUrl("/auth/login?error")
-            .permitAll()
-        )
-        .logout(logout -> logout
-            .logoutSuccessUrl("/")
-            .permitAll()
-        );
 
-    return http.build();
-}
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/index", "/inicio").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
+                .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+                .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+                .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/auth/logueo", true)// ✔ Redirige según rol
+                .failureUrl("/auth/login?error")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/")
+                .permitAll()
+            );
 
-
+        return http.build();
+    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

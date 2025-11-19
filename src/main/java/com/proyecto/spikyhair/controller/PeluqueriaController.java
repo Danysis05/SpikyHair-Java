@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
+import com.proyecto.spikyhair.entity.Rol;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.UsuarioService;
@@ -36,6 +37,9 @@ public class PeluqueriaController {
     public String crearPeluqueria(PeluqueriaDto peluqueriaDto) {
         Usuario usuario = usuarioService.getUsuarioAutenticado();
         peluqueriaDto.setUsuarioId(usuario.getId());
+        Rol rolOwner = new Rol();
+        rolOwner.setId(3L); // Suponiendo que el ID 3 corresponde al rol de "Owner"
+        usuario.setRol(rolOwner);
         peluqueriaService.save(peluqueriaDto);
         return "redirect:/Owners/dashboard";
     }

@@ -39,7 +39,7 @@ public class PeluqueriaController {
         peluqueriaDto.setUsuarioId(usuarioId);
         usuarioService.actualizarRol(usuarioId, 3L);
         peluqueriaService.save(peluqueriaDto);
-        return "redirect:/Owners/dashboard";
+        return "redirect:/owners/dashboard";
     }
 
     @GetMapping("/nuevo")

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.proyecto.spikyhair.DTO.EstilistaDto;
 import com.proyecto.spikyhair.entity.Estilista;
@@ -27,12 +28,23 @@ public class EstilistaService implements Idao<Estilista, Long, EstilistaDto> {
         this.peluqueriaRepository = peluqueriaRepository;
     }
 
-    @Override
-    public EstilistaDto save(EstilistaDto dto) {
-        Estilista estilista = modelMapper.map(dto, Estilista.class);
-        Estilista saved = estilistaRepository.save(estilista);
-        return modelMapper.map(saved, EstilistaDto.class);
+@Override
+public EstilistaDto save(EstilistaDto dto) {
+    // Mapear DTO a entidad usando ModelMapper
+    Estilista estilista = modelMapper.map(dto, Estilista.class);
+
+    // Guardar solo el nombre de la imagen
+    if (dto.getImagenPerfil() != null && !dto.getImagenPerfil().isEmpty()) {
+        String fileName = StringUtils.cleanPath(dto.getImagenPerfil());
+        estilista.setImagenPerfil(fileName);
     }
+
+    // Guardar entidad
+    Estilista saved = estilistaRepository.save(estilista);
+
+    // Devolver DTO actualizado (si quieres, puedes mapear también la imagenNombre si lo agregaste al DTO)
+    return modelMapper.map(saved, EstilistaDto.class);
+}
 
 @Override
 public EstilistaDto update(Long id, EstilistaDto dto) {
@@ -86,4 +98,44 @@ public EstilistaDto update(Long id, EstilistaDto dto) {
                 .map(estilista -> modelMapper.map(estilista, EstilistaDto.class))
                 .collect(Collectors.toList());
     }
+
+public EstilistaDto saveOrUpdate(EstilistaDto dto) {
+
+    Estilista estilista;
+
+    // Si viene ID → actualizar
+    if (dto.getId() != null) {
+
+        estilista = estilistaRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "El estilista con ID " + dto.getId() + " no existe."
+                ));
+
+        estilista.setNombre(dto.getNombre());
+        estilista.setEspecialidad(dto.getEspecialidad());
+
+    } else {
+        estilista = modelMapper.map(dto, Estilista.class);
+    }
+
+    // ✔ CORRECCIÓN FINAL: usar imagenPerfil, ya NO imagenNombre
+    if (dto.getImagenPerfil() != null && !dto.getImagenPerfil().isEmpty()) {
+        estilista.setImagenPerfil(dto.getImagenPerfil());
+    }
+
+    // Actualizar peluquería si viene en el DTO
+    if (dto.getPeluqueriaId() != null) {
+        Peluqueria peluqueria = peluqueriaRepository.findById(dto.getPeluqueriaId())
+                .orElseThrow(() -> new RuntimeException(
+                        "La peluquería con ID " + dto.getPeluqueriaId() + " no existe."
+                ));
+        estilista.setPeluqueria(peluqueria);
+    }
+
+    Estilista saved = estilistaRepository.save(estilista);
+
+    return modelMapper.map(saved, EstilistaDto.class);
+}
+
+
 }

@@ -122,19 +122,29 @@ form button:hover {
 .login-link a:hover {
     text-decoration: underline;
 }
+
 .back {
-    background-color: crimson;
+    display: flex;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: white;
     border: none;
-    color: white;
+    color: crimson;
     font-size: 16px;
     cursor: pointer;
     text-decoration: none;
-    width: 90%;
+    border-radius: 20px;
+    width: 40px;
     height: 40px;
-    border-radius: 8px;
-    transition: 0.3s;
+    align-items: center;
+    justify-content: center;
 }
 .back:hover {
-    background-color: #a1001a;
-    transform: scale(1.03);
+    color: #ffffff;
+    background-color: rgb(219, 219, 219);
+}
+.back i {
+    font-size: 24px;
+    color: crimson;
 }

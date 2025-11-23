@@ -45,15 +45,21 @@ public class OwnerController {
         long id_usuario = usuario.getId();
         Peluqueria peluqueria = peluqueriaService.findByUsuarioId(id_usuario);
         Long peluqueriaId = peluqueria.getId();
+
         List<EstilistaDto> estilistas = estilistaService.getByPeluqueriaId(peluqueriaId);
         List<ServiciosDto> servicios = serviciosService.getByPeluqueriaId(peluqueriaId);
         List<ReservasDto> reservas = reservasService.findByPeluqueriaId(peluqueriaId);
         List<ResenasDto> resenas = resenaService.getByPeluqueriaId(peluqueriaId);
+        long totalEstilistas = estilistas.size();
+        long totalServicios = servicios.size();
         model.addAttribute("peluqueria", peluqueria);
         model.addAttribute("estilistas", estilistas);
         model.addAttribute("servicios", servicios);
         model.addAttribute("reservas", reservas);
         model.addAttribute("resenas", resenas);
+        model.addAttribute("totalEstilistas", totalEstilistas);
+        model.addAttribute("totalServicios", totalServicios);
+        model.addAttribute("usuario",usuario);
         return "owner/dashboard"; 
     }
 }

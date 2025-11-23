@@ -38,7 +38,7 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     public ReservasService(ReservasRepository reservasRepository,
                        ServiciosRepository serviciosRepository,
                        UsuarioRepository usuarioRepository,
-                       EmailService emailService) {
+                       EmailService emailService, ModelMapper modelMapper) {
     this.reservasRepository = reservasRepository;
     this.serviciosRepository = serviciosRepository;
     this.usuarioRepository = usuarioRepository;
@@ -104,25 +104,22 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     return new ReservasDto(guardada);
 }
     
-
-    
-
     @Override
 
-public ReservasDto update(Long id, ReservasDto dto) {
-    Reserva existente = reservasRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("No existe la reserva con id " + id));
+    public ReservasDto update(Long id, ReservasDto dto) {
+        Reserva existente = reservasRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No existe la reserva con id " + id));
 
-    // Solo actualizar lo que el usuario puede modificar
-    if (dto.getFecha() != null) {
-        existente.setFecha(dto.getFecha());
+        // Solo actualizar lo que el usuario puede modificar
+        if (dto.getFecha() != null) {
+            existente.setFecha(dto.getFecha());
+        }
+
+        // No tocar usuario ni servicio, porque no los mandas desde el formulario
+
+        Reserva actualizada = reservasRepository.save(existente);
+        return new ReservasDto(actualizada);
     }
-
-    // No tocar usuario ni servicio, porque no los mandas desde el formulario
-
-    Reserva actualizada = reservasRepository.save(existente);
-    return new ReservasDto(actualizada);
-}
 
     public List<ReservasDto> filtrarReservas(String nombreUsuario, String nombreServicio, String estado) {
     return reservasRepository.findAll().stream()

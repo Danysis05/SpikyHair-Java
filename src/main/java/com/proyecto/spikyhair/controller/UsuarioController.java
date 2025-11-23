@@ -105,7 +105,10 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
 
     if (usuario != null && usuario.getRol().getNombre().equals("ADMINISTRADOR")) {
         return "redirect:/admin/dashboard";
-    } else {
+    } else if(usuario != null && usuario.getRol().getNombre().equals("DUEÑO")){
+        return "redirect:/owners/dashboard";
+    }
+    else {
         return "redirect:/usuarios/home";
     }
 }

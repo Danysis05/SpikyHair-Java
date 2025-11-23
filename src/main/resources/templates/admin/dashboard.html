@@ -562,6 +562,242 @@ var meses = /*[[${meses}]]*/ [];
 
 
 
+
+</script>
+<script>
+/* ==========================
+    NAVEGACIÓN ENTRE PANELES - ANIMADA
+========================== */
+
+let panelActual = null;
+
+function navigate(seccionId) {
+    const nuevoPanel = document.getElementById(seccionId);
+
+    if (!nuevoPanel) {
+        console.error("Panel no encontrado:", seccionId);
+        return;
+    }
+
+    if (!panelActual) {
+        nuevoPanel.classList.add("active");
+        nuevoPanel.style.display = "block";
+        panelActual = nuevoPanel;
+        localStorage.setItem("seccionActiva", seccionId);
+        return;
+    }
+
+    if (panelActual === nuevoPanel) return;
+
+    panelActual.classList.remove("active");
+    panelActual.classList.add("saliendo");
+
+    nuevoPanel.style.display = "block";
+    nuevoPanel.classList.add("active");
+
+    setTimeout(() => {
+        panelActual.classList.remove("saliendo");
+        panelActual.style.display = "none";
+        panelActual = nuevoPanel;
+    }, 350);
+
+    localStorage.setItem("seccionActiva", seccionId);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'estilistas';
+    navigate(seccionActiva);
+
+    const btnPerfil = document.getElementById('perfilBtn');
+    if (btnPerfil) {
+        btnPerfil.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('modalPerfil').classList.add('show');
+        });
+    }
+});
+
+
+/* ==========================
+    MODAL PERFIL
+========================== */
+function cerrarModalPerfil() {
+  document.getElementById('modalPerfil').classList.remove('show');
+}
+
+
+/* ==========================
+    FUNCIÓN PREVIEW IMAGE GENERAL
+========================== */
+function previewImage(input, previewId) {
+  const preview = document.getElementById(previewId);
+  const file = input.files?.[0];
+  
+  if (preview && file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.classList.remove('hidden');
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+
+/* ==========================
+    MODAL SERVICIO
+========================== */
+function abrirModalServicio() {
+  const form = document.getElementById('formServicio');
+  form.reset();
+  form.action = '/servicios/create';
+
+  document.getElementById('servicioId').value = '';
+
+  const preview = document.getElementById('imagenPreview');
+  preview.src = '';
+  preview.classList.add('hidden');
+
+  document.getElementById('modalServicio').classList.add('show');
+}
+
+function editarServicio(boton) {
+  const form = document.getElementById('formServicio');
+
+  document.getElementById('servicioId').value = boton.dataset.id;
+  document.getElementById('nombreServicio').value = boton.dataset.nombre;
+  document.getElementById('duracionServicio').value = boton.dataset.duracion;
+  document.getElementById('descripcionServicio').value = boton.dataset.descripcion;
+  document.getElementById('precioServicio').value = boton.dataset.precio;
+
+  form.action = '/servicios/update/' + boton.dataset.id;
+
+  const preview = document.getElementById('imagenPreview');
+  if (boton.dataset.imagen) {
+    preview.src = '/uploads/' + boton.dataset.imagen;
+    preview.classList.remove('hidden');
+  } else {
+    preview.src = '';
+    preview.classList.add('hidden');
+  }
+
+  document.getElementById('modalServicio').classList.add('show');
+}
+
+function cerrarModalServicio() {
+  document.getElementById('modalServicio').classList.remove('show');
+}
+
+
+/* ==========================
+    MODAL ESTILISTA
+========================== */
+function abrirModalEstilista() {
+  resetModalEstilista();
+
+  // Siempre enviar a /estilistas/guardar (crear o editar)
+  const form = document.getElementById("formEstilista");
+  form.action = "/estilistas/guardar";
+
+  document.getElementById("modalEstilista").classList.add("show");
+}
+
+function cerrarModalEstilista() {
+  document.getElementById("modalEstilista").classList.remove("show");
+}
+
+function resetModalEstilista() {
+  document.getElementById("formEstilista").reset();
+  document.getElementById("estilistaId").value = "";
+
+  const preview = document.getElementById("estilistaImagenPreview");
+  if (preview) {
+    preview.classList.add("hidden");
+    preview.src = "";
+  }
+
+  const icono = document.getElementById("iconoDefaultEstilista");
+  if (icono) {
+    icono.style.display = "block";
+  }
+}
+
+
+/* ==========================
+    EDITAR ESTILISTA (CORREGIDO)
+========================== */
+/* ==========================
+    EDITAR ESTILISTA (CORREGIDO)
+========================== */
+function editarEstilista(boton) {
+
+  const card = boton.closest(".usuario-card");
+  const nombre = card.querySelector("h3")?.innerText.trim() || "";
+  const especialidad = card.querySelector("p")?.innerText.trim() || "";
+  const imagen = card.querySelector("img")?.getAttribute("src")?.replace("/uploads/", "") || "";
+
+  const form = document.getElementById("formEstilista");
+
+  document.getElementById("estilistaId").value = boton.dataset.id;
+
+  // ✅ IDs correctos
+  document.getElementById("estilistaNombre").value = nombre;
+  document.getElementById("estilistaEspecialidad").value = especialidad;
+
+  form.action = "/estilistas/guardar";
+
+  const preview = document.getElementById("estilistaImagenPreview");
+  const icono = document.getElementById("iconoDefaultEstilista");
+
+  if (imagen && imagen !== "null") {
+    preview.src = "/uploads/" + imagen;
+    preview.classList.remove("hidden");
+    icono.style.display = "none";
+  } else {
+    preview.src = "";
+    preview.classList.add("hidden");
+    icono.style.display = "block";
+  }
+
+  document.getElementById("modalEstilista").classList.add("show");
+}
+
+
+
+
+/* ==========================
+    PREVIEW ESTILISTA
+========================== */
+const inputEstilista = document.getElementById("estilistaImagenFile");
+if (inputEstilista) {
+  inputEstilista.addEventListener("change", function() {
+    previewImage(this, 'estilistaImagenPreview');
+  });
+}
+
+
+/* ==========================
+    ELIMINAR ESTILISTA
+========================== */
+function eliminarEstilista(boton) {
+  const estilistaId = boton.getAttribute('data-id');
+  if (confirm('¿Estás seguro de que deseas eliminar este estilista?')) {
+    window.location.href = '/estilistas/delete/' + estilistaId;
+  }
+}
+
+
+/* ==========================
+    CERRAR MODALS AL CLIC FUERA
+========================== */
+window.addEventListener('click', function(event) {
+  const modals = document.querySelectorAll('.modal');
+  modals.forEach(modal => {
+    if (event.target === modal) {
+      modal.classList.remove('show');
+    }
+  });
+});
 </script>
 </body>
 </html>

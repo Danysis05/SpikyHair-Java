@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <title>Registro</title>
     <link rel="stylesheet" th:href="@{/css/register.css}" />
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="register-container">
+        <a class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left-long"></i></a>
         <img src="/uploads/logox.jpg" alt="Logo Peluquería" class="logo-register" />
         <h2>Registro de Usuario</h2>
         <form th:action="@{/auth/register}" method="post" th:object="${usuario}">
@@ -28,7 +30,6 @@
         <div class="login-link">
             <p>¿Ya tienes una cuenta? <a th:href="@{/auth/login}">Inicia sesión aquí</a></p>
         </div>
-        <button class="back" onclick="history.back()">Volver</button>
     </div>
 </body>
 

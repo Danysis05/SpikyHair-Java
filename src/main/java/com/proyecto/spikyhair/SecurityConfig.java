@@ -2,6 +2,7 @@ package com.proyecto.spikyhair;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,12 +30,14 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/peluquerias/crear").permitAll()
+                .requestMatchers(HttpMethod.POST, "/peluquerias/crear").permitAll()
                 .requestMatchers("/", "/index", "/inicio").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
                 .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
-                .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+                .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR", "USUARIO")
                 .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
                 .anyRequest().authenticated()
             )

@@ -1,5 +1,7 @@
 package com.proyecto.spikyhair.DTO;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,14 +15,9 @@ public class EstilistaDto {
     private String apellido;
     private String especialidad;
     private Long peluqueriaId;
-    private PeluqueriaDto peluqueria;
-    
-    public PeluqueriaDto getPeluqueria() {
-        return peluqueria;
-    }
 
-    public void setPeluqueria(PeluqueriaDto peluqueria) {
-        this.peluqueria = peluqueria;
-    }
+    private MultipartFile archivoImagen;  // archivo subido
+    private String imagenPerfil;          // nombre del archivo que se guarda en BD
 }
+
 

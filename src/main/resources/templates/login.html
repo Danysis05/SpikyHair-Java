@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" th:href="@{/css/login.css}" />
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 </head>
 <body>
     
     <div class="login-container">
-
+        <a class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left-long"></i></a>
         <img src="/uploads/logox.jpg" alt="Logo Peluquería" class="logo-login" />
         <h2>Iniciar Sesión</h2>
 
@@ -25,7 +26,7 @@
         <div class="register-link">
             <p>¿No tienes una cuenta? <a th:href="@{/auth/new}">Regístrate aquí</a></p>
     </div>
-    <button class="back" onclick="history.back()">Volver</button>
+    
 
 </body>
 </html>

@@ -45,7 +45,7 @@ public class PeluqueriaController {
     @GetMapping("/nuevo")
     public String mostrarFormularioCrear(Model model) {
         model.addAttribute("peluqueria", new PeluqueriaDto());
-        return "Dashboard/crear_peluqueria";
+        return "usuario/peluquriaRegister";
     }
 
     @GetMapping("/editar/{id}")

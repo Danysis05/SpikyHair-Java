@@ -16,8 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.entity.Peluqueria;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.CsvServicioService;
+import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.ServiciosService;
 import com.proyecto.spikyhair.service.UsuarioService;
 
@@ -28,11 +30,13 @@ public class ServicioController {
     private final ServiciosService serviciosService;
     private final UsuarioService usuarioService;
     private final CsvServicioService csvServicioService;
+    private final PeluqueriaService peluqueriaService;
 
-    public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService, CsvServicioService csvServicioService) {
+    public ServicioController(ServiciosService serviciosService, UsuarioService usuarioService, CsvServicioService csvServicioService, PeluqueriaService peluqueriaService) {
         this.serviciosService = serviciosService;
         this.usuarioService = usuarioService;
         this.csvServicioService = csvServicioService;
+        this.peluqueriaService = peluqueriaService;
     }
 
     // Mostrar todos los servicios
@@ -65,13 +69,18 @@ public class ServicioController {
     public String crearServicio(@ModelAttribute ServiciosDto servicioDto,
                                  @RequestParam("imagenFile") MultipartFile imagenFile,
                                  RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+        long id_usuario = usuario.getId();
+        Peluqueria peluqueria = peluqueriaService.findByUsuarioId(id_usuario);
+        Long peluqueriaId = peluqueria.getId();
+        servicioDto.setPeluqueria_id(peluqueriaId);
         try {
             serviciosService.guardarServicio(servicioDto, imagenFile);
             redirectAttributes.addFlashAttribute("success", "Servicio guardado con éxito.");
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "Error al guardar el servicio.");
         }
-        return "redirect:/admin/dashboard";
+        return "redirect:/owners/dashboard";
     }
 
 
@@ -98,7 +107,7 @@ public class ServicioController {
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "Error al actualizar la imagen del servicio.");
         }
-        return "redirect:/admin/dashboard?seccion=servicios";
+        return "redirect:/owners/dashboard";
     }
     // Eliminar servicio
     @GetMapping("/delete/{id}")
@@ -107,7 +116,7 @@ public class ServicioController {
         if (servicioDto != null) {
             serviciosService.delete(id);
         }
-        return "redirect:/admin/dashboard?seccion=servicios";
+        return "redirect:/owners/dashboard";
     }
 
 @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -126,7 +135,7 @@ public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttr
             ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
         }
     }
-    return "redirect:/admin/dashboard#servicios";
+    return "redirect:/owners/dashboard";
 }
 
 }

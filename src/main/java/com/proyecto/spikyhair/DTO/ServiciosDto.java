@@ -21,5 +21,5 @@ public class ServiciosDto {
 
     private String imagen;
 
-
+    private Long peluqueria_id;
 }

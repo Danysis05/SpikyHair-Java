@@ -25,6 +25,9 @@ public class Estilista {
 
     @Column(name = "especialidad", nullable = false, length = 100)
     private String especialidad;
+    
+    @Column(name = "imagen_perfil", length = 255, nullable = true)
+    private String imagenPerfil;
 
     @ManyToOne
     @JoinColumn(name = "peluqueria_id", nullable = false)
@@ -76,5 +79,11 @@ public class Estilista {
 
     public void setReservas(List<Reserva> reservas) {
         this.reservas = reservas;
+    }
+    public String getImagenPerfil() {
+        return imagenPerfil;
+    }
+    public void setImagenPerfil(String imagenPerfil) {
+        this.imagenPerfil = imagenPerfil;
     }
 }

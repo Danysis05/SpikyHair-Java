@@ -12,5 +12,6 @@ public interface ServiciosRepository extends JpaRepository<Servicios, Long> {
     // Aquí puedes agregar métodos personalizados si es necesario
     boolean existsByNombreIgnoreCase(String nombre);
     List<Servicios> findByPeluqueriaId(Long peluqueriaId);
+     boolean existsByNombreIgnoreCaseAndPeluqueriaId(String nombre, Long peluqueriaId);
 
 }

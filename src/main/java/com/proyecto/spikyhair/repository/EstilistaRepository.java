@@ -10,4 +10,5 @@ import com.proyecto.spikyhair.entity.Estilista;
 @Repository
 public interface EstilistaRepository  extends JpaRepository<Estilista, Long> {
     List<Estilista> findByPeluqueriaId(Long peluqueriaId);
+    boolean existsByNombreIgnoreCaseAndPeluqueriaId(String nombre, Long peluqueriaId);
 }

@@ -13,33 +13,35 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.proyecto.spikyhair.entity.Estilista;
 import com.proyecto.spikyhair.entity.Peluqueria;
-import com.proyecto.spikyhair.entity.Servicios;
 import com.proyecto.spikyhair.entity.Usuario;
-import com.proyecto.spikyhair.repository.ServiciosRepository;
+import com.proyecto.spikyhair.repository.EstilistaRepository;
 
 @Service
-public class CsvServicioService {
+public class CSVEstilistasService {
 
-    private static final Logger log = LoggerFactory.getLogger(CsvServicioService.class);
+    private static final Logger log = LoggerFactory.getLogger(CSVEstilistasService.class);
 
-    private final ServiciosRepository serviciosRepository;
+    private final EstilistaRepository estilistaRepository;
     private final UsuarioService usuarioService;
     private final PeluqueriaService peluqueriaService;
 
-    public CsvServicioService(ServiciosRepository serviciosRepository,
-                              UsuarioService usuarioService,
-                              PeluqueriaService peluqueriaService) {
-        this.serviciosRepository = serviciosRepository;
+    public CSVEstilistasService(
+            EstilistaRepository estilistaRepository,
+            UsuarioService usuarioService,
+            PeluqueriaService peluqueriaService) {
+
+        this.estilistaRepository = estilistaRepository;
         this.usuarioService = usuarioService;
         this.peluqueriaService = peluqueriaService;
     }
 
     /** =============================
-     *  IMPORTAR SERVICIOS DESDE CSV
+     *  IMPORTAR ESTILISTAS DESDE CSV
      *  =============================
      */
-    public int cargarServiciosDesdeCsv(MultipartFile file) {
+    public int cargarEstilistasDesdeCsv(MultipartFile file) {
 
         int importados = 0;
         int repetidos = 0;
@@ -79,66 +81,54 @@ public class CsvServicioService {
                     if (row.length == 0 || (row.length == 1 && row[0].trim().isEmpty()))
                         continue;
 
+                    // Eliminar BOM en primera fila
                     if (first && row[0] != null)
                         row[0] = removeBom(row[0]);
 
+                    // Detectar cabecera
                     if (first && esCabecera(row)) {
                         first = false;
                         continue;
                     }
                     first = false;
 
-                    if (row.length < 4) {
-                        log.warn("Fila ignorada (columnas < 4): {}", (Object) row);
+                    if (row.length < 2) {
+                        log.warn("Fila ignorada (columnas < 2): {}", (Object) row);
                         continue;
                     }
 
                     String nombre = safe(row[0]);
-                    String duracion = safe(row[1]);
-                    String descripcion = safe(row[2]);
-                    String precioRaw = safe(row[3]);
+                    String especialidad = safe(row[1]);
 
-                    if (nombre.isBlank() || duracion.isBlank() || descripcion.isBlank() || precioRaw.isBlank()) {
-                        log.warn("Fila inválida, datos incompletos: {}", (Object) row);
+                    if (nombre.isBlank() || especialidad.isBlank()) {
+                        log.warn("Fila inválida, datos vacíos: {}", (Object) row);
                         continue;
                     }
 
-                    // Normalizar precio
-                    String precioNorm = precioRaw.replace("$", "").replace(".", "").replace(",", ".").trim();
-                    double precio;
-                    try {
-                        precio = Double.parseDouble(precioNorm);
-                    } catch (NumberFormatException nfe) {
-                        log.warn("Precio inválido '{}', fila ignorada: {}", precioRaw, (Object) row);
-                        continue;
-                    }
-
-                    // Evitar duplicados por nombre en la misma peluquería
-                    boolean existe = serviciosRepository.existsByNombreIgnoreCaseAndPeluqueriaId(nombre, peluqueriaId);
+                    // Verificar si ya existe el estilista en esa peluquería
+                    boolean existe = estilistaRepository.existsByNombreIgnoreCaseAndPeluqueriaId(nombre, peluqueriaId);
                     if (existe) {
                         repetidos++;
-                        log.info("Servicio repetido ignorado: {}", nombre);
+                        log.info("Estilista repetido ignorado: {}", nombre);
                         continue;
                     }
 
-                    Servicios servicio = new Servicios();
-                    servicio.setNombre(nombre);
-                    servicio.setDuracion(duracion);
-                    servicio.setDescripcion(descripcion);
-                    servicio.setPrecio(precio);
-                    servicio.setPeluqueria(peluqueria);
+                    Estilista est = new Estilista();
+                    est.setNombre(nombre);
+                    est.setEspecialidad(especialidad);
+                    est.setPeluqueria(peluqueria);
 
-                    serviciosRepository.save(servicio);
+                    estilistaRepository.save(est);
                     importados++;
                 }
             }
 
         } catch (Exception e) {
-            log.error("Error al procesar CSV de Servicios", e);
+            log.error("Error al procesar CSV de Estilistas", e);
             throw new RuntimeException("Error procesando CSV: " + e.getMessage(), e);
         }
 
-        log.info("Servicios importados: {}, repetidos: {}", importados, repetidos);
+        log.info("Estilistas importados: {}, repetidos: {}", importados, repetidos);
 
         if (repetidos > 0) {
             throw new RuntimeException(
@@ -168,11 +158,12 @@ public class CsvServicioService {
     }
 
     private static boolean esCabecera(String[] row) {
-        if (row.length < 4) return false;
+        if (row.length < 2)
+            return false;
+
         String a = row[0].toLowerCase();
         String b = row[1].toLowerCase();
-        String c = row[2].toLowerCase();
-        String d = row[3].toLowerCase();
-        return a.contains("nombre") && b.contains("duracion") && c.contains("descripcion") && d.contains("precio");
+
+        return a.contains("nombre") && b.contains("especialidad");
     }
 }

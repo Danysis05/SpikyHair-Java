@@ -11,17 +11,17 @@
 </head>
 <body>
   <div class="sidebar">
-  <div class="logo">
-    <img src="/uploads/Logo.png" alt="">
-    SPIKYHAIR
+    <div class="logo">
+      <img src="/uploads/Logo.png" alt="">
+      SPIKYHAIR
+    </div>
+    <ul class="nav">
+      <li onclick="navigate('servicios')">Servicios</li>
+      <li onclick="navigate('reservas')">Reservas</li>
+      <li onclick="navigate('estilistas')">Estilistas</li>
+      <li onclick="navigate('reseñas')">Reseñas</li>
+    </ul>
   </div>
-  <ul class="nav">
-    <li onclick="navigate('servicios')">Servicios</li>
-    <li onclick="navigate('reservas')">Reservas</li>
-    <li onclick="navigate('estilistas')">Estilistas</li>
-    <li onclick="navigate('reseñas')">Reseñas</li>
-  </ul>
-</div>
 
 <div class="main">
   <div class="header">
@@ -74,7 +74,7 @@
         </div> 
       </div> 
     <div class="accionesSuperiores"> 
-      <button onclick="abrirModalEstilista()" class="agregarServicio">Nuevo Estilista</button> 
+      <button onclick="abrirModalEstilista()" class="agregarServicio">NUEVO ESTILISTA</button> 
       <form class="form-importar" th:action="@{/estilistas/importar-csv}" method="post" enctype="multipart/form-data"> 
         <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInputEstilistas','fileNameEstilistas')" id="fileInputEstilistas">
         <!-- Mostrar nombre del archivo --> 
@@ -158,7 +158,7 @@
         </div> 
       </div> 
       <div class="accionesSuperiores"> 
-        <button onclick="abrirModalServicio()" class="agregarServicio">Nuevo Servicio</button> 
+        <button onclick="abrirModalServicio()" class="agregarServicio">NUEVO SERVICIO</button> 
         <form class="form-importar" th:action="@{/servicios/importar-csv}" method="post" enctype="multipart/form-data"> 
           <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInput','fileName')" id="fileInput"> 
           <!-- Mostrar nombre del archivo --> 
@@ -344,11 +344,13 @@ function navigate(seccionId) {
         return;
     }
 
+    // Panel actual
     if (!panelActual) {
         nuevoPanel.classList.add("active");
         nuevoPanel.style.display = "block";
         panelActual = nuevoPanel;
         localStorage.setItem("seccionActiva", seccionId);
+        actualizarNav(seccionId);
         return;
     }
 
@@ -367,7 +369,21 @@ function navigate(seccionId) {
     }, 350);
 
     localStorage.setItem("seccionActiva", seccionId);
+    actualizarNav(seccionId); // Actualiza el menú
 }
+
+// Función para actualizar el nav
+function actualizarNav(seccionId) {
+    const navItems = document.querySelectorAll('.nav li');
+    navItems.forEach(li => {
+        li.classList.remove('active');
+        // Si el li tiene onclick con la sección actual, se marca activo
+        if (li.getAttribute('onclick') === `navigate('${seccionId}')`) {
+            li.classList.add('active');
+        }
+    });
+}
+
 
 /* ========================== MODALES ========================== */
 

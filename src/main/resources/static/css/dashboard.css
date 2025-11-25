@@ -93,12 +93,14 @@ body {
     align-items: center;
     margin-bottom: 30px;
     padding: 20px 25px;
-    background: #111;
+    /* Degradado de crimson a rojo oscuro */
+    background: linear-gradient(90deg, #e63946, #8b0000); 
     border-radius: 20px;
     border: 1px solid #222;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* sombra sutil para profundidad */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
+
 
 .header h1 {
     font-size: 2rem;
@@ -118,7 +120,6 @@ body {
 }
 
 .user-actions i:hover {
-    color: #ff4b5c; /* cambio de color al hover */
     transform: scale(1.2); /* efecto de zoom suave */
 }
 
@@ -135,7 +136,7 @@ body {
 }
 
 .logout-button:hover {
-    color: #ff4b5c;
+    
     transform: scale(1.1);
 }
 
@@ -609,7 +610,9 @@ body {
 }
 /* CONTENEDOR PRINCIPAL DEL HEADER */
 .header {
-    background: #111; /* más elegante y profundo */
+    /* Degradado de crimson a rojo oscuro */
+    background: linear-gradient(135deg, #e63946, #8b0000);
+    
     padding: 22px 30px;
     border-radius: 14px;
     display: flex;
@@ -617,9 +620,10 @@ body {
     align-items: center;
     margin-bottom: 25px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    animation: fadeDownHeader .5s ease;
+    animation: fadeDownHeader 0.5s ease;
     margin-left: 20px;
 }
+
 
 /* ANIMACIÓN AL ENTRAR */
 @keyframes fadeDownHeader {
@@ -639,7 +643,7 @@ body {
 .header p {
     margin: 3px 0 0;
     font-size: 15px;
-    color: #cfcfcf;
+    color: #ffffff;
     opacity: 0.8;
 }
 
@@ -652,7 +656,6 @@ body {
 
 /* BOTÓN DE PERFIL */
 .user-actions a {
-    background: #1e1e1e;
     padding: 10px 12px;
     border-radius: 10px;
     display: flex;
@@ -674,7 +677,6 @@ body {
 
 /* BOTÓN DE LOGOUT */
 .logout-button {
-    background: #1e1e1e;
     border: none;
     padding: 10px 12px;
     border-radius: 10px;
@@ -684,7 +686,7 @@ body {
 }
 
 .logout-button:hover {
-    background: #b30000;
+     background: #242424;
     transform: translateY(-2px);
 }
 

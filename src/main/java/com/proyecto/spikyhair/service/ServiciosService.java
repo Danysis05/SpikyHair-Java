@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.proyecto.spikyhair.DTO.ServiciosDto;
@@ -168,4 +169,38 @@ public List<ServiciosDto> filtrarServicios(String nombre, Double precioMin, Doub
                 .map(servicio -> modelMapper.map(servicio, ServiciosDto.class))
                 .collect(Collectors.toList());
     }
+public List<ServiciosDto> buscarPorQuery(Long peluqueriaId, String q) {
+
+    // Si no hay texto en la búsqueda, devuelve todos los servicios de la peluquería
+    if (!StringUtils.hasText(q)) {
+        return serviciosRepository.findByPeluqueriaId(peluqueriaId)
+                .stream()
+                .map(s -> new ServiciosDto(
+                        s.getId(),                  // id
+                        s.getNombre(),              // nombre
+                        s.getDuracion(),            // duracion
+                        s.getDescripcion(),         // descripcion
+                        s.getPrecio(),              // precio
+                        s.getImagen(),              // imagen
+                        s.getPeluqueria() != null ? s.getPeluqueria().getId() : null // peluqueriaId
+                ))
+                .toList();
+    }
+
+    // Si hay texto en la búsqueda, usar la query del repositorio
+    return serviciosRepository.buscarPorQuery(peluqueriaId, q.trim())
+            .stream()
+            .map(s -> new ServiciosDto(
+                    s.getId(),                  // id
+                    s.getNombre(),              // nombre
+                    s.getDuracion(),            // duracion
+                    s.getDescripcion(),         // descripcion
+                    s.getPrecio(),              // precio
+                    s.getImagen(),              // imagen
+                    s.getPeluqueria_id()        // peluqueriaId (viene del constructor del query)
+            ))
+            .toList();
+}
+
+
 }

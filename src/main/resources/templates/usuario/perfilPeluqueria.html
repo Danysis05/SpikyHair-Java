@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:if="${peluqueria != null}" th:text="${peluqueria.nombre} + ' | SpikyHair'">SpikyHair</title>
+    <title th:if="${peluqueria == null}">SpikyHair</title>
+    <link rel="stylesheet" th:href="@{/css/perfilPeluqueria.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<header class="header-dashboard">
+    <a th:href="@{/home/page}" class="header-logo">
+        <i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span>
+    </a>
+
+    <nav class="nav-user">
+        <a th:href="@{/home/page}">Inicio</a>
+        <a th:href="@{/mis-reservas}">Mis Reservas</a>
+        <a th:href="@{/logout}" class="btn-logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Cerrar Sesión
+        </a>
+    </nav>
+</header>
+
+<main class="main-profile-container">
+
+    <section class="hero-section">
+        <div class="barberia-img">
+            <img th:if="${peluqueria != null and peluqueria.imagenUrl != null}" 
+                 th:src="@{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})}" 
+                 alt="Imagen Peluquería">
+            <img th:if="${peluqueria == null or peluqueria.imagenUrl == null}" 
+                 src="https://via.placeholder.com/600x400?text=Peluqueria" 
+                 alt="Peluquería por defecto">
+        </div>
+        
+        <div class="barberia-header">
+            <h1 th:if="${peluqueria != null}" th:text="${peluqueria.nombre}">Nombre Peluquería</h1>
+            <h1 th:if="${peluqueria == null}">Nombre Peluquería</h1>
+            <div class="rating-info">
+<span th:if="${peluqueria != null and peluqueria.horarioApertura != null and peluqueria.horarioCierre != null}"
+      th:text="'Horario: ' + ${peluqueria.horarioApertura} + ' - ' + ${peluqueria.horarioCierre}">
+</span>
+<span th:if="${peluqueria == null or peluqueria.horarioApertura == null or peluqueria.horarioCierre == null}">
+  Horario no disponible
+</span>
+
+
+            </div>
+        </div>
+    </section>
+
+    <div class="content-and-booking">
+
+        <div class="info-column">
+
+            <div class="info-box">
+                <h3>Información y Contacto</h3>
+                <p th:if="${peluqueria != null}" th:text="${peluqueria.descripcion}">Descripción de la peluquería...</p>
+                <p th:if="${peluqueria == null}">Descripción no disponible</p>
+                <div class="contact-details">
+                    <p><i class="fa-solid fa-location-dot"></i> <span th:if="${peluqueria != null}" th:text="${peluqueria.direccion}">Dirección</span>
+                       <span th:if="${peluqueria == null}">Dirección</span></p>
+                    <p><i class="fa-solid fa-phone"></i> <span th:if="${peluqueria != null}" th:text="${peluqueria.telefono}">Teléfono</span>
+                       <span th:if="${peluqueria == null}">Teléfono</span></p>
+                    <p><i class="fa-solid fa-envelope"></i> <span th:if="${peluqueria != null}" th:text="${peluqueria.email}">Correo</span>
+                       <span th:if="${peluqueria == null}">Correo</span></p>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>Nuestros Servicios</h3>
+                <div class="services-grid">
+                    <div th:if="${servicios != null}" th:each="servicio : ${servicios}" class="service-item">
+                        <span th:text="${servicio.nombre}">Nombre Servicio</span>
+                        <span class="price" th:text="'$' + ${servicio.precio}">$0</span>
+                    </div>
+                    <div th:if="${servicios == null or #lists.isEmpty(servicios)}">
+                        <p>No hay servicios disponibles.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>Conoce a Nuestros Estilistas</h3>
+                <div class="barberos-grid">
+                    <div th:if="${estilistas != null}" th:each="estilista : ${estilistas}" class="barbero-card">
+                        <img th:if="${estilista.imagenPerfil != null}" th:src="@{/uploads/estilistas/{img}(img=${estilista.imagenPerfil})}" alt="Estilista">
+                        <img th:if="${estilista.imagenPerfil == null}" src="https://via.placeholder.com/150" alt="Estilista por defecto">
+                        <h4 th:text="${estilista.nombre}">Nombre Estilista</h4>
+                        <small th:text="${estilista.especialidad}">Especialidad</small>
+                    </div>
+                    <div th:if="${estilistas == null or #lists.isEmpty(estilistas)}">
+                        <p>No hay estilistas registrados.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="booking-column">
+            <div class="booking-module">
+                <h3>Reserva tu Cita</h3>
+                <form th:action="@{/reservas/crear}" method="post">
+                    <input type="hidden" name="peluqueriaId" th:value="${peluqueria.id}" />
+
+                    <div class="booking-group">
+                        <label for="servicio">Servicio</label>
+                        <select id="servicio" name="servicioId" required>
+                            <option value="" disabled selected>Selecciona un servicio</option>
+                            <option th:each="s : ${servicios}" th:value="${s.id}" th:text="${s.nombre} + ' ($' + ${s.precio} + ')'">Servicio</option>
+                        </select>
+                    </div>
+
+                    <div class="booking-group">
+                        <label for="estilista">Estilista (Opcional)</label>
+                        <select id="estilista" name="estilistaId">
+                            <option value="">Cualquiera disponible</option>
+                            <option th:each="e : ${estilistas}" th:value="${e.id}" th:text="${e.nombre}">Estilista</option>
+                        </select>
+                    </div>
+
+                    <div class="booking-group">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" id="fecha" name="fecha" required>
+                    </div>
+
+                    <div class="booking-group">
+                        <label for="hora">Hora</label>
+                        <input type="time" id="hora" name="hora" min="09:00" max="18:00" required>
+                    </div>
+
+                    <button type="submit" class="btn-book-now">Reservar Ahora</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <p>© SpikyHair 2025 | Reserva con estilo. Tu look, nuestro compromiso.</p>
+</footer>
+
+</body>
+</html>

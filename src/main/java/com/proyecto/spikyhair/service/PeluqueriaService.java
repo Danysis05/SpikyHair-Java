@@ -1,12 +1,15 @@
 package com.proyecto.spikyhair.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
+import com.proyecto.spikyhair.DTO.PeluqueriaTopDto;
 import com.proyecto.spikyhair.entity.Peluqueria;
 import com.proyecto.spikyhair.repository.PeluqueriaRepository;
 import com.proyecto.spikyhair.service.DAO.Idao;
@@ -45,23 +48,36 @@ public class PeluqueriaService implements Idao<Peluqueria, Long, PeluqueriaDto> 
     }
 
     @Override
-    public PeluqueriaDto update(Long id, PeluqueriaDto dto) {
-        Peluqueria existente = peluqueriaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("La peluquería con ID " + id + " no existe"));
+public PeluqueriaDto update(Long id, PeluqueriaDto dto) {
 
-        // Actualizar campos manualmente
-        existente.setNombre(dto.getNombre());
-        existente.setDireccion(dto.getDireccion());
-        existente.setTelefono(dto.getTelefono());
-        existente.setEmail(dto.getEmail());
+    Peluqueria existente = peluqueriaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("La peluquería con ID " + id + " no existe"));
+
+    // Actualizar campos básicos
+    existente.setNombre(dto.getNombre());
+    existente.setDireccion(dto.getDireccion());
+    existente.setTelefono(dto.getTelefono());
+    existente.setEmail(dto.getEmail());
+    existente.setDescripcion(dto.getDescripcion());
+
+    // ⛔ EVITA SOBREESCRIBIR CON NULL
+    if (dto.getHorarioApertura() != null) {
         existente.setHorarioApertura(dto.getHorarioApertura());
-        existente.setHorarioCierre(dto.getHorarioCierre());
-        existente.setDescripcion(dto.getDescripcion());
-        existente.setImagenUrl(dto.getImagenUrl());
-
-        Peluqueria actualizado = peluqueriaRepository.save(existente);
-        return modelMapper.map(actualizado, PeluqueriaDto.class);
     }
+
+    if (dto.getHorarioCierre() != null) {
+        existente.setHorarioCierre(dto.getHorarioCierre());
+    }
+
+    // Imagen solo si llega algo
+    if (dto.getImagenUrl() != null && !dto.getImagenUrl().isEmpty()) {
+        existente.setImagenUrl(dto.getImagenUrl());
+    }
+
+    Peluqueria actualizado = peluqueriaRepository.save(existente);
+
+    return modelMapper.map(actualizado, PeluqueriaDto.class);
+}
 
     @Override
     public void delete(Long id) {
@@ -77,5 +93,48 @@ public class PeluqueriaService implements Idao<Peluqueria, Long, PeluqueriaDto> 
         return peluqueriaRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> new RuntimeException("No se encontró una peluquería para el usuario con ID " + usuarioId));
     }
+
+
+public List<PeluqueriaDto> buscarPorQuery(String query) {
+    if (query == null || query.trim().isEmpty()) {
+        return peluqueriaRepository.findAll()
+                .stream()
+                .map(p -> modelMapper.map(p, PeluqueriaDto.class))
+                .toList();
+    }
+
+    return peluqueriaRepository.buscarPorQuery(query.trim())
+            .stream()
+            .map(p -> modelMapper.map(p, PeluqueriaDto.class))
+            .toList();
+}
+
+public Optional<Peluqueria> findOptionalByUsuarioId(Long usuarioId) {
+    return peluqueriaRepository.findByUsuarioId(usuarioId); // ya devuelve Optional
+}
+
+public List<PeluqueriaTopDto> obtenerTop5() {
+
+    List<Object[]> filas = peluqueriaRepository.findTop5PeluqueriasWithPromedioRaw();
+    List<PeluqueriaTopDto> lista = new ArrayList<>();
+
+    for (Object[] f : filas) {
+
+        PeluqueriaTopDto dto = new PeluqueriaTopDto(
+            ((Number) f[0]).longValue(),            // id
+            (String) f[1],                          // nombre
+            (String) f[2],                          // direccion
+            (String) f[3],                          // descripcion
+            f[4] != null ? f[4].toString() : null,  // imagenUrl
+            f[5] != null ? ((Number) f[5]).doubleValue() : 0.0 // promedio
+        );
+
+        lista.add(dto);
+    }
+
+    return lista;
+}
+
+
 
 }

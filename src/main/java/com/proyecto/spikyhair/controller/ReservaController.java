@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.proyecto.spikyhair.DTO.EstilistaDto;
+import com.proyecto.spikyhair.DTO.PeluqueriaDto;
 import com.proyecto.spikyhair.DTO.ReservasDto;
 import com.proyecto.spikyhair.DTO.ServiciosDto;
 import com.proyecto.spikyhair.DTO.UsuarioDto;
@@ -24,6 +26,8 @@ import com.proyecto.spikyhair.entity.Reserva;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.enums.Estado;
 import com.proyecto.spikyhair.repository.ReservasRepository;
+import com.proyecto.spikyhair.service.EstilistaService;
+import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.ReservasService;
 import com.proyecto.spikyhair.service.ServiciosService;
 import com.proyecto.spikyhair.service.UsuarioService;
@@ -37,13 +41,17 @@ public class ReservaController {
     private final UsuarioService usuarioService;
     private final ServiciosService serviciosService;
     private final ReservasRepository ReservasRepository;
+    private final EstilistaService estilistaService;
+    private final PeluqueriaService peluqueriaService;
 
     public ReservaController(ReservasService reservasService, UsuarioService usuarioService,
-                             ServiciosService serviciosService, ReservasRepository reservasRepository) {
+                             ServiciosService serviciosService, ReservasRepository reservasRepository, EstilistaService estilistaService,  PeluqueriaService peluqueriaService) {
         this.reservasService = reservasService;
         this.usuarioService = usuarioService;
         this.serviciosService = serviciosService;
         this.ReservasRepository = reservasRepository;
+        this.estilistaService = estilistaService;
+        this.peluqueriaService = peluqueriaService;
     }
 
     // Mostrar todas las reservas
@@ -82,22 +90,55 @@ public String listReservas(Model model) {
     // Guardar nueva reserva
 @PostMapping("/crear")
 public String createReserva(@ModelAttribute("reserva") ReservasDto dto) {
+    // Obtener usuario autenticado
     Usuario usuario = usuarioService.getUsuarioAutenticado();
-    if (usuario == null) throw new RuntimeException("Usuario no autenticado");
+    if (usuario == null) {
+        throw new RuntimeException("Usuario no autenticado");
+    }
+    dto.setUsuario(new UsuarioDto(usuario));
 
-    UsuarioDto usuarioDto = new UsuarioDto();
-    usuarioDto.setId(usuario.getId());
-    usuarioDto.setNombre(usuario.getNombre()); // si tienes más campos relevantes
-    dto.setUsuario(usuarioDto);
-
+    // Obtener el servicio seleccionado
+    if (dto.getServicioId() == null) {
+        throw new RuntimeException("Debe seleccionar un servicio");
+    }
     ServiciosDto servicio = serviciosService.getById(dto.getServicioId());
+    if (servicio == null) {
+        throw new RuntimeException("Servicio no encontrado");
+    }
     dto.setServicio(servicio);
     dto.setDuracion(servicio.getDuracion());
+    dto.setServicioNombre(servicio.getNombre());
+
+    // Obtener peluquería desde el formulario o desde el servicio
+    PeluqueriaDto peluqueria = null;
+    if (dto.getPeluqueriaId() != null) {
+        peluqueria = peluqueriaService.getById(dto.getPeluqueriaId());
+        if (peluqueria == null) {
+            throw new RuntimeException("Peluquería no encontrada");
+        }
+    } else if (servicio.getPeluqueria_id() != null) {
+        peluqueria = peluqueriaService.getById(servicio.getPeluqueria_id());
+        if (peluqueria == null) {
+            throw new RuntimeException("Servicio sin peluquería asignada");
+        }
+    }
+    dto.setPeluqueria(peluqueria);
+
+    // Estilista opcional
+    if (dto.getEstilista() != null && dto.getEstilista().getId() != null) {
+        EstilistaDto estilista = estilistaService.getById(dto.getEstilista().getId());
+        dto.setEstilista(estilista);
+    } else {
+        dto.setEstilista(null); // Ningún estilista seleccionado
+    }
+
+    // Estado inicial
     dto.setEstado(Estado.PENDIENTE.name());
 
+    // Guardar reserva
     reservasService.save(dto);
 
-    return "redirect:/reservas/mostrar"; // Redirige a la lista de reservas
+    return "redirect:/reservas/mostrar";
 }
 
 

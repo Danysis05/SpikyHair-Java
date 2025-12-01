@@ -21,5 +21,15 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
            "GROUP BY MONTH(u.fechaRegistro) " +
            "ORDER BY MONTH(u.fechaRegistro)")
     List<Object[]> countUsuariosByMonth(@Param("year") int year);
+    @Query("""
+    SELECT u FROM Usuario u
+    WHERE 
+        LOWER(u.nombre) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.telefono) LIKE LOWER(CONCAT('%', :query, '%')) OR
+        LOWER(u.rol.nombre) LIKE LOWER(CONCAT('%', :query, '%'))
+    """)
+    List<Usuario> buscarPorQuery(@Param("query") String query);
+
     
 }

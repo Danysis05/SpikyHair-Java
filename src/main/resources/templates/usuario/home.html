@@ -4,9 +4,250 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SpikyHair | Inicio</title>
-  <link rel="stylesheet" th:href="@{/css/home.css}" />
+   <link rel="stylesheet" th:href="@{/css/home.css}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+
 </head>
+
 <body>
-    <a th:href="@{/peluquerias/nuevo}">Registrar Peluqueria</a>
+
+<header class="header">
+    <h1 class="logo">SpikyHair</h1>
+    <nav class="nav-container">
+        <a th:href="@{/peluquerias/nuevo}" class="nav-link">Registrar Peluquería</a>
+
+        <!-- Imagen de usuario -->
+        <button id="profileBtn" class="btn-profile-trigger" aria-label="Abrir perfil">
+
+            
+                <!-- Imagen existente -->
+                <img th:if="${usuario.imagenPerfil != null}" 
+                    th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}" 
+                    alt="Perfil" class="profile-avatar">
+
+                <!-- Imagen por defecto -->
+                <img th:unless="${usuario.imagenPerfil != null}" 
+                    th:src="@{/images/default-user.png}" 
+                    alt="Perfil" class="profile-avatar">
+            
+
+        </button>
+
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="logout-button" title="Cerrar Sesión">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </form>
+    </nav>
+</header>
+
+
+
+<div id="profileModal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="closeModalBtn" class="modal-close">&times;</button>
+        <h2 class="modal-title">Mi Perfil</h2>
+
+        <form th:action="@{/usuarios/guardar}" method="post" enctype="multipart/form-data" class="profile-form">
+
+            <input type="hidden" name="id" th:value="${usuario.id}">
+
+            <div class="form-group avatar-section">
+                <div class="avatar-wrapper">
+                    <img id="profilePreview" th:if="${usuario.imagenPerfil != null}" 
+                         th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}" 
+                         alt="Perfil" class="profile-modal-avatar">
+                    <img id="profilePreview" th:unless="${usuario.imagenPerfil != null}" 
+                         th:src="@{/images/default-user.png}" 
+                         alt="Perfil" class="profile-modal-avatar">
+                </div>
+                <label for="imageUpload" class="btn-upload">
+                    Cambiar Foto
+                </label>
+                <input type="file" id="imageUpload" name="imagen" accept="image/*" class="hidden-file-input" onchange="previewImage(event)">
+            </div>
+
+            <div class="form-group">
+                <label for="nombre" class="form-label">Nombre completo</label>
+                <input type="text" id="nombre" name="nombre" class="form-input" th:value="${usuario.nombre}" placeholder="Tu nombre">
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Correo electrónico</label>
+                <input type="email" id="email" name="email" class="form-input input-readonly" th:value="${usuario.email}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input type="tel" id="telefono" name="telefono" class="form-input" th:value="${usuario.telefono}" placeholder="Tu teléfono">
+            </div>
+
+            <button type="submit" class="btn-save">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+
+<section class="hero-section reveal">
+    <h2 class="hero-title">Tu estilo,<br>elevado al siguiente nivel.</h2>
+    <p class="hero-user-greeting">Hola, <span th:text="${usuario.nombre}">Usuario</span>. ¿Qué look definirá tu día hoy?</p>
+    <a href="#top-peluquerias" class="btn-cta-main">Explorar Peluquerías</a>
+</section>
+
+<section id="top-peluquerias" class="section-container reveal">
+    <div class="section-header">
+        <h2 class="section-title-text">Peluquerías mejor rankeadas</h2>
+        <p th:text="${peluqueriasTop != null} ? ${peluqueriasTop.size()} : 0">0</p>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Mensaje si no hay peluquerías -->
+        <div th:if="${peluqueriasTop == null or peluqueriasTop.isEmpty()}">
+            <p>No hay peluquerías disponibles.</p>
+        </div>
+
+        <!-- Iteración dinámica solo si hay peluquerías -->
+        <div class="pelu-card" th:each="p : ${peluqueriasTop}" th:if="${peluqueriasTop != null and !peluqueriasTop.isEmpty()}">
+            <div class="pelu-card-img-wrapper">
+                <img th:if="${p.imagenUrl != null}"
+                     th:src="@{'/uploads/peluquerias/' + ${p.imagenUrl}}"
+                     alt="Imagen de Peluquería">
+
+                <img th:unless="${p.imagenUrl != null}"
+                     src="https://via.placeholder.com/300x200?text=Peluqueria"
+                     alt="Sin imagen">
+            </div>
+
+            <div class="pelu-card-content">
+                <h3 th:text="${p.nombre}"></h3>
+
+                <p class="pelu-rating">
+                    <span class="star">⭐</span>
+                    <span th:text="${p.promedio}"></span> ·
+                    <span th:text="${p.descripcion}"></span>
+                </p>
+                <a th:href="@{/home/perfilPeluqueria/{id}(id=${p.id})}" class="btn-profile">
+                    Ver Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section-container reveal">
+     <div class="section-header">
+        <h2 class="section-title-text">Servicios populares</h2>
+    </div>
+
+    <div class="services-grid">
+        <div class="service-card">
+            <span class="service-icon">💈</span>
+            <h3>Corte clásico</h3>
+        </div>
+
+        <div class="service-card">
+            <span class="service-icon">🔥</span>
+            <h3>Fade moderno</h3>
+        </div>
+
+        <div class="service-card">
+            <span class="service-icon">🎨</span>
+            <h3>Coloración</h3>
+        </div>
+
+        <div class="service-card">
+            <span class="service-icon">💆‍♂️</span>
+            <h3>Tratamientos</h3>
+        </div>
+    </div>
+</section>
+
+<section class="section-container reveal">
+     <div class="section-header">
+        <h2 class="section-title-text">Experiencias de clientes</h2>
+    </div>
+
+    <div class="testimonials-grid">
+        <div class="test-card">
+            <p>Excelente servicio y muy profesionales. El ambiente es increíble y salí con el look exacto que buscaba.</p>
+            <h4 class="test-author">- Juan P.</h4>
+        </div>
+        <div class="test-card">
+            <p>La plataforma es súper intuitiva. Reservé mi cita en segundos y la atención en el local fue de primera categoría.</p>
+            <h4 class="test-author">- Laura G.</h4>
+        </div>
+        <div class="test-card">
+            <p>Gran variedad de estilos y profesionales. Es mi herramienta indispensable para mantener mi imagen.</p>
+            <h4 class="test-author">- Miguel D.</h4>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>SpikyHair © 2025. Tu estilo, tu decisión. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // --- Lógica del Modal ---
+    const modalInfo = {
+        triggerBtn: document.getElementById('profileBtn'),
+        modalOverlay: document.getElementById('profileModal'),
+        closeBtn: document.getElementById('closeModalBtn')
+    };
+
+    function toggleModal(isOpen) {
+        if (isOpen) {
+            modalInfo.modalOverlay.classList.add('active');
+            // Bloquear el scroll del body cuando el modal está abierto
+            document.body.style.overflow = 'hidden'; 
+        } else {
+            modalInfo.modalOverlay.classList.remove('active');
+             // Restaurar el scroll del body
+             document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Abrir modal
+    modalInfo.triggerBtn.addEventListener('click', () => toggleModal(true));
+
+    // Cerrar modal con el botón X
+    modalInfo.closeBtn.addEventListener('click', () => toggleModal(false));
+
+    // Cerrar modal haciendo clic fuera del contenido (en el overlay)
+    modalInfo.modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalInfo.modalOverlay) {
+            toggleModal(false);
+        }
+    });
+
+
+    // --- Lógica de Scroll Reveal (Existente mejorada) ---
+    const elements = document.querySelectorAll(".reveal");
+    const revealOnScroll = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                // Opcional: dejar de observar una vez revelado para mejor rendimiento
+                // revealOnScroll.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }); // Ajuste para que se active un poco antes
+
+    elements.forEach(el => revealOnScroll.observe(el));
+});
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function() {
+        const output = document.getElementById('profilePreview');
+        output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+</script>
+
 </body>
 </html>

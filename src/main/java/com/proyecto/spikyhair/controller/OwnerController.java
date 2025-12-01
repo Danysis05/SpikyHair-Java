@@ -18,6 +18,7 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +59,9 @@ public class OwnerController {
     private final ResenaService resenaService;
     private final ServiciosService serviciosService;
 
-    public OwnerController(PeluqueriaService peluqueriaService, EstilistaService estilistaService, ReservasService reservasService, ResenaService resenaService, UsuarioService usuarioService, ServiciosService serviciosService) {
+    public OwnerController(PeluqueriaService peluqueriaService, EstilistaService estilistaService,
+            ReservasService reservasService, ResenaService resenaService, UsuarioService usuarioService,
+            ServiciosService serviciosService) {
         this.peluqueriaService = peluqueriaService;
         this.estilistaService = estilistaService;
         this.reservasService = reservasService;
@@ -67,85 +70,179 @@ public class OwnerController {
         this.serviciosService = serviciosService;
     }
 
-   @GetMapping("/dashboard")
-public String mostrarDashboard(
-        @RequestParam(defaultValue = "0") int pageEstilistas,
-        @RequestParam(defaultValue = "0") int pageServicios,
-        @RequestParam(defaultValue = "0") int pageReservas,
-        @RequestParam(defaultValue = "0") int pageResenas,
-        Model model) {
+    @GetMapping("/dashboard")
+    public String mostrarDashboard(
+            @RequestParam(required = false) String q, // <-- query universal
+            @RequestParam(defaultValue = "0") int pageEstilistas,
+            @RequestParam(defaultValue = "0") int pageServicios,
+            @RequestParam(defaultValue = "0") int pageReservas,
+            @RequestParam(defaultValue = "0") int pageResenas,
+            @RequestParam(defaultValue = "estilistas") String panel, // panel a mostrar (estilistas|servicios|reservas|reseñas)
+            Model model) {
 
-    final int size = 6; // 6 elementos por página
+        final int size = 6; // 6 elementos por página
 
-    Usuario usuario = usuarioService.getUsuarioAutenticado();
-    long id_usuario = usuario.getId();
-    Peluqueria peluqueria = peluqueriaService.findByUsuarioId(id_usuario);
-    Long peluqueriaId = peluqueria.getId();
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+        long id_usuario = usuario.getId();
+        Peluqueria peluqueria = peluqueriaService.findByUsuarioId(id_usuario);
+        Long peluqueriaId = peluqueria.getId();
 
-    // Listas completas
-    List<EstilistaDto> estilistas = estilistaService.getByPeluqueriaId(peluqueriaId);
-    List<ServiciosDto> servicios = serviciosService.getByPeluqueriaId(peluqueriaId);
-    List<ReservasDto> reservas = reservasService.findByPeluqueriaId(peluqueriaId);
-    List<ResenasDto> resenas = resenaService.getByPeluqueriaId(peluqueriaId);
+        // Si q viene vacío, usar null
+        String query = StringUtils.hasText(q) ? q.trim() : null;
 
-    // Paginación manual
-    model.addAttribute("estilistas", paginar(estilistas, pageEstilistas, size));
-    model.addAttribute("servicios", paginar(servicios, pageServicios, size));
-    model.addAttribute("reservas", paginar(reservas, pageReservas, size));
-    model.addAttribute("resenas", paginar(resenas, pageResenas, size));
+        // Obtener listas aplicando búsqueda universal (si query == null, devuelven todos por peluqueria)
+        List<EstilistaDto> estilistas = estilistaService.buscarPorQuery(peluqueriaId, query);
+        List<ServiciosDto> servicios = serviciosService.buscarPorQuery(peluqueriaId, query);
+        List<ReservasDto> reservas = reservasService.buscarPorQuery(peluqueriaId, query);
+        List<ResenasDto> resenas = resenaService.buscarPorQuery(peluqueriaId, query);
 
-    // Totales
-    model.addAttribute("totalEstilistas", estilistas.size());
-    model.addAttribute("totalServicios", servicios.size());
-    model.addAttribute("totalReservas", reservas.size());
-    model.addAttribute("totalResenas", resenas.size());
+        // Paginación manual
+        model.addAttribute("estilistas", paginar(estilistas, pageEstilistas, size));
+        model.addAttribute("servicios", paginar(servicios, pageServicios, size));
+        model.addAttribute("reservas", paginar(reservas, pageReservas, size));
+        model.addAttribute("resenas", paginar(resenas, pageResenas, size));
 
-    // Info adicional
-    model.addAttribute("peluqueria", peluqueria);
-    model.addAttribute("usuario", usuario);
-    model.addAttribute("promedioPuntacion", resenaService.obtenerPromedioPorPeluqueria(peluqueriaId));
+        // Totales
+        model.addAttribute("totalEstilistas", estilistas.size());
+        model.addAttribute("totalServicios", servicios.size());
+        model.addAttribute("totalReservas", reservas.size());
+        model.addAttribute("totalResenas", resenas.size());
 
-    // Páginas actuales y totales
-    model.addAttribute("pageEstilistas", pageEstilistas);
-    model.addAttribute("pageServicios", pageServicios);
-    model.addAttribute("pageReservas", pageReservas);
-    model.addAttribute("pageResenas", pageResenas);
+        // Info adicional
+        model.addAttribute("peluqueria", peluqueria);
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("promedioPuntacion", resenaService.obtenerPromedioPorPeluqueria(peluqueriaId));
 
-    model.addAttribute("totalPagesEstilistas", totalPages(estilistas.size(), size));
-    model.addAttribute("totalPagesServicios", totalPages(servicios.size(), size));
-    model.addAttribute("totalPagesReservas", totalPages(reservas.size(), size));
-    model.addAttribute("totalPagesResenas", totalPages(resenas.size(), size));
+        // Páginas actuales y totales
+        model.addAttribute("pageEstilistas", pageEstilistas);
+        model.addAttribute("pageServicios", pageServicios);
+        model.addAttribute("pageReservas", pageReservas);
+        model.addAttribute("pageResenas", pageResenas);
 
-    return "owner/dashboard";
-}
+        model.addAttribute("totalPagesEstilistas", totalPages(estilistas.size(), size));
+        model.addAttribute("totalPagesServicios", totalPages(servicios.size(), size));
+        model.addAttribute("totalPagesReservas", totalPages(reservas.size(), size));
+        model.addAttribute("totalPagesResenas", totalPages(resenas.size(), size));
 
-private <T> List<T> paginar(List<T> lista, int page, int size) {
-    int fromIndex = page * size;
-    int toIndex = Math.min(fromIndex + size, lista.size());
-    if(fromIndex >= lista.size()) return new ArrayList<>();
-    return lista.subList(fromIndex, toIndex);
-}
+        // Mantener la query y el panel en la vista
+        model.addAttribute("q", query);
+        model.addAttribute("panel", panel);
 
-private int totalPages(int totalItems, int size) {
-    return (int) Math.ceil((double) totalItems / size);
-}
+        return "owner/dashboard";
+    }
+
+    private <T> List<T> paginar(List<T> lista, int page, int size) {
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, lista.size());
+        if (fromIndex >= lista.size())
+            return new ArrayList<>();
+        return lista.subList(fromIndex, toIndex);
+    }
+
+    private int totalPages(int totalItems, int size) {
+        return (int) Math.ceil((double) totalItems / size);
+    }
 
     @GetMapping("/pdf-Servicios")
-public void generarPdfServicios(
-        @RequestParam(required = false) String nombreServicio,
-        @RequestParam(required = false) Double precioMin,
-        @RequestParam(required = false) Double precioMax,
+    public void generarPdfServicios(
+            @RequestParam(required = false) String q, // <-- recibir query universal para filtrar el PDF también
+            @RequestParam(required = false) Double precioMin,
+            @RequestParam(required = false) Double precioMax,
+            HttpServletResponse response) throws IOException, DocumentException {
+
+        // Reutilizamos el filtro: si q está presente lo usamos como nombreServicio (o en tu servicio puedes hacer búsqueda más amplia)
+        List<ServiciosDto> servicios = serviciosService.filtrarServicios(q, precioMin, precioMax);
+
+        // Obtener estadísticas de servicios
+        Map<String, List<?>> estadisticasServicios = reservasService.obtenerEstadisticasServicios();
+        List<String> labels = (List<String>) estadisticasServicios.get("labels"); // nombres de servicios
+        List<Long> values = (List<Long>) estadisticasServicios.get("values"); // número de reservas
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=servicios.pdf");
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // Título
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+        Paragraph title = new Paragraph("Reporte de Servicios", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(20);
+        document.add(title);
+
+        // Tabla de servicios
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[] { 3, 2, 4, 2 });
+
+        Stream.of("Nombre", "Duración", "Descripción", "Precio").forEach(header -> {
+            PdfPCell cell = new PdfPCell(new Phrase(header));
+            cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            cell.setPadding(5);
+            table.addCell(cell);
+        });
+
+        for (ServiciosDto servicio : servicios) {
+            table.addCell(servicio.getNombre());
+            table.addCell(servicio.getDuracion() + " min");
+            table.addCell(servicio.getDescripcion());
+            table.addCell("$" + servicio.getPrecio());
+        }
+
+        document.add(table);
+
+        // Crear gráfico de barras de servicios más reservados
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < labels.size(); i++) {
+            dataset.addValue(values.get(i), "Reservas", labels.get(i));
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Servicios más reservados",
+                "Servicio",
+                "Número de reservas",
+                dataset
+        );
+
+        // Personalizar renderer moderno
+        CategoryPlot plot = chart.getCategoryPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        renderer.setDefaultItemLabelsVisible(true);
+
+        chart.getCategoryPlot().setRangeGridlinesVisible(true);
+
+        // Convertir gráfico a imagen
+        BufferedImage chartImage = chart.createBufferedImage(500, 300);
+        ByteArrayOutputStream chartBaos = new ByteArrayOutputStream();
+        ImageIO.write(chartImage, "png", chartBaos);
+        Image chartPdfImage = Image.getInstance(chartBaos.toByteArray());
+
+        chartPdfImage.setAlignment(Element.ALIGN_CENTER);
+        chartPdfImage.setSpacingBefore(20);
+        document.add(chartPdfImage);
+
+        document.close();
+    }
+
+    @GetMapping("/pdf-Estilistas")
+public void generarPdfEstilistas(
+        @RequestParam(required = false) String q, // query universal para filtrar
         HttpServletResponse response) throws IOException, DocumentException {
 
-    List<ServiciosDto> servicios = serviciosService.filtrarServicios(nombreServicio, precioMin, precioMax);
+    // Usuario autenticado y peluquería
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+    Long peluqueriaId = peluqueriaService.findByUsuarioId(usuario.getId()).getId();
 
-    // Obtener estadísticas de servicios
-    Map<String, List<?>> estadisticasServicios = reservasService.obtenerEstadisticasServicios();
-    List<String> labels = (List<String>) estadisticasServicios.get("labels"); // nombres de servicios
-    List<Long> values = (List<Long>) estadisticasServicios.get("values");   // número de reservas
+    // Obtener lista filtrada de estilistas
+    String query = StringUtils.hasText(q) ? q.trim() : null;
+    List<EstilistaDto> estilistas = estilistaService.buscarPorQuery(peluqueriaId, query);
 
+    // Configurar respuesta
     response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "attachment; filename=servicios.pdf");
+    response.setHeader("Content-Disposition", "attachment; filename=estilistas.pdf");
 
     Document document = new Document();
     PdfWriter.getInstance(document, response.getOutputStream());
@@ -153,64 +250,68 @@ public void generarPdfServicios(
 
     // Título
     Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-    Paragraph title = new Paragraph("Reporte de Servicios", titleFont);
+    Paragraph title = new Paragraph("Reporte de Estilistas", titleFont);
     title.setAlignment(Element.ALIGN_CENTER);
     title.setSpacingAfter(20);
     document.add(title);
 
-    // Tabla de servicios
-    PdfPTable table = new PdfPTable(4);
+    // Tabla de estilistas
+    PdfPTable table = new PdfPTable(3); // Nombre | Especialidad | Email
     table.setWidthPercentage(100);
-    table.setWidths(new float[]{3, 2, 4, 2});
+    table.setWidths(new float[]{3, 3, 4});
 
-    Stream.of("Nombre", "Duración", "Descripción", "Precio").forEach(header -> {
+    Stream.of("Nombre", "Especialidad", "Email").forEach(header -> {
         PdfPCell cell = new PdfPCell(new Phrase(header));
         cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
         cell.setPadding(5);
         table.addCell(cell);
     });
 
-    for (ServiciosDto servicio : servicios) {
-        table.addCell(servicio.getNombre());
-        table.addCell(servicio.getDuracion() + " min");
-        table.addCell(servicio.getDescripcion());
-        table.addCell("$" + servicio.getPrecio());
+    for (EstilistaDto e : estilistas) {
+        table.addCell(e.getNombre());
+        table.addCell(e.getEspecialidad());
+        
     }
 
     document.add(table);
 
-    // Crear gráfico de barras de servicios más reservados
-    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-    for (int i = 0; i < labels.size(); i++) {
-        dataset.addValue(values.get(i), "Reservas", labels.get(i));
+    // Opcional: agregar gráfico de estilistas con más reservas
+    Map<String, List<?>> estadisticas = reservasService.obtenerEstadisticasEstilistas(peluqueriaId);
+    List<String> labels = (List<String>) estadisticas.get("labels"); // nombres estilistas
+    List<Long> values = (List<Long>) estadisticas.get("values"); // número de reservas
+
+    if (!labels.isEmpty() && !values.isEmpty()) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < labels.size(); i++) {
+            dataset.addValue(values.get(i), "Reservas", labels.get(i));
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Estilistas más activos",
+                "Estilista",
+                "Número de reservas",
+                dataset
+        );
+
+        // Personalizar renderer
+        CategoryPlot plot = chart.getCategoryPlot();
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        renderer.setDefaultItemLabelsVisible(true);
+        plot.setRangeGridlinesVisible(true);
+
+        BufferedImage chartImage = chart.createBufferedImage(500, 300);
+        ByteArrayOutputStream chartBaos = new ByteArrayOutputStream();
+        ImageIO.write(chartImage, "png", chartBaos);
+        Image chartPdfImage = Image.getInstance(chartBaos.toByteArray());
+
+        chartPdfImage.setAlignment(Element.ALIGN_CENTER);
+        chartPdfImage.setSpacingBefore(20);
+        document.add(chartPdfImage);
     }
-
-    JFreeChart chart = ChartFactory.createBarChart(
-            "Servicios más reservados",
-            "Servicio",
-            "Número de reservas",
-            dataset
-    );
-
-    // Personalizar renderer moderno
-    CategoryPlot plot = chart.getCategoryPlot();
-    BarRenderer renderer = (BarRenderer) plot.getRenderer();
-    renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-    renderer.setDefaultItemLabelsVisible(true);
-
-    chart.getCategoryPlot().setRangeGridlinesVisible(true);
-
-    // Convertir gráfico a imagen
-    BufferedImage chartImage = chart.createBufferedImage(500, 300);
-    ByteArrayOutputStream chartBaos = new ByteArrayOutputStream();
-    ImageIO.write(chartImage, "png", chartBaos);
-    Image chartPdfImage = Image.getInstance(chartBaos.toByteArray());
-
-    chartPdfImage.setAlignment(Element.ALIGN_CENTER);
-    chartPdfImage.setSpacingBefore(20);
-    document.add(chartPdfImage);
 
     document.close();
 }
+
 
 }

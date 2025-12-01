@@ -30,7 +30,7 @@ public class LoginController {
         return switch (role) {
             case "ROLE_ADMINISTRADOR" -> "redirect:/admin/dashboard";
             case "ROLE_DUEÑO" -> "redirect:/owners/dashboard";
-            case "ROLE_USUARIO" -> "redirect:/usuarios/home";
+            case "ROLE_USUARIO" -> "redirect:/home/page";
             default -> "redirect:/auth/login?error";
         };
     }

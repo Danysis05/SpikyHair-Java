@@ -13,12 +13,15 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.proyecto.spikyhair.DTO.ReservasDto;
+import com.proyecto.spikyhair.entity.Estilista;
 import com.proyecto.spikyhair.entity.Reserva;
 import com.proyecto.spikyhair.entity.Servicios;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.enums.Estado;
+import com.proyecto.spikyhair.repository.EstilistaRepository;
 import com.proyecto.spikyhair.repository.ReservasRepository;
 import com.proyecto.spikyhair.repository.ServiciosRepository;
 import com.proyecto.spikyhair.repository.UsuarioRepository;
@@ -34,15 +37,17 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
     private final ServiciosRepository serviciosRepository;
     private final UsuarioRepository usuarioRepository;
     private final EmailService emailService;
+    private final EstilistaRepository estilistaRepository;
 
     public ReservasService(ReservasRepository reservasRepository,
                        ServiciosRepository serviciosRepository,
                        UsuarioRepository usuarioRepository,
-                       EmailService emailService, ModelMapper modelMapper) {
+                       EmailService emailService, ModelMapper modelMapper, EstilistaRepository estilistaRepository) {
     this.reservasRepository = reservasRepository;
     this.serviciosRepository = serviciosRepository;
     this.usuarioRepository = usuarioRepository;
     this.emailService = emailService;
+    this.estilistaRepository = estilistaRepository;
 }
 
     @Override
@@ -59,50 +64,64 @@ public class ReservasService implements Idao<Reserva, Long, ReservasDto> {
         return new ReservasDto(reserva); // CORREGIDO: Usar constructor para incluir servicioNombre
     }
 
-    @Override
-    public ReservasDto save(ReservasDto dto) {
-        if (dto.getServicio() == null || dto.getServicio().getId() == null) {
-            throw new RuntimeException("El ID del servicio es requerido");
-        }
+@Override
+public ReservasDto save(ReservasDto dto) {
+    if (dto.getServicio() == null || dto.getServicio().getId() == null) {
+        throw new RuntimeException("El ID del servicio es requerido");
+    }
 
-        if (dto.getUsuario() == null || dto.getUsuario().getId() == null) {
-            throw new RuntimeException("El ID del usuario es requerido");
-        }
+    if (dto.getUsuario() == null || dto.getUsuario().getId() == null) {
+        throw new RuntimeException("El ID del usuario es requerido");
+    }
 
-        Reserva reserva = new Reserva();
+    Reserva reserva = new Reserva();
 
-        reserva.setFecha(dto.getFecha());
-        reserva.setDuracion(dto.getDuracion());
-        reserva.setHora(dto.getHora());
+    reserva.setFecha(dto.getFecha());
+    reserva.setDuracion(dto.getDuracion());
+    reserva.setHora(dto.getHora());
+    reserva.setEstado(dto.getEstado() != null ? Estado.valueOf(dto.getEstado()) : Estado.PENDIENTE);
 
-        // Estado por defecto si no viene del formulario
-        reserva.setEstado(dto.getEstado() != null ? Estado.valueOf(dto.getEstado()) : Estado.PENDIENTE);
+    Servicios servicio = serviciosRepository.findById(dto.getServicio().getId())
+        .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+    reserva.setServicios(servicio);
 
-        Servicios servicio = serviciosRepository.findById(dto.getServicio().getId())
-            .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-        reserva.setServicios(servicio);
+    // Peluquería obligatoria
+    if (servicio.getPeluqueria() != null) {
+        reserva.setPeluqueria(servicio.getPeluqueria());
+    } else {
+        throw new RuntimeException("Servicio sin peluquería asignada");
+    }
 
-        Usuario usuario = usuarioRepository.findById(dto.getUsuario().getId())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        reserva.setUsuario(usuario);
+    Usuario usuario = usuarioRepository.findById(dto.getUsuario().getId())
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    reserva.setUsuario(usuario);
 
-        Reserva guardada = reservasRepository.save(reserva);
+    // Estilista opcional
+    if (dto.getEstilista() != null && dto.getEstilista().getId() != null) {
+        Estilista estilista = estilistaRepository.findById(dto.getEstilista().getId())
+            .orElseThrow(() -> new RuntimeException("Estilista no encontrado"));
+        reserva.setEstilista(estilista);
+    } else {
+        reserva.setEstilista(null);
+    }
 
-        try {
+    Reserva guardada = reservasRepository.save(reserva);
+
+    try {
         emailService.enviarCorreoReserva(
-            usuario.getEmail(),   // o getEmail() según tu entidad Usuario
+            usuario.getEmail(),
             usuario.getNombre(),
             servicio.getNombre(),
             reserva.getFecha().toString(),
             reserva.getHora()
         );
-
     } catch (MessagingException e) {
         System.out.println("⚠ Error enviando correo: " + e.getMessage());
     }
 
     return new ReservasDto(guardada);
 }
+
     
     @Override
 
@@ -239,8 +258,44 @@ public List<Double> obtenerIngresosPorMes(int year) {
     return reservasRepository.findByPeluqueriaId(peluqueriaId)
             .stream()
             .map(reserva -> new ReservasDto(reserva))
+         
             .collect(Collectors.toList());
     }
+public List<ReservasDto> buscarPorQuery(Long peluqueriaId, String q) {
+    List<Reserva> reservas;
+
+    // Si el texto de búsqueda es vacío o nulo, devolvemos todas las reservas de la peluquería
+    if (!StringUtils.hasText(q)) {
+        reservas = reservasRepository.findByPeluqueriaId(peluqueriaId);
+    } else {
+        // Usamos la query JPQL del repositorio para buscar por todos los atributos
+        reservas = reservasRepository.buscarPorQuery(peluqueriaId, q.trim());
+    }
+
+    // Convertimos la lista de entidades a DTOs
+    return reservas.stream()
+            .map(r -> new ReservasDto(r))
+            .toList();
+}
+
+public Map<String, List<?>> obtenerEstadisticasEstilistas(Long peluqueriaId) {
+        List<Object[]> resultados = reservasRepository.contarReservasPorEstilista(peluqueriaId);
+
+        List<String> labels = new ArrayList<>();
+        List<Long> values = new ArrayList<>();
+
+        for (Object[] obj : resultados) {
+            labels.add((String) obj[0]);
+            values.add((Long) obj[1]);
+        }
+
+        Map<String, List<?>> estadisticas = new HashMap<>();
+        estadisticas.put("labels", labels);
+        estadisticas.put("values", values);
+
+        return estadisticas;
+    }
+
 }
 
 

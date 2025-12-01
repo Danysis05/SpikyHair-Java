@@ -36,6 +36,8 @@ public class Estilista {
     @OneToMany(mappedBy = "estilista")
     private List<Reserva> reservas;
 
+    
+
 
     // ===========================
     // GETTERS Y SETTERS

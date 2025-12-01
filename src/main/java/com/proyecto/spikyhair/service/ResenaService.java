@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.proyecto.spikyhair.DTO.ResenasDto;
 import com.proyecto.spikyhair.DTO.UsuarioDto;
@@ -120,5 +121,30 @@ public ResenasDto save(ResenasDto dto) {
         return promedio != null ? promedio : 0.0;
     }
 
+   public List<ResenasDto> buscarPorQuery(Long peluqueriaId, String q) {
+    List<Resena> resenas;
+
+    if (!StringUtils.hasText(q)) {
+        resenas = resenasRepository.findByPeluqueriaId(peluqueriaId);
+    } else {
+        resenas = resenasRepository.buscarPorQuery(peluqueriaId, q.trim());
+    }
+
+    // Mapeo manual de Resena a ResenasDto
+    return resenas.stream()
+            .map(r -> new ResenasDto(
+                    r.getId(),
+                    r.getComentario(),
+                    r.getPuntuacion(),
+                    new UsuarioDto(r.getUsuario()), // asumimos que UsuarioDto tiene constructor que recibe Usuario
+                    r.getPeluqueria().getId()
+            ))
+            .toList();
+}
 
 }
+
+
+
+
+

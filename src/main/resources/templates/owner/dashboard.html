@@ -3,565 +3,511 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestion Propietario</title>
+  <title>Gestión Propietario - SpikyHair</title>
   <link rel="icon" type="image/x-icon" th:href="@{/uploads/favicon.png}">
 
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+  
+  <style>
+      .panel { display: none; opacity: 0; transition: opacity 0.3s ease; }
+      .panel.active { display: block; opacity: 1; }
+      .hidden { display: none !important; }
+  </style>
 </head>
+
 <body>
+  
   <div class="sidebar">
     <div class="logo">
-      <img src="/uploads/Logo.png" alt="">
+      <img src="/uploads/Logo.png" alt="Logo" loading="lazy">
       SPIKYHAIR
     </div>
     <ul class="nav">
-      <li onclick="navigate('servicios')">Servicios</li>
-      <li onclick="navigate('reservas')">Reservas</li>
-      <li onclick="navigate('estilistas')">Estilistas</li>
-      <li onclick="navigate('reseñas')">Reseñas</li>
+      <li onclick="navigate('servicios')" id="nav-servicios">Servicios</li>
+      <li onclick="navigate('reservas')" id="nav-reservas">Reservas</li>
+      <li onclick="navigate('estilistas')" id="nav-estilistas">Estilistas</li>
+      <li onclick="navigate('reseñas')" id="nav-reseñas">Reseñas</li>
+      <li onclick="navigate('peluqueria')" id="nav-peluqueria">Tu Salón</li>
     </ul>
   </div>
 
-<div class="main">
-  <div class="header">
-    <div>
-      <h1>Bienvenido, Propietario</h1>
-      <p th:text="${usuario.nombre}">Nombre de Usuario</p>
-    </div>
-    <div class="user-actions">
-      <a href="#" id="perfilBtn"><i class="fa-solid fa-user"></i></a>
-      <form th:action="@{/logout}" method="post">
-        <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
-      </form>
-    </div>
-  </div>
-  <!-- Mensajes de importación CSV -->
-<div class="mensajes-csv" style="margin-top: 20px; width: 90%; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <div class="main">
     
-    <!-- Éxito -->
-    <div th:if="${success}" class="alert alert-success" 
-         style="background-color: #28a745; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px;">
-        <i class="fa fa-check-circle"></i>
-        <span th:text="${success}"></span>
+    <div class="header">
+      <div>
+        <h1>Bienvenido, Propietario</h1>
+        <p th:text="${usuario.nombre}">Usuario</p>
+      </div>
+      <div class="user-actions">
+        <a href="#" id="perfilBtn" title="Mi Perfil Personal"><i class="fa-solid fa-user"></i></a>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <button type="submit" class="logout-button" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </form>
+      </div>
     </div>
-    
-    <!-- Advertencia -->
-    <div th:if="${warning}" class="alert alert-warning" 
-         style="background-color: #f0ad4e; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px;">
-        <i class="fa fa-exclamation-triangle"></i>
-        <span th:text="${warning}"></span>
+
+    <div class="mensajes-csv" style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
+        <div th:if="${success}" class="alert alert-success" style="background: #28a745; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${warning}" class="alert alert-warning" style="background: #f0ad4e; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa fa-exclamation-triangle"></i> <span th:text="${warning}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger" style="background: #d93b3b; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa fa-times-circle"></i> <span th:text="${error}"></span>
+        </div>
     </div>
-    
-    <!-- Error -->
-    <div th:if="${error}" class="alert alert-danger" 
-         style="background-color: #d93b3b; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px;">
-        <i class="fa fa-times-circle"></i>
-        <span th:text="${error}"></span>
-    </div>
-</div>
 
+    <div id="panelContainer">
 
-  <h1>Panel de Administración</h1>
-  <div id="panelContainer">
-  <!-- PANEL Estilistas --> 
-   <div id="estilistas" class="panel"> 
-      <h2>Gestión de Estilistas</h2> 
-      <div class="usuarios-grid mb-4">
-        <div class="card text-center p-3"> 
-          <h5>Total estilistas</h5> 
-          <h2 th:text="${totalEstilistas}">0</h2> 
-        </div> 
-      </div> 
-    <div class="accionesSuperiores"> 
-      <button onclick="abrirModalEstilista()" class="agregarServicio">NUEVO ESTILISTA</button> 
-      <form class="form-importar" th:action="@{/estilistas/importar-csv}" method="post" enctype="multipart/form-data"> 
-        <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInputEstilistas','fileNameEstilistas')" id="fileInputEstilistas">
-        <!-- Mostrar nombre del archivo --> 
-        <span id="fileNameEstilistas" style="margin-left: 10px; font-weight: 500; color: #fff;"></span> 
-        <button type="submit" class="btn-importar"> 
-          <i class="fa fa-cloud-upload"></i> Subir Archivo 
-        </button> 
-      </form> 
-    </div> 
-    <div class="datos-container"> 
-      <div class="usuarios-grid">
-        <div class="usuario-card" th:each="e : ${estilistas}" th:attr="data-id=${e.id}">
-          <!-- FOTO DEL ESTILISTA --> 
-          <img th:if="${e.imagenPerfil != null}" th:src="@{/uploads/estilistas/{file}(file=${e.imagenPerfil})}" class="avatar-img"> 
-          <!-- ÍCONO POR DEFECTO --> 
-            <i th:if="${e.imagenPerfil == null}" class="fa-solid fa-user fa-3x avatar-default"></i> 
-            <h3 th:text="${e.nombre}">Nombre Estilista</h3> 
-            <p th:text="${e.especialidad}">Especialidad</p> 
-            <div class="acciones">
-               <!-- BOTÓN EDITAR --> 
-                <button class="btn-editar" onclick="editarEstilista(this)" th:data-id="${e.id}" th:data-nombre="${e.nombre}" th:data-especialidad="${e.especialidad}" th:data-imagen="${e.imagenPerfil}"> 
-                  <i class="fa-regular fa-pen-to-square"></i> 
-                </button> 
-                <!-- BOTÓN ELIMINAR --> 
-                <button class="btn-eliminar" onclick="eliminarEstilista(this)" th:data-id="${e.id}">
-                  <i class="fa-regular fa-trash-can"></i> 
-                </button> 
-            </div> 
-          </div> 
-        </div> 
-        <!-- PAGINACIÓN ESTILISTAS -->
-<div class="pagination">
-    <a th:each="i : ${#numbers.sequence(0, totalPagesEstilistas - 1)}"
-       th:classappend="${i == pageEstilistas} ? 'active' : ''"
-       th:href="@{/owners/dashboard(
-            pageEstilistas=${i},
-            pageServicios=${pageServicios},
-            pageReservas=${pageReservas},
-            pageResenas=${pageResenas}
-       )}"
-       class="pagination-btn"
-       th:text="${i + 1}">
-    </a>
-</div>
-
-
-
-      </div> 
-    </div> 
-    <!-- PANEL RESEÑAS --> 
-    <div id="reseñas" class="panel"> 
-      <h2>Reseñas</h2> 
-      <div class="usuarios-grid mb-4"> 
-        <div class="card text-center p-3"> 
-          <h5>Total Reseñas</h5> 
-          <h2 th:text="${totalReseñas}">0</h2> 
-        </div> <div class="card text-center p-3"> 
-          <h5>Promedio de puntuación</h5> 
-          <h2 th:text="${promedioPuntación}">0</h2> 
-        </div> 
-      </div> 
-      <div class="datos-container"> 
-        <div class="usuarios-grid"> 
-          <div class="usuario-card" th:each="r : ${reseñas}" th:attr="data-id=${r.id}"> 
-            <!-- FOTO DEL USUARIO --> 
-            <img th:if="${r.usuario.imagenPerfil != null}" th:src="@{'/uploads/' + ${r.usuario.imagenPerfil}}" class="avatar-img" /> 
-            <i th:if="${r.usuario.imagenPerfil == null}" class="fa-solid fa-user fa-3x avatar-default"></i> 
-            <h3 th:text="${r.usuario.nombre}">Nombre Usuario</h3> 
-            <p th:text="${r.comentario}">Comentario</p> 
-          </div> 
-        </div> 
-      </div> 
-    </div> 
-    <!-- PANEL SERVICIOS --> 
-    <div id="servicios" class="panel"> 
-      <h2>Gestión de Servicios</h2> 
-      <div class="usuarios-grid mb-4"> 
-        <div class="card text-center p-3"> 
-          <h5>Servicios Activos</h5> 
-          <h2 th:text="${totalServicios}">0</h2> 
-        </div> 
-      </div> 
-      <div class="accionesSuperiores"> 
-        <button onclick="abrirModalServicio()" class="agregarServicio">NUEVO SERVICIO</button> 
-        <form class="form-importar" th:action="@{/servicios/importar-csv}" method="post" enctype="multipart/form-data"> 
-          <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInput','fileName')" id="fileInput"> 
-          <!-- Mostrar nombre del archivo --> 
-          <span id="fileName" style="margin-left: 10px; font-weight: 500; color: #fff;"></span> 
-          <button type="submit" class="btn-importar"> 
-            <i class="fa fa-cloud-upload"></i> Subir Archivo 
-          </button> 
-        </form> 
-        <!-- Enlace como botón con ícono --> 
-        <a th:href="@{/owners/pdf-Servicios}" class="btn-pdf"> 
-          <i class="fa fa-file-pdf"></i> Descargar PDF 
-        </a> 
-      </div> <div class="datos-container"> 
-      <div class="usuarios-grid"> 
-        <div class="usuario-card" th:each="s : ${servicios}"> 
-          <img th:src="@{/uploads/{img}(img=${s.imagen})}" class="avatar-img"/> 
-          <h3 th:text="${s.nombre}">Servicio</h3> 
-          <p th:text="${s.duracion}">Duración</p> 
-          <p th:text="${s.descripcion}">Descripción</p> 
-          <p th:text="'$' + ${s.precio}">Precio</p> 
-          <div class="acciones"> 
-            <button class="btn-editar" type="button" onclick="editarServicio(this)" 
-              th:data-id="${s.id}" th:data-nombre="${s.nombre}" th:data-duracion="${s.duracion}" 
-              th:data-descripcion="${s.descripcion}" th:data-precio="${s.precio}" th:data-imagen="${s.imagen}"> 
-              <i class="fa-regular fa-pen-to-square"></i> 
-            </button> 
-            <a th:href="@{'/servicios/delete/' + ${s.id}}" class="btn-eliminar" 
-              onclick="return confirm('¿Estás seguro de que deseas eliminar este servicio?');"> 
-              <i class="fa-regular fa-trash-can"></i> 
-            </a> 
-          </div> 
-        </div> 
-      </div> 
-<!-- PAGINACIÓN SERVICIOS -->
-<div class="pagination">
-    <a th:each="i : ${#numbers.sequence(0, totalPagesServicios - 1)}"
-       th:classappend="${i == pageServicios} ? 'active' : ''"
-       th:href="@{/owners/dashboard(
-            pageEstilistas=${pageEstilistas},
-            pageServicios=${i},
-            pageReservas=${pageReservas},
-            pageResenas=${pageResenas}
-       )}"
-       class="pagination-btn"
-       th:text="${i + 1}">
-    </a>
-</div>
-
-
-
-    </div> 
-  </div> 
-</div> <!-- FIN panelContainer -->
-
-  <!-- MODAL PERFIL (fuera de panelContainer) -->
-  <div id="modalPerfil" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="cerrarModalPerfil()">&times;</span>
-
-      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
-        <h2 class="modal-title">Mi Perfil</h2>
-
-        <div class="preview-container">
-          <img id="avatarPreview"
-               th:if="${usuario.imagenPerfil != null}"
-               th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}"
-               alt="Avatar"
-               class="imagen-preview">
-
-          <img id="avatarPreviewDefault"
-               th:unless="${usuario.imagenPerfil != null}"
-               src="/images/default-avatar.png"
-               alt="Avatar"
-               class="imagen-preview">
-
-          <label for="imagenPerfil" class="btn-guardar" style="margin-top: 10px; display: inline-block;">
-            <i class="fa-solid fa-camera"></i> Cambiar imagen
-          </label>
-          <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*" onchange="previewImage(this, 'avatarPreview')">
+      <div id="estilistas" class="panel">
+        <h2>Gestión de Estilistas</h2>
+        <div class="usuarios-grid mb-4">
+            <div class="card text-center p-3">
+                <h5>Total estilistas</h5>
+                <div class="content">
+                    <i class="fas fa-cut"></i>
+                    <h2 th:text="${totalEstilistas}">0</h2>
+                </div>
+            </div>
         </div>
 
+        <div class="accionesSuperiores">
+            <button onclick="abrirModalEstilista()" class="agregarServicio">NUEVO ESTILISTA</button>
+            <form class="form-importar" th:action="@{/estilistas/importar-csv}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInputEstilistas','fileNameEstilistas')" id="fileInputEstilistas">
+                <span id="fileNameEstilistas" style="margin-left: 10px; font-weight: 500; color: #fff;"></span>
+                <button type="submit" class="btn-importar"><i class="fa fa-cloud-upload"></i> Subir Archivo</button>
+            </form>
+            <a th:href="@{/owners/pdf-Estilistas}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
+        </div>
+
+        <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
+            <input type="hidden" name="activeTab" value="estilistas">
+            <input type="text" name="q" placeholder="Buscar estilista..." th:value="${q}" />
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+
+        <div class="datos-container">
+            <div class="usuarios-grid">
+                <div class="usuario-card" th:each="e : ${estilistas}" th:attr="data-id=${e.id}">
+                    <img th:src="@{${e.imagenPerfil != null ? '/uploads/estilistas/' + e.imagenPerfil : '/images/default-stylist.png'}}" class="avatar-img" 
+                         loading="lazy" onerror="this.src='/images/default-avatar.png'">
+                    <h3 th:text="${e.nombre}">Nombre</h3>
+                    <p th:text="${e.especialidad}">Especialidad</p>
+                    <div class="acciones">
+                        <button class="btn-editar" onclick="editarEstilista(this)" 
+                            th:data-id="${e.id}" th:data-nombre="${e.nombre}" th:data-especialidad="${e.especialidad}" th:data-imagen="${e.imagenPerfil}">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                        <button class="btn-eliminar" onclick="eliminarEstilista(this)" th:data-id="${e.id}">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pagination" th:if="${totalPagesEstilistas > 0}">
+                <a th:each="i : ${#numbers.sequence(0, totalPagesEstilistas - 1)}"
+                   th:classappend="${i == pageEstilistas} ? 'active' : ''"
+                   th:href="@{/owners/dashboard(pageEstilistas=${i}, activeTab='estilistas')}"
+                   class="pagination-btn" th:text="${i + 1}"></a>
+            </div>
+        </div>
+      </div>
+
+      <div id="reseñas" class="panel">
+        <h2>Reseñas de Clientes</h2>
+        <div class="usuarios-grid mb-4">
+            <div class="card text-center p-3">
+                <h5>Total Reseñas</h5>
+                <h2 th:text="${totalReseñas}">0</h2>
+            </div>
+            <div class="card text-center p-3">
+                <h5>Calificación Promedio</h5>
+                <h2 th:text="${promedioPuntación}">0</h2>
+            </div>
+        </div>
+        <div class="datos-container">
+            <div class="usuarios-grid">
+                <div class="usuario-card" th:each="r : ${reseñas}">
+                    <img th:src="@{${r.usuario.imagenPerfil != null ? '/uploads/' + r.usuario.imagenPerfil : '/images/default-avatar.png'}}" class="avatar-img" loading="lazy"/>
+                    <h3 th:text="${r.usuario.nombre}">Usuario</h3>
+                    <div class="stars" style="color: gold; margin: 5px 0;">
+                        <span th:text="${r.puntuacion} + ' ★'"></span>
+                    </div>
+                    <p th:text="${r.comentario}" style="font-style: italic;">Comentario</p>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="servicios" class="panel">
+        <h2>Catálogo de Servicios</h2>
+        <div class="usuarios-grid mb-4">
+            <div class="card text-center p-3">
+                <h5>Servicios Activos</h5>
+                <div class="content">
+                    <i class="las la-store-alt"></i>
+                    <h2 th:text="${totalServicios}">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="accionesSuperiores">
+            <button onclick="abrirModalServicio()" class="agregarServicio">NUEVO SERVICIO</button>
+            <form class="form-importar" th:action="@{/servicios/importar-csv}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInput','fileName')" id="fileInput">
+                <span id="fileName" style="margin-left: 10px; font-weight: 500; color: #fff;"></span>
+                <button type="submit" class="btn-importar"><i class="fa fa-cloud-upload"></i> Subir Archivo</button>
+            </form>
+            <a th:href="@{/owners/pdf-Servicios}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
+        </div>
+        <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
+            <input type="hidden" name="activeTab" value="servicios">
+            <input type="text" name="q" placeholder="Buscar servicio..." th:value="${q}" />
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+
+        <div class="datos-container">
+            <div class="usuarios-grid">
+                <div class="usuario-card" th:each="s : ${servicios}">
+                    <img th:src="@{/uploads/{img}(img=${s.imagen})}" class="avatar-img" loading="lazy" onerror="this.src='/images/default-service.png'"/>
+                    <h3 th:text="${s.nombre}">Servicio</h3>
+                    <p><i class="far fa-clock"></i> <span th:text="${s.duracion}"></span></p>
+                    <p th:text="${s.descripcion}" style="font-size: 0.9em; color: #aaa;"></p>
+                    <h4 th:text="'$' + ${s.precio}" style="color: var(--primary-color);">Precio</h4>
+                    <div class="acciones">
+                        <button class="btn-editar" type="button" onclick="editarServicio(this)" 
+                            th:data-id="${s.id}" th:data-nombre="${s.nombre}" th:data-duracion="${s.duracion}" 
+                            th:data-descripcion="${s.descripcion}" th:data-precio="${s.precio}" th:data-imagen="${s.imagen}">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </button>
+                        <a th:href="@{'/servicios/delete/' + ${s.id}}" class="btn-eliminar" onclick="return confirm('¿Eliminar servicio?');">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+             <div class="pagination" th:if="${totalPagesServicios > 0}">
+                <a th:each="i : ${#numbers.sequence(0, totalPagesServicios - 1)}"
+                   th:classappend="${i == pageServicios} ? 'active' : ''"
+                   th:href="@{/owners/dashboard(pageServicios=${i}, activeTab='servicios')}"
+                   class="pagination-btn" th:text="${i + 1}"></a>
+            </div>
+        </div>
+      </div>
+
+      <div id="reservas" class="panel">
+          <h2>Gestión de Reservas</h2>
+          <p style="color: #aaa;">Funcionalidad de calendario y reservas aquí...</p>
+      </div>
+
+      <div id="peluqueria" class="panel">
+        
+        <form th:action="@{/peluquerias/actualizar/{id}(id=${peluqueria.id})}"
+              method="post" enctype="multipart/form-data" id="form-peluqueria">
+
+            <div class="salon-header-bg">
+                <img th:src="${peluqueria.imagenUrl != null} 
+                            ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
+                            : @{/images/default-salon.png}"
+                     alt="Portada del salón" loading="lazy">
+            </div>
+
+            <div class="salon-header-title">
+                <h1 th:text="${peluqueria.nombre}">Nombre Peluquería</h1>
+            </div>
+
+            <div class="salon-grid-layout">
+                <aside class="salon-photo-card">
+                    <div class="salon-avatar-wrapper">
+                        <img id="preview-logo-salon"
+                             th:src="${peluqueria.imagenUrl != null} 
+                                      ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
+                                      : @{/images/default-salon.png}"
+                             alt="Logo Peluquería" loading="lazy">
+                        <label for="input-logo-salon" class="salon-avatar-overlay">
+                            <i class="fa-solid fa-camera fa-2x"></i>
+                            <span>Cambiar</span>
+                        </label>
+                        <input type="file" name="archivoImagen" id="input-logo-salon"
+                               hidden onchange="genericImagePreview(this, 'preview-logo-salon')">
+                    </div>
+                    <p class="salon-photo-hint">Logo / Fachada del Salón</p>
+                </aside>
+
+                <section class="salon-form-card">
+                    <h3 class="form-section-title">Información de Contacto</h3>
+
+                    <div class="modern-input-group">
+                        <div>
+                            <label class="modern-label">Nombre</label>
+                            <input type="text" name="nombre" th:value="${peluqueria.nombre}" class="modern-input">
+                        </div>
+                        <div>
+                            <label class="modern-label">Dirección</label>
+                            <input type="text" name="direccion" th:value="${peluqueria.direccion}" class="modern-input" placeholder="Ej: Calle 123">
+                        </div>
+                        <div>
+                            <label class="modern-label">Teléfono</label>
+                            <input type="text" name="telefono" th:value="${peluqueria.telefono}" class="modern-input" placeholder="Ej: 300 123 4567">
+                        </div>
+                    </div>
+                    <div class="modern-input-group full">
+                        <div>
+                            <label class="modern-label">Correo Electrónico</label>
+                            <input type="email" name="email" th:value="${peluqueria.email}" class="modern-input">
+                        </div>
+                    </div>
+
+                    <h3 class="form-section-title">Configuración</h3>
+                    <div class="modern-input-group">
+                        <div>
+                            <label class="modern-label">Apertura</label>
+                            <input type="time" name="horarioApertura" th:value="${peluqueria.horarioApertura}" class="modern-input">
+                        </div>
+                        <div>
+                            <label class="modern-label">Cierre</label>
+                            <input type="time" name="horarioCierre" th:value="${peluqueria.horarioCierre}" class="modern-input">
+                        </div>
+                    </div>
+                    <div class="modern-input-group full">
+                        <div>
+                            <label class="modern-label">Descripción</label>
+                            <textarea name="descripcion" rows="4" class="modern-input" th:text="${peluqueria.descripcion}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-save-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                    </div>
+                </section>
+            </div>
+        </form>
+      </div> </div> </div> <div id="modalPerfil" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
+      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+        <h2 class="modal-title">Mi Perfil</h2>
+        <div class="preview-container">
+           <img id="avatarPreviewUser" th:src="@{${usuario.imagenPerfil != null ? '/uploads/' + usuario.imagenPerfil : '/images/default-avatar.png'}}" class="imagen-preview">
+           <label for="imagenPerfilUser" class="btn-guardar" style="margin-top: 10px; display: inline-block; cursor: pointer;">
+             <i class="fa-solid fa-camera"></i> Cambiar imagen
+           </label>
+           <input type="file" id="imagenPerfilUser" name="imagen" style="display: none;" accept="image/*" onchange="genericImagePreview(this, 'avatarPreviewUser')">
+        </div>
         <input type="hidden" name="id" th:value="${usuario.id}">
         <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required class="form-input">
         <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required class="form-input">
         <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}" class="form-input">
-
-        <button type="submit" class="btn-guardar">Guardar Cambios</button>
-      </form>
-
-      <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn-logout">Cerrar Sesión</button>
+        <button type="submit" class="btn-guardar">Guardar</button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL SERVICIO -->
   <div id="modalServicio" class="modal">
     <div class="modal-content">
-      <span class="close-button" onclick="cerrarModalServicio()">&times;</span>
-      <h2 class="modal-title" id="tituloModalServicio">Nuevo Servicio</h2>
-
+      <span class="close-button" onclick="cerrarModal('modalServicio')">&times;</span>
+      <h2 class="modal-title">Gestión Servicio</h2>
       <form id="formServicio" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" id="servicioId" />
         <input type="hidden" name="peluqueria_id" th:value="${peluqueria.id}">
-
-        <input type="text" name="nombre" id="nombreServicio" placeholder="Nombre del servicio" required class="form-input" />
+        
+        <input type="text" name="nombre" id="nombreServicio" placeholder="Nombre" required class="form-input" />
         <input type="text" name="duracion" id="duracionServicio" placeholder="Duración (ej: 45 min)" required class="form-input" />
         <textarea name="descripcion" id="descripcionServicio" placeholder="Descripción" required class="form-input" style="height: 100px; resize: vertical;"></textarea>
         <input type="number" step="0.01" name="precio" id="precioServicio" placeholder="Precio" required class="form-input" />
-
-        <label class="btn-guardar" style="margin-bottom: 15px; display: inline-block;">
-          <i class="fa-solid fa-image"></i> Seleccionar Imagen
-          <input type="file" name="imagenFile" id="imagenFile" accept="image/*" style="display: none;" onchange="previewImage(this, 'imagenPreview')">
+        
+        <label class="btn-guardar" style="margin-bottom: 15px; display: inline-block; cursor: pointer;">
+          <i class="fa-solid fa-image"></i> Subir Imagen
+          <input type="file" name="imagenFile" accept="image/*" style="display: none;" onchange="genericImagePreview(this, 'previewServicio')">
         </label>
-
-        <div id="previewContainer" class="preview-container">
-          <img id="imagenPreview" src="" alt="Vista previa" class="imagen-preview hidden" />
-        </div>
+        <img id="previewServicio" src="" class="imagen-preview hidden" style="max-height: 150px; display: block; margin: 0 auto;">
 
         <div class="form-buttons">
           <button type="submit" class="btn-guardar">Guardar</button>
-          <button type="button" onclick="cerrarModalServicio()" class="btn-cancelar">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL ESTILISTA -->
   <div id="modalEstilista" class="modal">
     <div class="modal-content">
-      <span class="close-button" onclick="cerrarModalEstilista()">&times;</span>
-      <h2 class="modal-title" id="tituloModalEstilista">Nuevo Estilista</h2>
-
+      <span class="close-button" onclick="cerrarModal('modalEstilista')">&times;</span>
+      <h2 class="modal-title">Gestión Estilista</h2>
       <form id="formEstilista" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" id="estilistaId" />
-
-        <input type="text" name="nombre" id="estilistaNombre"
-               placeholder="Nombre del estilista" required
-               class="form-input" />
-
-        <input type="text" name="especialidad" id="estilistaEspecialidad"
-               placeholder="Especialidad (ej: Barbería, Tintes...)"
-               required class="form-input" />
-
-        <label class="btn-guardar" style="margin-bottom: 15px; display: inline-block;">
-          <i class="fa-solid fa-image"></i> Seleccionar Foto
-          <input type="file" name="archivoImagen" id="estilistaImagenFile"
-                 accept="image/*" style="display: none;"
-                 onchange="previewImage(this, 'estilistaImagenPreview')">
+        <input type="text" name="nombre" id="estilistaNombre" placeholder="Nombre" required class="form-input" />
+        <input type="text" name="especialidad" id="estilistaEspecialidad" placeholder="Especialidad" required class="form-input" />
+        
+        <label class="btn-guardar" style="margin-bottom: 15px; display: inline-block; cursor: pointer;">
+          <i class="fa-solid fa-image"></i> Subir Foto
+          <input type="file" name="archivoImagen" accept="image/*" style="display: none;" onchange="genericImagePreview(this, 'previewEstilista')">
         </label>
-
-        <div id="previewEstilistaContainer" class="preview-container">
-          <img id="estilistaImagenPreview" src=""
-               alt="Vista previa"
-               class="imagen-preview hidden" />
-
-          <i id="iconoDefaultEstilista"
-             class="fa-solid fa-user fa-4x avatar-default"
-             style="margin-top: 10px; color: #666;"></i>
-        </div>
+        <img id="previewEstilista" src="" class="imagen-preview hidden" style="max-height: 150px; display: block; margin: 0 auto;">
 
         <div class="form-buttons">
           <button type="submit" class="btn-guardar">Guardar</button>
-          <button type="button" onclick="cerrarModalEstilista()" class="btn-cancelar">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-</div> <!-- FIN .main -->
+  <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 
-
-
-  <!-- SCRIPTS CORREGIDOS -->
-<script>
-/* ========================== NAVEGACIÓN ENTRE PANELES - ANIMADA ========================== */ 
-let panelActual = null;
-
-function navigate(seccionId) {
-    const nuevoPanel = document.getElementById(seccionId);
-    if (!nuevoPanel) {
-        console.error("Panel no encontrado:", seccionId);
-        return;
-    }
-
-    // Panel actual
-    if (!panelActual) {
-        nuevoPanel.classList.add("active");
-        nuevoPanel.style.display = "block";
-        panelActual = nuevoPanel;
-        localStorage.setItem("seccionActiva", seccionId);
-        actualizarNav(seccionId);
-        return;
-    }
-
-    if (panelActual === nuevoPanel) return;
-
-    panelActual.classList.remove("active");
-    panelActual.classList.add("saliendo");
-
-    nuevoPanel.style.display = "block";
-    nuevoPanel.classList.add("active");
-
-    setTimeout(() => {
-        panelActual.classList.remove("saliendo");
-        panelActual.style.display = "none";
-        panelActual = nuevoPanel;
-    }, 350);
-
-    localStorage.setItem("seccionActiva", seccionId);
-    actualizarNav(seccionId); // Actualiza el menú
-}
-
-// Función para actualizar el nav
-function actualizarNav(seccionId) {
-    const navItems = document.querySelectorAll('.nav li');
-    navItems.forEach(li => {
-        li.classList.remove('active');
-        // Si el li tiene onclick con la sección actual, se marca activo
-        if (li.getAttribute('onclick') === `navigate('${seccionId}')`) {
-            li.classList.add('active');
+  <script>
+    /* ================= GESTIÓN DE PESTAÑAS ================= */
+    function navigate(tabId) {
+        // Ocultar todos los paneles
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        // Quitar clase active de navs
+        document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
+        
+        // Activar el seleccionado (CON VALIDACIÓN DE SEGURIDAD)
+        const selectedPanel = document.getElementById(tabId);
+        if(selectedPanel) {
+            selectedPanel.classList.add('active');
+        } else {
+            console.error("Panel no encontrado: " + tabId);
         }
-    });
-}
+        
+        const selectedNav = document.getElementById('nav-' + tabId);
+        if(selectedNav) selectedNav.classList.add('active');
 
-
-/* ========================== MODALES ========================== */
-
-/* Modal Perfil */
-function cerrarModalPerfil() {
-    document.getElementById('modalPerfil').classList.remove('show');
-}
-
-/* Modal Servicio */
-function abrirModalServicio() {
-    const form = document.getElementById('formServicio');
-    form.reset();
-    form.action = '/servicios/create';
-    document.getElementById('servicioId').value = '';
-
-    const preview = document.getElementById('imagenPreview');
-    preview.src = '';
-    preview.classList.add('hidden');
-
-    document.getElementById('modalServicio').classList.add('show');
-}
-
-function editarServicio(boton) {
-    const form = document.getElementById('formServicio');
-
-    document.getElementById('servicioId').value = boton.dataset.id;
-    document.getElementById('nombreServicio').value = boton.dataset.nombre;
-    document.getElementById('duracionServicio').value = boton.dataset.duracion;
-    document.getElementById('descripcionServicio').value = boton.dataset.descripcion;
-    document.getElementById('precioServicio').value = boton.dataset.precio;
-    form.action = '/servicios/update/' + boton.dataset.id;
-
-    const preview = document.getElementById('imagenPreview');
-    if (boton.dataset.imagen) {
-        preview.src = '/uploads/' + boton.dataset.imagen;
-        preview.classList.remove('hidden');
-    } else {
-        preview.src = '';
-        preview.classList.add('hidden');
+        // Guardar estado
+        localStorage.setItem('activeOwnerTab', tabId);
     }
 
-    document.getElementById('modalServicio').classList.add('show');
-}
-
-function cerrarModalServicio() {
-    document.getElementById('modalServicio').classList.remove('show');
-}
-
-/* Modal Estilista */
-function abrirModalEstilista() {
-    resetModalEstilista();
-    const form = document.getElementById("formEstilista");
-    form.action = "/estilistas/guardar";
-    document.getElementById("modalEstilista").classList.add("show");
-}
-
-function cerrarModalEstilista() {
-    document.getElementById("modalEstilista").classList.remove("show");
-}
-
-function resetModalEstilista() {
-    document.getElementById("formEstilista").reset();
-    document.getElementById("estilistaId").value = "";
-
-    const preview = document.getElementById("estilistaImagenPreview");
-    if (preview) {
-        preview.classList.add("hidden");
-        preview.src = "";
-    }
-
-    const icono = document.getElementById("iconoDefaultEstilista");
-    if (icono) icono.style.display = "block";
-}
-
-/* Editar Estilista */
-function editarEstilista(boton) {
-    const card = boton.closest(".usuario-card");
-    const nombre = card.querySelector("h3")?.innerText.trim() || "";
-    const especialidad = card.querySelector("p")?.innerText.trim() || "";
-    const imagen = card.querySelector("img")?.getAttribute("src")?.replace("/uploads/", "") || "";
-
-    const form = document.getElementById("formEstilista");
-    document.getElementById("estilistaId").value = boton.dataset.id;
-    document.getElementById("estilistaNombre").value = nombre;
-    document.getElementById("estilistaEspecialidad").value = especialidad;
-    form.action = "/estilistas/guardar";
-
-    const preview = document.getElementById("estilistaImagenPreview");
-    const icono = document.getElementById("iconoDefaultEstilista");
-
-    if (imagen && imagen !== "null") {
-        preview.src = "/uploads/" + imagen;
-        preview.classList.remove("hidden");
-        icono.style.display = "none";
-    } else {
-        preview.src = "";
-        preview.classList.add("hidden");
-        icono.style.display = "block";
-    }
-
-    document.getElementById("modalEstilista").classList.add("show");
-}
-
-/* ========================== PREVIEW DE IMAGEN ========================== */
-function previewImage(input, previewId) {
-    const preview = document.getElementById(previewId);
-    const file = input.files?.[0];
-    if (preview && file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.classList.remove('hidden');
+    /* ================= PREVIEW DE IMAGENES UNIFICADO ================= */
+    function genericImagePreview(input, imgId) {
+        const preview = document.getElementById(imgId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        reader.readAsDataURL(file);
     }
-}
 
-/* Preview para Estilista */
-const inputEstilista = document.getElementById("estilistaImagenFile");
-if (inputEstilista) {
-    inputEstilista.addEventListener("change", function() {
-        previewImage(this, 'estilistaImagenPreview');
-    });
-}
-
-/* ========================== ELIMINAR ESTILISTA ========================== */
-function eliminarEstilista(boton) {
-    const estilistaId = boton.getAttribute('data-id');
-    if (confirm('¿Estás seguro de que deseas eliminar este estilista?')) {
-        window.location.href = '/estilistas/delete/' + estilistaId;
+    /* ================= MODALES ================= */
+    function cerrarModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
     }
-}
 
-/* ========================== CERRAR MODALS AL CLIC FUERA ========================== */
-window.addEventListener('click', function(event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            modal.classList.remove('show');
-        }
-    });
-});
-
-/* ========================== NOMBRE DE ARCHIVO SUBIDO ========================== */
-function updateFileName(inputId, spanId) {
-    const input = document.getElementById(inputId);
-    const fileName = document.getElementById(spanId);
-    if (input.files.length > 0) {
-        fileName.textContent = input.files[0].name;
-    } else {
-        fileName.textContent = "";
-    }
-}
-
-/* ========================== DOM CONTENT LOADED ========================== */
-document.addEventListener('DOMContentLoaded', function() {
-    // Navegación inicial
-    const seccionActiva = localStorage.getItem('seccionActiva') || 'estilistas';
-    navigate(seccionActiva);
-
-    // Modal Perfil
-    const btnPerfil = document.getElementById('perfilBtn');
-    if (btnPerfil) {
-        btnPerfil.addEventListener('click', function(e) {
+    // Modal Perfil Personal
+    const perfilBtn = document.getElementById('perfilBtn');
+    if(perfilBtn){
+        perfilBtn.addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('modalPerfil').classList.add('show');
         });
     }
 
-    // Mensajes CSV - fade up después de 5s
-    setTimeout(() => {
-        const mensajes = document.querySelectorAll('.mensajes-csv .alert');
-        mensajes.forEach(msg => {
-            msg.classList.add('fade-up'); // aplica animación CSS
-            setTimeout(() => msg.remove(), 800); // elimina después de transición
-        });
-    }, 5000);
-});
-</script>
+    // Modal Estilistas
+    function abrirModalEstilista() {
+        const form = document.getElementById('formEstilista');
+        form.reset();
+        form.action = "/estilistas/guardar";
+        document.getElementById('estilistaId').value = "";
+        const img = document.getElementById('previewEstilista');
+        img.src = "";
+        img.style.display = 'none';
+        document.getElementById('modalEstilista').classList.add('show');
+    }
 
+    function editarEstilista(btn) {
+        const form = document.getElementById('formEstilista');
+        form.action = "/estilistas/guardar";
+        document.getElementById('estilistaId').value = btn.dataset.id;
+        document.getElementById('estilistaNombre').value = btn.dataset.nombre;
+        document.getElementById('estilistaEspecialidad').value = btn.dataset.especialidad;
+        
+        const imgPreview = document.getElementById('previewEstilista');
+        if(btn.dataset.imagen && btn.dataset.imagen !== 'null') {
+            imgPreview.src = '/uploads/estilistas/' + btn.dataset.imagen;
+            imgPreview.style.display = 'block';
+        } else {
+            imgPreview.style.display = 'none';
+        }
+        document.getElementById('modalEstilista').classList.add('show');
+    }
+
+    function eliminarEstilista(btn) {
+        if(confirm('¿Eliminar estilista?')) window.location.href = '/estilistas/delete/' + btn.dataset.id;
+    }
+
+    // Modal Servicios
+    function abrirModalServicio() {
+        document.getElementById('formServicio').reset();
+        document.getElementById('formServicio').action = '/servicios/create';
+        document.getElementById('servicioId').value = '';
+        document.getElementById('previewServicio').style.display = 'none';
+        document.getElementById('modalServicio').classList.add('show');
+    }
+
+    function editarServicio(btn) {
+        document.getElementById('servicioId').value = btn.dataset.id;
+        document.getElementById('nombreServicio').value = btn.dataset.nombre;
+        document.getElementById('duracionServicio').value = btn.dataset.duracion;
+        document.getElementById('descripcionServicio').value = btn.dataset.descripcion;
+        document.getElementById('precioServicio').value = btn.dataset.precio;
+        document.getElementById('formServicio').action = '/servicios/update/' + btn.dataset.id;
+        
+        const imgPreview = document.getElementById('previewServicio');
+        if(btn.dataset.imagen) {
+            imgPreview.src = '/uploads/' + btn.dataset.imagen;
+            imgPreview.style.display = 'block';
+        } else {
+            imgPreview.style.display = 'none';
+        }
+        document.getElementById('modalServicio').classList.add('show');
+    }
+
+    /* ================= UTILIDADES ================= */
+    function updateFileName(inputId, spanId) {
+        const input = document.getElementById(inputId);
+        const span = document.getElementById(spanId);
+        if(input.files.length > 0) span.textContent = input.files[0].name;
+    }
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+        // Recuperar pestaña activa o usar defecto
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('activeTab');
+        const savedTab = localStorage.getItem('activeOwnerTab');
+        
+        // Prioridad: URL > LocalStorage > Default
+        if (tabParam) {
+            navigate(tabParam);
+        } else if (savedTab) {
+            navigate(savedTab);
+        } else {
+            navigate('estilistas');
+        }
+
+        // Auto-dismiss alertas
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+        a.classList.add('hide'); // activa la animación
+        setTimeout(() => a.remove(), 500); // elimina del DOM después de que termine la transición
+    });
+}, 5000);
+
+        
+        // Cerrar modales click afuera
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        }
+    });
+  </script>
+</body>
 </html>

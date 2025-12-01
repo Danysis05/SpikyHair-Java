@@ -62,43 +62,52 @@ public class EstilistaController {
     }
 
     // ✔ Crear o actualizar estilista
-    @PostMapping("/guardar")
-    public String guardarEstilista(@ModelAttribute EstilistaDto estilistaDto) {
-        try {
-            // Usuario autenticado
-            Usuario usuario = usuarioService.getUsuarioAutenticado();
-            Peluqueria peluqueria = peluqueriaService.findByUsuarioId(usuario.getId());
-            estilistaDto.setPeluqueriaId(peluqueria.getId());
+   @PostMapping("/guardar")
+public String guardarEstilista(@ModelAttribute EstilistaDto estilistaDto,
+                               RedirectAttributes redirectAttributes) {
+    try {
+        // Usuario autenticado
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+        Peluqueria peluqueria = peluqueriaService.findByUsuarioId(usuario.getId());
+        estilistaDto.setPeluqueriaId(peluqueria.getId());
 
-            // ============================
-            //  SUBIDA DE IMAGEN
-            // ============================
-            MultipartFile imagen = estilistaDto.getArchivoImagen();
+        // ============================
+        //  SUBIDA DE IMAGEN
+        // ============================
+        MultipartFile imagen = estilistaDto.getArchivoImagen();
 
-            if (imagen != null && !imagen.isEmpty()) {
+        if (imagen != null && !imagen.isEmpty()) {
+            String fileName = StringUtils.cleanPath(imagen.getOriginalFilename());
+            String uploadDir = System.getProperty("user.dir") + "/uploads/estilistas/";
 
-                String fileName = StringUtils.cleanPath(imagen.getOriginalFilename());
-                String uploadDir = System.getProperty("user.dir") + "/uploads/estilistas/";
+            File uploadPath = new File(uploadDir);
+            if (!uploadPath.exists()) uploadPath.mkdirs();
 
-                File uploadPath = new File(uploadDir);
-                if (!uploadPath.exists()) uploadPath.mkdirs();
+            Path path = Paths.get(uploadDir + fileName);
+            Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
-                Path path = Paths.get(uploadDir + fileName);
-                Files.copy(imagen.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
-                // Guardamos SOLO el nombre del archivo en el DTO
-                estilistaDto.setImagenPerfil(fileName);
-            }
-
-            estilistaService.saveOrUpdate(estilistaDto);
-
-            return "redirect:/owners/dashboard";
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "error";
+            // Guardamos SOLO el nombre del archivo en el DTO
+            estilistaDto.setImagenPerfil(fileName);
         }
+
+        estilistaService.saveOrUpdate(estilistaDto);
+
+        // Mensaje de éxito
+        redirectAttributes.addFlashAttribute("success", "Estilista guardado correctamente.");
+
+    } catch (IOException e) {
+        e.printStackTrace();
+        // Mensaje de error por fallo en la subida
+        redirectAttributes.addFlashAttribute("error", "Error al subir la imagen.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        // Mensaje de advertencia u otro tipo de error
+        redirectAttributes.addFlashAttribute("warning", "No se pudo guardar el estilista. Verifica los datos ingresados.");
     }
+
+    return "redirect:/owners/dashboard";
+}
+
 
 @GetMapping("/delete/{id}")
 public String eliminarEstilista(@PathVariable Long id, RedirectAttributes redirectAttributes) {

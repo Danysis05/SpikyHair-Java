@@ -1,164 +1,240 @@
+
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpikyHair | Inicio</title>
+    <title>SpikyHair | Domina tu Estilo</title>
 
-    <link rel="stylesheet" th:href="@{/css/index.css}" />
-
-    <!-- Fuentes e íconos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+     <link rel="stylesheet" th:href="@{/css/index.css}" />
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 
-    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    
 </head>
 
 <body>
-<header class="hero">
-    <div class="menu">
-        <img src="/uploads/logox.jpg" alt="logo" class="menu-icono">
 
-        <nav>
-            <ul class="lista-menu">
-                <li><a th:href="@{/auth/login}">Inicia Sesión</a></li>
-                <li><a th:href="@{/auth/new}" class="btn-register">Regístrate</a></li>
-            </ul>
+    <header class="hero-header">
+        <div class="logo-area">
+            <i class="fa-solid fa-scissors" style="color: var(--primary);"></i>
+            Spiky<span>Hair</span>
+        </div>
+
+        <nav class="nav-links">
+            <a th:href="@{/salones/listar}">Explorar</a>
+            <a th:href="@{/auth/login}" class="btn-login">Iniciar Sesión</a>
+            <a th:href="@{/auth/new}" class="btn-register">Regístrate</a>
         </nav>
-    </div>
+    </header>
 
-    <div class="hero-content">
-        <h1 class="title">SpikyHair</h1>
-        <h2 class="subtitle">Reserva tu Estilo</h2>
-        <p class="tagline">Tu próximo look está a un clic.</p>
-    </div>
-</header>
+    <main>
 
-<div class="separacion"></div>
-<main>
-
-    <!-- NOSOTROS -->
-    <section id="nosotros" class="reveal">
-        <div class="dentro">
-            <img src="/uploads/nosotros.jpg" alt="Imagen de salón de belleza">
-            <div class="info">
-                <h1>Nosotros</h1>
-                <h4>Tu estilo, tu espacio, tu elección</h4>
-                <p>
-                    En SpikyHair reunimos los mejores salones de belleza de la ciudad 
-                    para que encuentres el lugar ideal según tu estilo. 
-                    Explora, compara y elige la peluquería que más se adapte a ti, 
-                    disfrutando una experiencia moderna, fácil y diseñada para tu comodidad.
+        <section class="hero-section">
+            <div class="hero-bg"></div> <div class="hero-content reveal">
+                <div class="hero-badge">La App #1 de Peluquerias</div>
+                <h1 class="hero-title">Domina tu <span>Imagen</span><br> Sin Esperas.</h1>
+                <p class="hero-tagline">
+                    Olvídate de las filas y las llamadas incómodas. Encuentra los mejores peluquerias de tu ciudad, revisa sus trabajos y reserva en segundos.
                 </p>
+                <div class="hero-buttons">
+                    <a th:href="@{/auth/new}" class="btn-hero btn-primary">Empezar Gratis</a>
+                    <a href="#como-funciona" class="btn-hero btn-outline">Cómo Funciona</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="marquee">
+            <div class="marquee-content">
+                <span class="marquee-item">★ Reservas faciles</span>
+                <span class="marquee-item">★ Peluquerias Verificadas</span>
+                <span class="marquee-item">★ Pagos Seguros</span>
+                <span class="marquee-item">★ Estilos Trending</span>
+                <span class="marquee-item">★ Sin Filas</span>
+                <span class="marquee-item">★ Atención VIP</span>
+                <span class="marquee-item">★ Cortes Exclusivos</span>
+                <span class="marquee-item">★ Reservas faciles</span>
+                <span class="marquee-item">★ Pagos Seguros</span>
+                <span class="marquee-item">★ Peluquerias Verificadas</span>
             </div>
         </div>
-    </section>
 
-    <div class="separacion"></div>
-
-    <!-- GALERÍA -->
-    <section id="galeria" class="reveal">
-        <div class="container">
-            <h3 class="titulo-seccion">¿Qué te ofrecemos?</h3>
-            <div class="separador"></div>
-
-            <div class="galeria-grid">
-
-                <!-- Tarjeta de servicio -->
-                <div class="tarjeta-servicio">
-                    <a th:href="@{/salones/listar}">
-                        <div class="tarjeta-img">
-                            <img src="/uploads/fondo2.jpg" alt="">
-                        </div>
-                        <div class="tarjeta-info">
-                            <h4>Salones de Belleza</h4>
-                        </div>
-                    </a>
+        <section id="como-funciona" class="section-container reveal">
+            <div class="section-header">
+                <span class="section-subtitle">Simple y Rápido</span>
+                <h2 class="section-title">Tu Nuevo Corte en 3 Pasos</h2>
+            </div>
+            
+            <div class="steps-grid">
+                <div class="step-card">
+                    <span class="step-number">01</span>
+                    <i class="fa-solid fa-location-crosshairs step-icon"></i>
+                    <h3>Ubica tu Zona</h3>
+                    <p>Al iniciar sesión, te mostramos automáticamente las mejores peluquerias cerca de tu ubicación actual.</p>
                 </div>
-
-                <!-- Texto descriptivo -->
-                <div class="galeria-descripcion" >
-                    <h1>Encuentra el salón perfecto para ti</h1>
-                    <p>
-                        Explora una amplia variedad de salones de belleza cerca de ti. 
-                        Compara estilos, especialidades, ubicaciones y disponibilidad para 
-                        elegir el lugar ideal donde cuidar tu imagen y vivir una experiencia única.
-                    </p>
+                <div class="step-card">
+                    <span class="step-number">02</span>
+                    <i class="fa-solid fa-user-check step-icon"></i>
+                    <h3>Elige tu Peluqueria</h3>
+                    <p>Compara calificaciones, revisa fotos de cortes reales y selecciona al profesional que entienda tu estilo.</p>
                 </div>
+                <div class="step-card">
+                    <span class="step-number">03</span>
+                    <i class="fa-regular fa-calendar-check step-icon"></i>
+                    <h3>Reserva y Listo</h3>
+                    <p>Selecciona la hora, confirma y llega directo a la silla. Sin filas, sin perder tiempo.</p>
+                </div>
+            </div>
+        </section>
 
+        <section class="section-container split-section reveal">
+            <div class="image-stack">
+                <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=2070&auto=format&fit=crop" alt="Barber" class="img-main">
+                <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=2070&auto=format&fit=crop" alt="Tools" class="img-main img-accent">
+            </div>
+            
+            <div class="text-content">
+                <span class="section-subtitle">Sobre SpikyHair</span>
+                <h2>Más que un corte,<br>es una experiencia.</h2>
+                <p>
+                    En SpikyHair redefinimos el cuidado de tu cabello. No somos solo un directorio, somos un club selecto donde reunimos la sofisticación que mereces con la tecnología que necesitas.
+                </p>
+                <ul class="feature-list">
+                    <li><i class="fa-solid fa-check"></i> Las mejores peluquerias seleccionadas para ti.</li>
+                    <li><i class="fa-solid fa-check"></i> Historial de cortes para repetir tu look exacto.</li>
+                    <li><i class="fa-solid fa-check"></i> Notificaciones y recordatorios automáticos.</li>
+                </ul>
+                <br>
+                <a th:href="@{/auth/login}" style="border-bottom: 1px solid var(--primary); padding-bottom: 5px;">Explorar Salones <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </section>
+
+        <section class="section-container reveal">
+            <div class="section-header">
+                <span class="section-subtitle">Inspiración</span>
+                <h2 class="section-title">Tendencias de la Semana</h2>
+            </div>
+            
+            <div class="gallery-wrap">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=1976&auto=format&fit=crop" alt="Cut 1">
+                    <div class="gallery-overlay"><h4>Fade Clásico</h4></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1605497788044-5a902791326d?q=80&w=2070&auto=format&fit=crop" alt="Cut 2">
+                    <div class="gallery-overlay"><h4>Barba Perfilada</h4></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1593702295094-aea8c5c13d99?q=80&w=1974&auto=format&fit=crop" alt="Cut 3">
+                    <div class="gallery-overlay"><h4>Pompadour</h4></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=2070&auto=format&fit=crop" alt="Cut 4">
+                    <div class="gallery-overlay"><h4>Texturizado</h4></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials reveal">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">Lo que dicen ellos</h2>
+                </div>
+                <div class="steps-grid">
+                    <div class="review-card">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p>"Antes perdía horas esperando en la barbería. Con SpikyHair llego, me siento y salgo fresco en 30 minutos. Imprescindible."</p>
+                        <div class="user-profile">
+                            <div class="user-avatar" style="background-image: url('https://randomuser.me/api/portraits/men/32.jpg'); background-size: cover;"></div>
+                            <div><strong>Carlos M.</strong><br><small style="color: #666">Cliente Frecuente</small></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p>"Encontré una barbería de lujo a dos cuadras de mi oficina que no sabía que existía. La interfaz es súper fácil de usar."</p>
+                        <div class="user-profile">
+                            <div class="user-avatar" style="background-image: url('https://randomuser.me/api/portraits/men/45.jpg'); background-size: cover;"></div>
+                            <div><strong>David R.</strong><br><small style="color: #666">Usuario Nuevo</small></div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
+                        <p>"Excelente para comparar precios y estilos. Las fotos de los trabajos anteriores me ayudaron a decidirme."</p>
+                        <div class="user-profile">
+                            <div class="user-avatar" style="background-image: url('https://randomuser.me/api/portraits/men/86.jpg'); background-size: cover;"></div>
+                            <div><strong>Jorge L.</strong><br><small style="color: #666">Usuario Premium</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </section>
+
+        <section class="cta-final reveal">
+            <div class="cta-box">
+                <h2>¿Listo para mejorar tu imagen?</h2>
+                <p style="color: #aaa; margin: 1rem 0 2rem;">Únete a miles de personas que ya han elevado su estándar. El registro toma menos de 1 minuto.</p>
+                <a th:href="@{/auth/new}" class="btn-register" style="font-size: 1.2rem; padding: 1rem 3rem;">Crear Cuenta Gratis</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h2>Spiky<span>Hair</span></h2>
+                <p>La plataforma definitiva para caballeros que valoran su tiempo y su imagen. Conectamos estilo con tecnología.</p>
+                <div class="socials">
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Plataforma</h4>
+                <ul>
+                    <li><a th:href="@{/auth/login}">Iniciar Sesión</a></li>
+                    <li><a th:href="@{/auth/new}">Registrarse</a></li>
+                    <li><a th:href="@{/auth/login}">Ver Peluquerias</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Términos y Condiciones</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Soporte</a></li>
+                </ul>
             </div>
         </div>
-    </section>
-
-
-    <div class="separacion"></div>
-    <!-- BENEFICIOS -->
-    <section id="beneficios" class="reveal">
-        <h3>Beneficios de SpikyHair</h3>
-        <div class="beneficio">
-            <i class="fa-solid fa-calendar-check"></i>
-            <p>Reserva en segundos</p>
+        <div class="copyright">
+            <p>© SpikyHair 2025 | Todos los derechos reservados.</p>
         </div>
-        <div class="beneficio">
-            <i class="fa-solid fa-scissors"></i>
-            <p>Variedad de salones</p>
-        </div>
-        <div class="beneficio">
-            <i class="fa-solid fa-location-dot"></i>
-            <p>Cerca de ti</p>
-        </div>
-    </section>
+    </footer>
 
-    <section class="cta-final reveal" >
-        <h2>¿Listo para encontrar tu nuevo look?</h2>
-        <p>Crea tu cuenta y empieza a explorar los mejores salones de belleza.</p>
-        <a th:href="@{/auth/new}" class="btn-cta">Crear cuenta</a>
-    </section>
-
-</main>
-<!-- FOOTER -->
-<footer>
-    <div class="contenedor-footer">
-        <div class="lista-menu">
-            <ul>
-                <li><a th:href="@{/auth/login}">Inicia Sesión</a></li>
-                <li><a th:href="@{/auth/new}">Regístrate</a></li>
-
-
-                </li>
-            </ul>
-        </div>
-
-        <div class="listas-footer">
-            <ul>
-                <li><a><i class="fa-brands fa-instagram"></i></a></li>
-                <li><a><i class="fa-brands fa-facebook"></i></a></li>
-                <li><a><i class="fa-brands fa-twitter"></i></a></li>
-                <li><a><i class="fa-brands fa-tiktok"></i></a></li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="footer-last"><p>© SpikyHair 2025</p></div>
-</footer>
-
-<!-- SCRIPTS -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const elements = document.querySelectorAll(".reveal");
 
         const options = {
-            threshold: 0.2
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
         };
 
         const revealOnScroll = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add("visible");
+                    revealOnScroll.unobserve(entry.target); 
                 }
             });
         }, options);
@@ -166,8 +242,6 @@
         elements.forEach(el => revealOnScroll.observe(el));
     });
     </script>
-
-
 
 </body>
 </html>

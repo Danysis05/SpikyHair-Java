@@ -1,32 +1,109 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar Sesión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso VIP | SpikyHair</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/login.css}" />
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+
+   
 </head>
+
 <body>
-    
-    <div class="login-container">
-        <a class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left-long"></i></a>
-        <img src="/uploads/logox.jpg" alt="Logo Peluquería" class="logo-login" />
-        <h2>Iniciar Sesión</h2>
 
-        <form th:action="@{/login}" method="post">
-            <div th:if="${param.error}" class="error-message">Credenciales inválidas.</div>
-            <div th:if="${param.logout}" class="logout-message">Has cerrado sesión correctamente.</div>
-            <div th:if="${param.registroExitoso}" class="success-message">Registro exitoso. Por favor, inicia sesión.</div>
+    <div class="split-screen">
 
-            <input type="email" name="username" placeholder="Correo electrónico" required />
-            <input type="password" name="password" placeholder="Contraseña" required />
-            <button type="submit">Entrar</button>
-            
-        </form>
-        <div class="register-link">
-            <p>¿No tienes una cuenta? <a th:href="@{/auth/new}">Regístrate aquí</a></p>
+        <div class="left-pane">
+
+            <a onclick="history.back()" class="back-btn">
+                <i class="fa-solid fa-arrow-left-long"></i> <span>Volver</span>
+            </a>
+
+            <div class="header-content">
+                <div class="logo-text"><i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span></div>
+                <h2>Bienvenido</h2>
+                <p class="subtitle">Ingresa tus credenciales para gestionar tu estilo.</p>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+
+                <div th:if="${param.error}" class="alert alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Usuario o contraseña incorrectos.</span>
+                </div>
+
+                <div th:if="${param.logout}" class="alert alert-success">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Sesión cerrada correctamente.</span>
+                </div>
+
+                <div th:if="${param.registroExitoso}" class="alert alert-success">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>¡Cuenta creada! Inicia sesión ahora.</span>
+                </div>
+
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <input type="email" name="username" placeholder="ejemplo@correo.com" required autocomplete="email"/>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" id="passwordInput" placeholder="••••••••" required />
+                        <i class="fa-solid fa-lock"></i>
+                        <i class="fa-solid fa-eye" id="togglePassword" style="left: auto; right: 15px; cursor: pointer;" onclick="togglePass()"></i>
+                    </div>
+                </div>
+
+                <button type="submit">
+                    Iniciar Sesión <i class="fa-solid fa-arrow-right" style="margin-left: 10px;"></i>
+                </button>
+
+            </form>
+
+            <div class="register-footer">
+                <p>¿Primera vez aquí? <a th:href="@{/auth/new}">Crear cuenta gratis</a></p>
+            </div>
+
+        </div>
+
+        <div class="right-pane">
+            <div class="showcase-content">
+                <div class="glass-badge">
+                    <i class="fa-solid fa-crown"></i> Acceso Premium
+                </div>
+                <h3>Define tu<br>Estilo.</h3>
+                <p>Únete a la comunidad más exclusiva de barberías. Gestiona tus citas, encuentra expertos y mantén tu imagen impecable.</p>
+            </div>
+        </div>
+
     </div>
-    
+
+    <script>
+        function togglePass() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 
 </body>
 </html>

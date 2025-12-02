@@ -1,36 +1,110 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Registro</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Crear Cuenta | SpikyHair</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/register.css}" />
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="register-container">
-        <a class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left-long"></i></a>
-        <img src="/uploads/logox.jpg" alt="Logo Peluquería" class="logo-register" />
-        <h2>Registro de Usuario</h2>
-        <form th:action="@{/auth/register}" method="post" th:object="${usuario}">
-            <label for="nombre">Nombre:</label>
-            <input type="text" th:field="*{nombre}" required />
 
-            <label for="telefono">Teléfono:</label>
-            <input type="text" th:field="*{telefono}" required />
+    <div class="split-screen">
 
-            <label for="email">Correo:</label>
-            <input type="email" th:field="*{email}" required />
+        <div class="left-pane">
+            
+            <a onclick="history.back()" class="back-btn">
+                <i class="fa-solid fa-arrow-left-long"></i> <span>Volver</span>
+            </a>
 
-            <label for="contrasena">Contraseña:</label>
-            <input type="password" th:field="*{contrasena}" required />
+            <div class="header-content">
+                <div class="logo-text"><i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span></div>
+                <h2>Crear Cuenta</h2>
+                <p class="subtitle">Únete a la comunidad exclusiva de caballeros.</p>
+            </div>
 
-            <button type="submit">Registrarse</button>
-        </form>
+            <form th:action="@{/auth/register}" method="post" th:object="${usuario}">
 
-        <div class="login-link">
-            <p>¿Ya tienes una cuenta? <a th:href="@{/auth/login}">Inicia sesión aquí</a></p>
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span th:text="${error}">Ha ocurrido un error.</span>
+                </div>
+
+                <div class="input-group">
+                    <label for="nombre">Nombre Completo</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{nombre}" placeholder="Ej. Alejandro Magno" required autocomplete="name" />
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="telefono">Teléfono Móvil</label>
+                    <div class="input-wrapper">
+                        <input type="tel" th:field="*{telefono}" placeholder="Ej. 300 123 4567" required autocomplete="tel"/>
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <input type="email" th:field="*{email}" placeholder="tu@email.com" required autocomplete="email"/>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="contrasena">Contraseña</label>
+                    <div class="input-wrapper">
+                        <input type="password" th:field="*{contrasena}" id="passwordInput" placeholder="Mínimo 8 caracteres" required />
+                        <i class="fa-solid fa-lock"></i>
+                        <i class="fa-solid fa-eye" id="togglePassword" style="left: auto; right: 15px; pointer-events: auto; cursor: pointer;" onclick="togglePass()"></i>
+                    </div>
+                </div>
+
+                <button type="submit">
+                    Unirse Ahora <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+                </button>
+
+            </form>
+
+            <div class="login-link">
+                <p>¿Ya tienes cuenta? <a th:href="@{/auth/login}">Iniciar Sesión</a></p>
+            </div>
+
         </div>
-    </div>
-</body>
 
+        <div class="right-pane">
+            <div class="showcase-content">
+                <div class="feature-badge">Beneficios Premium</div>
+                <h3>Expertos en<br>tu mejor versión.</h3>
+                <p>Accede a reservas prioritarias, historial de cortes detallado y encuentra a los mejores profesionales de tu zona con un solo clic.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function togglePass() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
+</body>
 </html>

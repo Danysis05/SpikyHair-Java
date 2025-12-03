@@ -42,6 +42,22 @@ public interface PeluqueriaRepository extends JpaRepository<Peluqueria, Long> {
     LIMIT 5
     """, nativeQuery = true)
 List<Object[]> findTop5PeluqueriasWithPromedioRaw();
+@Query(value = """
+    SELECT 
+        p.id AS id,
+        p.nombre AS nombre,
+        p.direccion AS direccion,
+        p.descripcion AS descripcion,
+        p.imagen_url AS imagenUrl,
+        COUNT(r.id) AS totalReservas
+    FROM peluqueria p
+    LEFT JOIN reserva r ON r.peluqueria_id = p.id
+    GROUP BY p.id
+    ORDER BY totalReservas DESC
+    LIMIT 5
+    """, nativeQuery = true)
+List<Object[]> findTop5PeluqueriasPorReservas();
+
 
 
 

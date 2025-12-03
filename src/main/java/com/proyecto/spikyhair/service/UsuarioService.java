@@ -225,16 +225,15 @@ public List<UsuarioDto> buscarPorQuery(String query) {
             .stream()
             .map(u -> modelMapper.map(u, UsuarioDto.class))
             .toList();
+}   
+public UsuarioDto obtenerUsuarioPorPeluqueriaId(Long peluqueriaId) {
+    Usuario usuario = usuarioRepository.findUsuarioByPeluqueriaId(peluqueriaId);
+    if (usuario == null) {
+        return null; // o lanzar excepción si prefieres
+    }
+    return modelMapper.map(usuario, UsuarioDto.class);
 }
 
-
-
-
-
-    
 }
-
-
-
 
 

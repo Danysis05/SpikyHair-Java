@@ -29,6 +29,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
+import com.proyecto.spikyhair.DTO.PeluqueriaTopDto;
 import com.proyecto.spikyhair.DTO.ServiciosDto;
 import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.entity.Usuario;
@@ -247,7 +248,103 @@ public String generarPdfUsuarios(
         redirectAttributes.addFlashAttribute("error", "Error al generar el PDF.");
         return "redirect:/admin/dashboard";
     }
+
 }
+
+@GetMapping("/pdf-peluquerias")
+public String generarPdfPeluquerias(
+        @RequestParam(required = false) String q,
+        HttpServletResponse response,
+        RedirectAttributes redirectAttributes) {
+
+    try {
+        // 1️⃣ Obtener peluquerías filtradas
+        List<PeluqueriaDto> peluqueriasFiltradas = peluqueriaService.buscarPorQuery(q);
+
+        // 2️⃣ Si no hay peluquerías, mostrar advertencia
+        if (peluqueriasFiltradas == null || peluqueriasFiltradas.isEmpty()) {
+            redirectAttributes.addFlashAttribute("warning", "No hay peluquerías para generar el PDF.");
+            return "redirect:/admin/dashboard";
+        }
+
+        // 3️⃣ Configurar PDF
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=peluquerias.pdf");
+
+        Document document = new Document();
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // 4️⃣ Título
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, BaseColor.BLUE);
+        Paragraph title = new Paragraph("SpikyHair - Reporte de Peluquerías", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingAfter(20);
+        document.add(title);
+
+        // 5️⃣ Tabla con datos de peluquerías
+       PdfPTable table = new PdfPTable(4); // solo nombre, dirección, teléfono, email
+table.setWidthPercentage(100);
+table.setWidths(new float[]{3, 4, 3, 4});
+table.setSpacingBefore(10);
+
+// Encabezados
+Stream.of("Nombre", "Dirección", "Teléfono", "Email").forEach(header -> {
+    PdfPCell cell = new PdfPCell(new Phrase(header));
+    cell.setBackgroundColor(new BaseColor(220, 220, 220));
+    cell.setPadding(6);
+    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    table.addCell(cell);
+});
+
+// Filas
+for (PeluqueriaDto p : peluqueriasFiltradas) {
+    table.addCell(p.getNombre());
+    table.addCell(p.getDireccion());
+    table.addCell(p.getTelefono() != null ? p.getTelefono() : "-");
+    table.addCell(p.getEmail() != null ? p.getEmail() : "-");
+}
+
+        document.add(table);
+
+        // 6️⃣ Estadísticas: Peluquería con más reservas y mejor reseña
+        PeluqueriaTopDto masReservas = peluqueriaService.obtenerTop5PorReservas().stream().findFirst().orElse(null);
+        PeluqueriaTopDto mejorResena = peluqueriaService.obtenerTop5().stream().findFirst().orElse(null);
+
+        Font statsFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD, BaseColor.DARK_GRAY);
+        Paragraph statsTitle = new Paragraph("\nEstadísticas", statsFont);
+        statsTitle.setSpacingAfter(10);
+        document.add(statsTitle);
+
+        if (masReservas != null) {
+            Paragraph reservas = new Paragraph(
+                    "Peluquería con más reservas: " + masReservas.getNombre() +
+                    " (" + masReservas.getPromedio() + " reservas)"
+            );
+            reservas.setSpacingAfter(5);
+            document.add(reservas);
+        }
+
+        if (mejorResena != null) {
+            Paragraph resena = new Paragraph(
+                    "Peluquería con mejor reseña: " + mejorResena.getNombre() +
+                    " (Promedio: " + String.format("%.2f", mejorResena.getPromedio()) + ")"
+            );
+            document.add(resena);
+        }
+
+        document.close();
+
+        // 7️⃣ Mensaje de éxito
+        redirectAttributes.addFlashAttribute("success", "PDF de peluquerías generado correctamente.");
+        return "redirect:/admin/dashboard";
+
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "Error al generar el PDF: " + e.getMessage());
+        return "redirect:/admin/dashboard";
+    }
+}
+
 
 
 

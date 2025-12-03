@@ -219,7 +219,7 @@
             <input type="text" name="q" placeholder="Buscar peluquería..." th:value="${q}">
             <button type="submit"><i class="fa fa-search"></i></button>
         </form>
-        <a th:href="@{/admin/pdf-Peluquerias}" class="btn-pdf btn-peluquerias">
+        <a th:href="@{/admin/pdf-peluquerias}" class="btn-pdf btn-peluquerias">
             <i class="fa fa-file-pdf"></i> Descargar PDF
         </a>
     </div>
@@ -233,9 +233,8 @@
                 <p th:text="${p.direccion}">Dirección</p>
                 <p th:text="${p.telefono}">Teléfono</p>
 
-                <button class="btn-eliminar btn-eliminar-peluqueria" onclick="eliminarPeluqueria(this)" th:data-id="${p.id}">
-                    <i class="fa-regular fa-trash-can"></i>
-                </button>
+
+                <a th:href="@{'/peluquerias/delete/' + ${p.id}}" class="btn-eliminar btn-eliminar-peluqueria"><i class="fa-regular fa-trash-can"></i></a>
             </div>
         </div>
 
@@ -293,267 +292,161 @@
 
   <!-- SCRIPTS -->
  <script>
+/* ==========================
+   NAVEGACIÓN ENTRE PANELES
+========================== */
+function navigate(tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
 
+    const selectedPanel = document.getElementById(tabId);
+    if (selectedPanel) selectedPanel.classList.add('active');
 
-  // Restaurar sección activa al cargar
-  window.addEventListener('DOMContentLoaded', () => {
+    const selectedNav = document.getElementById('nav-' + tabId);
+    if (selectedNav) selectedNav.classList.add('active');
+
+    localStorage.setItem('seccionActiva', tabId);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
     const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
     navigate(seccionActiva);
-  });
 
-  document.getElementById('perfilBtn').addEventListener('click', function (e) {
-    e.preventDefault();
-    document.getElementById('modalPerfil').classList.remove('hidden');
-  });
-
-  function cerrarModal() {
-    document.getElementById('modalPerfil').classList.add('hidden');
-  }
-
-  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById('avatarPreview').src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-function cambiarRol(selectElement) {
-    const userId = selectElement.getAttribute("data-id");
-    const nuevoRol = selectElement.value;
-
-    const confirmado = confirm(`¿Estás seguro de cambiar el rol del usuario a "${nuevoRol}"?`);
-    if (!confirmado) {
-        selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-        return;
-    }
-
-    const rolMap = {
-        "ADMINISTRADOR": 1,
-        "USUARIO": 2
-    };
-
-    fetch(`/usuarios/cambiar-rol`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            usuarioId: parseInt(userId),
-            rolId: rolMap[nuevoRol]
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        mostrarMensajeDinamico(data);
-
-        if (data.success) {
-            [...selectElement.options].forEach(opt => opt.defaultSelected = false);
-            selectElement.options[selectElement.selectedIndex].defaultSelected = true;
-        } else {
-            selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-        }
-    })
-    .catch(error => {
-        console.error("Error en la solicitud:", error);
-        mostrarMensajeDinamico({ error: "Error de comunicación con el servidor." });
-        selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
+    // Ocultar automáticamente los mensajes Thymeleaf
+    const mensajes = document.querySelectorAll('#mensajesContainer .alert');
+    mensajes.forEach(mensaje => {
+        setTimeout(() => {
+            mensaje.style.transition = "all 0.5s ease";
+            mensaje.style.opacity = "0";
+            mensaje.style.transform = "translateY(-10px)";
+            setTimeout(() => mensaje.remove(), 500);
+        }, 3000);
     });
-}
+});
+
+/* ==========================
+   MENSAJES DINÁMICOS
+========================== */
 function mostrarMensajeDinamico(data) {
     const contenedor = document.getElementById("mensaje-dinamico");
-    contenedor.innerHTML = ""; // limpiar anterior
+    contenedor.innerHTML = "";
 
-    let tipo = "";
-    let icono = "";
-    let texto = "";
+    let tipo = "", icono = "", texto = "";
 
-    if (data.success) {
-        tipo = "alert-success";
-        icono = "fa-check-circle";
-        texto = data.success;
-    } else if (data.warning) {
-        tipo = "alert-warning";
-        icono = "fa-exclamation-triangle";
-        texto = data.warning;
-    } else if (data.error) {
-        tipo = "alert-danger";
-        icono = "fa-times-circle";
-        texto = data.error;
-    }
+    if (data.success) { tipo="alert-success"; icono="fa-check-circle"; texto=data.success; }
+    else if (data.warning) { tipo="alert-warning"; icono="fa-exclamation-triangle"; texto=data.warning; }
+    else if (data.error) { tipo="alert-danger"; icono="fa-times-circle"; texto=data.error; }
 
     const div = document.createElement("div");
     div.className = `alert ${tipo}`;
     div.style = `
-        padding: 15px; 
-        border-radius: 8px; 
-        margin-bottom: 10px; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px;
-        color: white;
+        padding: 15px; border-radius: 8px; margin-bottom: 10px; 
+        display: flex; align-items: center; gap: 10px; color: white;
     `;
 
-    // Colores idénticos a Thymeleaf
     if (tipo === "alert-success") div.style.background = "#28a745";
     if (tipo === "alert-warning") div.style.background = "#f0ad4e";
     if (tipo === "alert-danger") div.style.background = "#d93b3b";
 
     div.innerHTML = `<i class="fa ${icono}"></i> <span>${texto}</span>`;
-
     contenedor.appendChild(div);
 
-    // activar fade-up después de 3 segundos
+    // desaparecer solo después de 3.8s
     setTimeout(() => {
-        div.classList.add("fade-up");
+        div.style.transition = "all 0.5s ease";
+        div.style.opacity = "0";
+        div.style.transform = "translateY(-10px)";
+        setTimeout(() => div.remove(), 500);
     }, 3000);
-
-    // remover después de la animación
-    setTimeout(() => {
-        div.remove();
-    }, 3800);
 }
 
+/* ==========================
+   CAMBIO DE ROL DE USUARIOS
+========================== */
+function cambiarRol(selectElement) {
+    const userId = selectElement.getAttribute("data-id");
+    const nuevoRol = selectElement.value;
+    if (!confirm(`¿Estás seguro de cambiar el rol del usuario a "${nuevoRol}"?`)) {
+        selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
+        return;
+    }
 
+    const rolMap = { "ADMINISTRADOR": 1, "USUARIO": 2 };
 
-
-  function eliminarUsuario(boton) {
-    const userId = boton.getAttribute("data-id");
-    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
-
-    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
-      .then(response => {
-        if (response.status === 205) {
-          alert("Tu cuenta ha sido eliminada. Saliendo...");
-          window.location.href = "/auth/login";
-        } else if (response.ok) {
-          boton.closest(".usuario-card").remove();
-          alert("Usuario eliminado correctamente");
+    fetch(`/usuarios/cambiar-rol`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: parseInt(userId), rolId: rolMap[nuevoRol] })
+    })
+    .then(res => res.json())
+    .then(data => {
+        mostrarMensajeDinamico(data);
+        if (data.success) {
+            [...selectElement.options].forEach(opt => opt.defaultSelected = false);
+            selectElement.options[selectElement.selectedIndex].defaultSelected = true;
         } else {
-          alert("Error al eliminar el usuario");
+            selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
         }
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("Error al eliminar el usuario");
-      });
-  }
-
-
-
-
-
-/* ==========================
-    NAVEGACIÓN ENTRE PANELES - ANIMADA
-========================== */
-
-/* ================= GESTIÓN DE PESTAÑAS ================= */
-function navigate(tabId) {
-    // Ocultar todos los paneles
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    // Quitar clase active de navs
-    document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
-
-    // Activar el panel seleccionado
-    const selectedPanel = document.getElementById(tabId);
-    if (selectedPanel) {
-        selectedPanel.classList.add('active');
-    } else {
-        console.error("Panel no encontrado: " + tabId);
-    }
-
-    // Activar la pestaña del menú
-    const selectedNav = document.getElementById('nav-' + tabId);
-    if (selectedNav) selectedNav.classList.add('active');
-
-    // Guardar estado REAL
-    localStorage.setItem('seccionActiva', tabId);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Obtener la pestaña guardada, si no existe → "usuarios"
-    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
-    navigate(seccionActiva);
-
-    // Mantengo intacta tu lógica del modal
-    const btnPerfil = document.getElementById('perfilBtn');
-    if (btnPerfil) {
-        btnPerfil.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('modalPerfil').classList.add('show');
-        });
-    }
-});
-
-
-/* ==========================
-    MODAL PERFIL
-========================== */
-function cerrarModalPerfil() {
-  document.getElementById('modalPerfil').classList.remove('show');
-}
-
-
-/* ==========================
-    FUNCIÓN PREVIEW IMAGE GENERAL
-========================== */
-function previewImage(input, previewId) {
-  const preview = document.getElementById(previewId);
-  const file = input.files?.[0];
-  
-  if (preview && file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      preview.src = e.target.result;
-      preview.classList.remove('hidden');
-    }
-    reader.readAsDataURL(file);
-  }
+    })
+    .catch(err => {
+        console.error(err);
+        mostrarMensajeDinamico({ error: "Error de comunicación con el servidor." });
+        selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
+    });
 }
 
 /* ==========================
-    PREVIEW ESTILISTA
-========================== */
-const inputEstilista = document.getElementById("estilistaImagenFile");
-if (inputEstilista) {
-  inputEstilista.addEventListener("change", function() {
-    previewImage(this, 'estilistaImagenPreview');
-  });
-}
-
-
-/* ==========================
-    ELIMINAR Usuario
+   ELIMINAR USUARIO
 ========================== */
 function eliminarUsuario(boton) {
-  const estilistaId = boton.getAttribute('data-id');
-  if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-    window.location.href = '/estilistas/delete/' + estilistaId;
-  }
+    const userId = boton.getAttribute('data-id');
+    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
+        .then(resp => {
+            if (resp.status === 205) {
+                alert("Tu cuenta ha sido eliminada. Saliendo...");
+                window.location.href = "/auth/login";
+            } else if (resp.ok) {
+                boton.closest(".usuario-card").remove();
+                mostrarMensajeDinamico({ success: "Usuario eliminado correctamente." });
+            } else {
+                mostrarMensajeDinamico({ error: "Error al eliminar el usuario." });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            mostrarMensajeDinamico({ error: "Error al eliminar el usuario." });
+        });
 }
 
-        // Auto-dismiss alertas
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        a.classList.add('hide'); // activa la animación
-        setTimeout(() => a.remove(), 500); // elimina del DOM después de que termine la transición
+/* ==========================
+   MODAL PERFIL
+========================== */
+function abrirModalPerfil() { document.getElementById('modalPerfil').classList.add('show'); }
+function cerrarModalPerfil() { document.getElementById('modalPerfil').classList.remove('show'); }
+window.addEventListener('click', event => {
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (event.target === modal) modal.classList.remove('show');
     });
-}, 5000);
-
+});
 
 /* ==========================
-    CERRAR MODALS AL CLIC FUERA
+   PREVIEW IMÁGENES
 ========================== */
-window.addEventListener('click', function(event) {
-  const modals = document.querySelectorAll('.modal');
-  modals.forEach(modal => {
-    if (event.target === modal) {
-      modal.classList.remove('show');
+function previewImage(input, previewId) {
+    const file = input.files?.[0];
+    const preview = document.getElementById(previewId);
+    if (file && preview) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.classList.remove('hidden'); };
+        reader.readAsDataURL(file);
     }
-  });
-});
+}
+
+/* ==========================
+   DESCARGAR PDF PELOQUERIAS + MENSAJE
+========================== */
+
 </script>
 
 </body>

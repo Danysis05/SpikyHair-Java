@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
+import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.UsuarioService;
@@ -116,5 +117,18 @@ public String actualizarPeluqueria(
     return "redirect:/owners/dashboard";
 }
 
+@GetMapping("/delete/{id}")
+public String eliminarPeluqueria(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    try {
+        UsuarioDto usuario = usuarioService.obtenerUsuarioPorPeluqueriaId(id);        
+        Long usuarioId = usuario.getId();
+        usuarioService.actualizarRol(usuarioId, 2L);
+        peluqueriaService.delete(id);
+        redirectAttributes.addFlashAttribute("success", "Peluquería eliminada correctamente.");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "Error al eliminar la peluquería.");
+    }
+    return "redirect:/admin/dashboard";
 
+}
 }

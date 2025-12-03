@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-                .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
+                .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR", "USUARIO")
                 .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR", "USUARIO")
                 .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
                 .requestMatchers("/reservas/eliminar/**").permitAll()
@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/auth/login?logout")
                 .permitAll()
             );
 

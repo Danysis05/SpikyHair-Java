@@ -2,6 +2,7 @@ package com.proyecto.spikyhair.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -135,12 +136,29 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
 
 @PostMapping("/cambiar-rol")
 @ResponseBody
-public ResponseEntity<String> cambiarRol(@RequestBody Map<String, Long> payload) {
-    Long usuarioId = payload.get("usuarioId");
-    Long rolId = payload.get("rolId");
-    usuarioService.actualizarRol(usuarioId, rolId);
-    return ResponseEntity.ok("Rol actualizado correctamente");
+public ResponseEntity<Map<String, String>> cambiarRol(@RequestBody Map<String, Long> payload) {
+
+    Map<String, String> response = new HashMap<>();
+
+    try {
+        Long usuarioId = payload.get("usuarioId");
+        Long rolId = payload.get("rolId");
+
+        usuarioService.actualizarRol(usuarioId, rolId);
+
+        response.put("success", "Rol actualizado correctamente");
+        return ResponseEntity.ok(response);
+
+    } catch (IllegalArgumentException e) {
+        response.put("warning", e.getMessage());
+        return ResponseEntity.badRequest().body(response);
+
+    } catch (Exception e) {
+        response.put("error", "Ocurrió un error inesperado al cambiar el rol.");
+        return ResponseEntity.internalServerError().body(response);
+    }
 }
+
 
 
  @GetMapping("/delete/{id}")

@@ -44,7 +44,7 @@
       </div>
     </div>
 
-        <div class="mensajes-csv" style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
+        <div class="mensajes-csv" id="mensajesContainer" style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
           <div th:if="${success}" class="alert alert-success" style="background: #28a745; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
               <i class="fa fa-check-circle"></i> <span th:text="${success}"></span>
           </div>
@@ -55,8 +55,8 @@
               <i class="fa fa-times-circle"></i> <span th:text="${error}"></span>
           </div>
         </div>
+        <div id="mensaje-dinamico"></div>
     <div id="panelContainer">
-
 
 <!-- PANEL USUARIOS -->
 <div id="usuarios" class="panel-usuarios panel">
@@ -180,13 +180,16 @@
 
 
     <!-- PAGINACIÓN -->
-    <div class="usuarios-paginacion" th:if="${totalPages > 0}">
-        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:classappend="${i == currentPage} ? 'pag-activa' : ''"
-           th:href="@{/admin/dashboard(page=${i})}"
-           class="usuarios-pag-btn"
-           th:text="${i + 1}"></a>
-    </div>
+<div class="pagination" 
+     th:if="${totalPagesUsuarios > 1}">
+    <a th:each="i : ${#numbers.sequence(0, totalPagesUsuarios - 1)}"
+       th:href="@{/admin/dashboard(pageUsuarios=${i}, activeTab='usuarios')}"
+       th:text="${i + 1}"
+       th:classappend="${i == pageUsuarios} ? 'active' : ''"
+       class="pagination-btn">
+    </a>
+</div>
+
 
 </div>
 
@@ -237,12 +240,16 @@
         </div>
 
         <!-- Paginación -->
-        <div class="pagination pagination-peluquerias" th:if="${totalPages > 0}">
-            <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-               th:classappend="${i == currentPage} ? 'active' : ''"
-               th:href="@{/admin/dashboard(page=${i}, activeTab='peluquerias')}"
-               class="pagination-btn" th:text="${i + 1}"></a>
-        </div>
+<div class="pagination" 
+     th:if="${totalPagesPeluquerias > 1}">
+    <a th:each="i : ${#numbers.sequence(0, totalPagesPeluquerias - 1)}"
+       th:href="@{/admin/dashboard(pagePeluquerias=${i}, activeTab='peluquerias')}"
+       th:text="${i + 1}"
+       th:classappend="${i == pagePeluquerias} ? 'active' : ''"
+       class="pagination-btn">
+    </a>
+</div>
+
     </div>
 </div>
 
@@ -286,11 +293,7 @@
 
   <!-- SCRIPTS -->
  <script>
-  function navigate(seccionId) {
-    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
-    document.getElementById(seccionId).classList.remove('hidden');
-    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
-  }
+
 
   // Restaurar sección activa al cargar
   window.addEventListener('DOMContentLoaded', () => {
@@ -318,34 +321,102 @@
     }
   });
 
-  function cambiarRol(selectElement) {
+function cambiarRol(selectElement) {
     const userId = selectElement.getAttribute("data-id");
     const nuevoRol = selectElement.value;
-    const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
+
+    const confirmado = confirm(`¿Estás seguro de cambiar el rol del usuario a "${nuevoRol}"?`);
     if (!confirmado) {
-      selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-      return;
+        selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
+        return;
     }
 
     const rolMap = {
-      "ADMINISTRADOR": 1,
-      "USUARIO": 2
+        "ADMINISTRADOR": 1,
+        "USUARIO": 2
     };
 
     fetch(`/usuarios/cambiar-rol`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuarioId: parseInt(userId),
-        rolId: rolMap[nuevoRol]
-      })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            usuarioId: parseInt(userId),
+            rolId: rolMap[nuevoRol]
+        })
     })
-    .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
+    .then(res => res.json())
+    .then(data => {
+        mostrarMensajeDinamico(data);
+
+        if (data.success) {
+            [...selectElement.options].forEach(opt => opt.defaultSelected = false);
+            selectElement.options[selectElement.selectedIndex].defaultSelected = true;
+        } else {
+            selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
+        }
+    })
     .catch(error => {
-      console.error('Error en la solicitud:', error);
-      alert('Error al actualizar el rol');
+        console.error("Error en la solicitud:", error);
+        mostrarMensajeDinamico({ error: "Error de comunicación con el servidor." });
+        selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
     });
-  }
+}
+function mostrarMensajeDinamico(data) {
+    const contenedor = document.getElementById("mensaje-dinamico");
+    contenedor.innerHTML = ""; // limpiar anterior
+
+    let tipo = "";
+    let icono = "";
+    let texto = "";
+
+    if (data.success) {
+        tipo = "alert-success";
+        icono = "fa-check-circle";
+        texto = data.success;
+    } else if (data.warning) {
+        tipo = "alert-warning";
+        icono = "fa-exclamation-triangle";
+        texto = data.warning;
+    } else if (data.error) {
+        tipo = "alert-danger";
+        icono = "fa-times-circle";
+        texto = data.error;
+    }
+
+    const div = document.createElement("div");
+    div.className = `alert ${tipo}`;
+    div.style = `
+        padding: 15px; 
+        border-radius: 8px; 
+        margin-bottom: 10px; 
+        display: flex; 
+        align-items: center; 
+        gap: 10px;
+        color: white;
+    `;
+
+    // Colores idénticos a Thymeleaf
+    if (tipo === "alert-success") div.style.background = "#28a745";
+    if (tipo === "alert-warning") div.style.background = "#f0ad4e";
+    if (tipo === "alert-danger") div.style.background = "#d93b3b";
+
+    div.innerHTML = `<i class="fa ${icono}"></i> <span>${texto}</span>`;
+
+    contenedor.appendChild(div);
+
+    // activar fade-up después de 3 segundos
+    setTimeout(() => {
+        div.classList.add("fade-up");
+    }, 3000);
+
+    // remover después de la animación
+    setTimeout(() => {
+        div.remove();
+    }, 3800);
+}
+
+
+
 
   function eliminarUsuario(boton) {
     const userId = boton.getAttribute("data-id");
@@ -369,185 +440,44 @@
       });
   }
 
-  function abrirModalServicio() {
-    const form = document.getElementById('formServicio');
-    form.reset();
-    form.action = '/servicios/create';
-    document.getElementById('servicioId').value = '';
-    const preview = document.getElementById('imagenPreview');
-    preview.src = '';
-    preview.classList.add('hidden');
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
-
-  function editarServicio(boton) {
-    const form = document.getElementById('formServicio');
-    const id = boton.getAttribute('data-id');
-    const nombre = boton.getAttribute('data-nombre');
-    const duracion = boton.getAttribute('data-duracion');
-    const descripcion = boton.getAttribute('data-descripcion');
-    const precio = boton.getAttribute('data-precio');
-    const imagen = boton.getAttribute('data-imagen');
-    document.getElementById('servicioId').value = id;
-    document.getElementById('nombre').value = nombre;
-    document.getElementById('duracion').value = duracion;
-    document.getElementById('descripcion').value = descripcion;
-    document.getElementById('precio').value = precio;
-    form.action = '/servicios/update/' + id;
-    const preview = document.getElementById('imagenPreview');
-    if (imagen) {
-      preview.src = '/uploads/servicios/' + imagen;
-      preview.classList.remove('hidden');
-    } else {
-      preview.src = '';
-      preview.classList.add('hidden');
-    }
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
-
-  function cerrarModalServicio() {
-    document.getElementById('modalServicio').classList.add('hidden');
-  }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:inline="javascript">
-/*<![CDATA[*/
-  // Datos Thymeleaf
-  var meses = /*[[${meses}]]*/ [];
-  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
-
-  // USUARIOS
-  var mesesUsuarios = /*[[${mesesUsuarios}]]*/ [];
-var usuariosPorMes = /*[[${usuariosPorMes}]]*/ [];
-
-var uCanvas = document.getElementById('usuariosChart');
-if (uCanvas) {
-  new Chart(uCanvas.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: mesesUsuarios,
-      datasets: [{
-        label: 'Usuarios Nuevos',
-        data: usuariosPorMes,
-        backgroundColor: 'rgba(54,162,235,0.7)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { precision: 0 }
-        }
-      }
-    }
-  });
-}
-
-  // SERVICIOS
-
-    var serviciosLabels = /*[[${serviciosLabels}]]*/ [];
-    var serviciosValues = /*[[${serviciosValues}]]*/ [];
-
-    console.log("Labels:", serviciosLabels);
-    console.log("Values:", serviciosValues);
-
-    var sCanvas = document.getElementById('serviciosChart');
-    if (sCanvas) {
-        new Chart(sCanvas.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: serviciosLabels,
-                datasets: [{
-                    label: 'Servicios más usados',
-                    data: serviciosValues,
-                    backgroundColor: [
-                        'rgba(220,53,69,0.7)',
-                        'rgba(40,167,69,0.7)',
-                        'rgba(255,193,7,0.7)'
-                    ]
-                }]
-            }
-        });
-    }
-  
-  
-
-  function cambiarEstadoReserva(boton) {
-    const id = boton.getAttribute("data-id");
-    const estadoActual = boton.getAttribute("data-estado");
-    const nuevoEstado = estadoActual === "PENDIENTE" ? "REALIZADA" : "PENDIENTE";
-
-    // Confirmación
-    if (!confirm(`¿Deseas cambiar el estado a "${nuevoEstado}"?`)) return;
-
-    fetch(`/reservas/cambiar-estado/${id}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Error al actualizar el estado');
-        return res.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Actualiza la tarjeta sin recargar
-            const estadoP = boton.closest('.reserva-card').querySelector('.estado');
-            if (estadoP) {
-                estadoP.innerText = data.estado; // nuevo estado
-                estadoP.className = 'estado ' + data.estado.toLowerCase(); // clases CSS
-            }
-            boton.setAttribute('data-estado', data.estado); // actualizar atributo
-            alert('Estado actualizado correctamente');
-        } else {
-            alert('Error: ' + (data.message || data.error));
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Error en el servidor');
-    });
-}
 
 
 
 
-</script>
-<script>
 /* ==========================
     NAVEGACIÓN ENTRE PANELES - ANIMADA
 ========================== */
 
 /* ================= GESTIÓN DE PESTAÑAS ================= */
-    function navigate(tabId) {
-        // Ocultar todos los paneles
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        // Quitar clase active de navs
-        document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
-        
-        // Activar el seleccionado (CON VALIDACIÓN DE SEGURIDAD)
-        const selectedPanel = document.getElementById(tabId);
-        if(selectedPanel) {
-            selectedPanel.classList.add('active');
-        } else {
-            console.error("Panel no encontrado: " + tabId);
-        }
-        
-        const selectedNav = document.getElementById('nav-' + tabId);
-        if(selectedNav) selectedNav.classList.add('active');
+function navigate(tabId) {
+    // Ocultar todos los paneles
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    // Quitar clase active de navs
+    document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
 
-        // Guardar estado
-        localStorage.setItem('activeOwnerTab', tabId);
+    // Activar el panel seleccionado
+    const selectedPanel = document.getElementById(tabId);
+    if (selectedPanel) {
+        selectedPanel.classList.add('active');
+    } else {
+        console.error("Panel no encontrado: " + tabId);
     }
 
+    // Activar la pestaña del menú
+    const selectedNav = document.getElementById('nav-' + tabId);
+    if (selectedNav) selectedNav.classList.add('active');
+
+    // Guardar estado REAL
+    localStorage.setItem('seccionActiva', tabId);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const seccionActiva = localStorage.getItem('seccionActiva') || 'estilistas';
+
+    // Obtener la pestaña guardada, si no existe → "usuarios"
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
     navigate(seccionActiva);
 
+    // Mantengo intacta tu lógica del modal
     const btnPerfil = document.getElementById('perfilBtn');
     if (btnPerfil) {
         btnPerfil.addEventListener('click', function(e) {
@@ -582,14 +512,6 @@ function previewImage(input, previewId) {
     reader.readAsDataURL(file);
   }
 }
-
-
-
-
-
-
-
-
 
 /* ==========================
     PREVIEW ESTILISTA
@@ -633,5 +555,6 @@ window.addEventListener('click', function(event) {
   });
 });
 </script>
+
 </body>
 </html>

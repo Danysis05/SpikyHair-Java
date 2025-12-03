@@ -146,12 +146,19 @@ public class OwnerController {
     @GetMapping("/pdf-Servicios")
     public void generarPdfServicios(
             @RequestParam(required = false) String q, // <-- recibir query universal para filtrar el PDF también
-            @RequestParam(required = false) Double precioMin,
-            @RequestParam(required = false) Double precioMax,
+   
             HttpServletResponse response) throws IOException, DocumentException {
 
         // Reutilizamos el filtro: si q está presente lo usamos como nombreServicio (o en tu servicio puedes hacer búsqueda más amplia)
-        List<ServiciosDto> servicios = serviciosService.filtrarServicios(q, precioMin, precioMax);
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
+Long peluqueriaId = peluqueriaService.findByUsuarioId(usuario.getId()).getId();
+
+List<ServiciosDto> servicios = serviciosService.buscarPorQuery(peluqueriaId, q);
+                System.out.println("PDF: peluqueriaId=" + peluqueriaId + ", q=" + q + ", servicios.size=" + servicios.size());
+if (!servicios.isEmpty()) {
+    System.out.println("PDF primer servicio: " + servicios.get(0).getNombre() + " - peluqueriaId? (no dto) -> revisar repo");
+}
+
 
         // Obtener estadísticas de servicios
         Map<String, List<?>> estadisticasServicios = reservasService.obtenerEstadisticasServicios();

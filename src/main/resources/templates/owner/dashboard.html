@@ -59,6 +59,10 @@
             <i class="fa fa-times-circle"></i> <span th:text="${error}"></span>
         </div>
     </div>
+    <div id="mensajes" class="mensajes-csv" 
+     style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
+</div>
+
 
     <div id="panelContainer">
 
@@ -163,7 +167,10 @@
                 <span id="fileName" style="margin-left: 10px; font-weight: 500; color: #fff;"></span>
                 <button type="submit" class="btn-importar"><i class="fa fa-cloud-upload"></i> Subir Archivo</button>
             </form>
-            <a th:href="@{/owners/pdf-Servicios}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
+            <a th:href="@{/owners/pdf-Servicios(q=${q})}" class="btn-pdf">
+
+            <i class="fa fa-file-pdf"></i> Descargar PDF
+        </a>
         </div>
         <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
             <input type="hidden" name="activeTab" value="servicios">
@@ -199,11 +206,113 @@
             </div>
         </div>
       </div>
+ <div id="reservas" class="panel">
+    <h2>Listado de Reservas</h2>
 
-      <div id="reservas" class="panel">
-          <h2>Gestión de Reservas</h2>
-          <p style="color: #aaa;">Funcionalidad de calendario y reservas aquí...</p>
-      </div>
+    <!-- TARJETA SUPERIOR -->
+    <div class="usuarios-grid mb-4">
+        <div class="card text-center p-3">
+            <h5>Reservas Totales</h5>
+            <div class="content">
+                <i class="las la-calendar-check"></i>
+                <h2 th:text="${totalReservas}">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCIONES SUPERIORES -->
+    <div class="accionesSuperiores">
+       
+        <a th:href="@{/owners/pdf-Reservas(q=${q})}" class="btn-pdf">
+
+            <i class="fa fa-file-pdf"></i> Descargar PDF
+        </a>
+    </div>
+
+    <!-- BUSCADOR -->
+    <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
+        <input type="hidden" name="activeTab" value="reservas">
+        <input type="text" name="q" placeholder="Buscar por servicio, usuario, fecha..." th:value="${q}" />
+        <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+
+    <!-- CONTENEDOR DE TARJETAS -->
+    <div class="datos-container">
+        <div class="usuarios-grid">
+
+            <div class="usuario-card" th:each="r : ${reservas}">
+
+               
+                <i class="las la-calendar-check reservaIcon"></i>
+                 <span class="reservaIcon"></span>
+                <!-- Servicio -->
+                <h3 th:text="${r.servicioNombre}">Servicio</h3>
+
+                <!-- Fecha y hora -->
+                <p>
+                    <i class="far fa-calendar"></i>
+                    <span th:text="${r.fecha}"></span>
+                    <i class="far fa-clock" style="margin-left: 6px;"></i>
+                    <span th:text="${r.hora}"></span>
+                </p>
+
+                <!-- Duración -->
+                <p>
+                    <i class="far fa-hourglass"></i>
+                    <span th:text="${r.duracion}"></span>
+                </p>
+
+                <!-- Estilista -->
+                <p th:if="${r.estilista != null}">
+                    <i class="fas fa-user-tie"></i>
+                    <span th:text="${r.estilista.nombre}"></span>
+                </p>
+
+                <!-- Usuario -->
+                <p>
+                    <i class="fas fa-user"></i>
+                    <span th:text="${r.usuario.nombre}"></span>
+                </p>
+
+                <!-- Estado -->
+                <select class="estado-select"
+                        th:data-id="${r.id}"
+                        th:value="${r.estado}"
+                        onchange="cambiarEstadoReserva(this)">
+                    <option value="PENDIENTE" 
+                            th:selected="${r.estado == 'PENDIENTE'}">PENDIENTE</option>
+                    <option value="REALIZADA" 
+                            th:selected="${r.estado == 'REALIZADA'}">REALIZADA</option>
+                </select>
+
+
+                <!-- ACCIONES -->
+                <div class="acciones">
+
+                    <a th:href="@{'/reservas/eliminar/' + ${r.id}}"
+                       class="btn-eliminar"
+                       onclick="return confirm('¿Eliminar reserva?');">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div class="pagination" th:if="${totalPagesReservas > 0}">
+            <a th:each="i : ${#numbers.sequence(0, totalPagesReservas - 1)}"
+               th:classappend="${i == pageReservas} ? 'active' : ''"
+               th:href="@{/owners/dashboard(pageReservas=${i}, activeTab='reservas')}"
+               class="pagination-btn"
+               th:text="${i + 1}">
+            </a>
+        </div>
+    </div>
+
+</div>
+
+
 
       <div id="peluqueria" class="panel">
         
@@ -508,6 +617,72 @@ setTimeout(() => {
             }
         }
     });
+ function cambiarEstadoReserva(selectElement) {
+
+    const reservaId = selectElement.getAttribute("data-id");
+
+    fetch(`/reservas/cambiar-estado/${reservaId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.success) {
+            selectElement.value = data.estado;
+
+            mostrarMensaje("success", "Estado actualizado correctamente");
+
+        } else {
+            mostrarMensaje("error", data.error || "No se pudo cambiar el estado.");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        mostrarMensaje("error", "Error al conectar con el servidor.");
+    });
+}
+
+function mostrarMensaje(tipo, mensaje) {
+    const contenedor = document.getElementById("mensajes");
+
+    let color = "#28a745"; 
+    let icon = "fa-check-circle";
+
+    if (tipo === "warning") {
+        color = "#f0ad4e";
+        icon = "fa-exclamation-triangle";
+    }
+    if (tipo === "error") {
+        color = "#d93b3b";
+        icon = "fa-times-circle";
+    }
+
+    // Crear alerta dinámica
+    const alerta = document.createElement("div");
+    alerta.className = "alert";
+    alerta.style.background = color;
+    alerta.style.color = "white";
+    alerta.style.padding = "15px";
+    alerta.style.borderRadius = "8px";
+    alerta.style.marginBottom = "10px";
+    alerta.style.display = "flex";
+    alerta.style.alignItems = "center";
+    alerta.style.gap = "10px";
+    alerta.innerHTML = `<i class="fa ${icon}"></i> <span>${mensaje}</span>`;
+
+    contenedor.appendChild(alerta);
+
+    // Después de 3 segundos, aplicar animación de salida
+    setTimeout(() => {
+        alerta.classList.add("fade-up");
+
+        // Eliminar del DOM cuando termine la transición
+        setTimeout(() => alerta.remove(), 800);
+    }, 3000);
+}
+
+
+
   </script>
 </body>
 </html>

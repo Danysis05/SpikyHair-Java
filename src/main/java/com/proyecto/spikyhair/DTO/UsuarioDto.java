@@ -26,17 +26,19 @@ public class UsuarioDto {
 
     private RolDto rol;
 
-    public UsuarioDto(Usuario usuario) {
+   public UsuarioDto(Usuario usuario) {
     this.id = usuario.getId();
     this.nombre = usuario.getNombre();
     this.email = usuario.getEmail();
     this.telefono = usuario.getTelefono();
+    this.imagenPerfil = usuario.getImagenPerfil(); // <-- FALTABA ESTO
 
-    // Asume que RolDto tiene un constructor que recibe un Rol
     if (usuario.getRol() != null) {
         this.rol = new RolDto(usuario.getRol());
     }
 }
 
-
 }
+
+
+

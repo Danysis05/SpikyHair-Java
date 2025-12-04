@@ -110,32 +110,50 @@ public class ServicioController {
         return "redirect:/owners/dashboard";
     }
     // Eliminar servicio
-    @GetMapping("/delete/{id}")
-    public String eliminarServicio(@PathVariable Long id) {
+@GetMapping("/delete/{id}")
+public String eliminarServicio(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+
+    try {
         ServiciosDto servicioDto = serviciosService.getById(id);
+
         if (servicioDto != null) {
             serviciosService.delete(id);
+            redirectAttributes.addFlashAttribute("success", "¡El servicio fue eliminado correctamente!");
+        } else {
+            redirectAttributes.addFlashAttribute("warning", "El servicio que intentas eliminar no existe.");
         }
-        return "redirect:/owners/dashboard";
+
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "Ocurrió un error al intentar eliminar el servicio.");
     }
 
-@PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
-    if (file == null || file.isEmpty()) {
-        ra.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
-        return "redirect:/admin/dashboard#servicios";
-    }
-    try {
-        int n = csvServicioService.cargarServiciosDesdeCsv(file);
-        ra.addFlashAttribute("success", "Importación exitosa: " + n + " servicios nuevos.");
-    } catch (RuntimeException e) {
-        if (e.getMessage().startsWith("Importación parcial")) {
-            ra.addFlashAttribute("warning", e.getMessage());
-        } else {
-            ra.addFlashAttribute("error", "Error al importar: " + e.getMessage());
-        }
-    }
     return "redirect:/owners/dashboard";
 }
 
+
+@PostMapping("/importar-csv")
+public String importarCsv(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    if (file == null || file.isEmpty()) {
+        redirectAttributes.addFlashAttribute("error", "Debes seleccionar un archivo CSV.");
+        return "redirect:/owners/dashboard";
+    }
+
+    try {
+        int n = csvServicioService.cargarServiciosDesdeCsv(file);
+        redirectAttributes.addFlashAttribute("success", "Se importaron " + n + " servicios.");
+        return "redirect:/owners/dashboard";
+    } catch (RuntimeException e) {
+        redirectAttributes.addFlashAttribute("error", e.getMessage());
+        return "redirect:/owners/dashboard";
+    }
 }
+
+
+
+
+
+}
+
+
+
+

@@ -27,6 +27,7 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
     private final ModelMapper modelMapper = new ModelMapper();
     private final PasswordEncoder passwordEncoder;
     private final RolRepository rolRepository;
+    
 
 
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, RolRepository rolRepository) {
@@ -182,6 +183,9 @@ public void initRoles() {
     public long countUsers() {
         return usuarioRepository.countByRol_Id(2L);
     }
+        public long countOwners() {
+        return usuarioRepository.countByRol_Id(3L);
+    }
 
     
 public List<String> obtenerMesesUsuarios() {
@@ -208,6 +212,22 @@ public List<Long> obtenerUsuariosPorMes(int year) {
     }
     return resultados;
 }
+
+public List<UsuarioDto> buscarPorQuery(String query) {
+    if (query == null || query.trim().isEmpty()) {
+        return usuarioRepository.findAll()
+                .stream()
+                .map(u -> modelMapper.map(u, UsuarioDto.class))
+                .toList();
+    }
+
+    return usuarioRepository.buscarPorQuery(query.trim())
+            .stream()
+            .map(u -> modelMapper.map(u, UsuarioDto.class))
+            .toList();
+}
+
+
 
 
 

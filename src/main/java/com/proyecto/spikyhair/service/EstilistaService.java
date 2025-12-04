@@ -136,6 +136,32 @@ public EstilistaDto saveOrUpdate(EstilistaDto dto) {
 
     return modelMapper.map(saved, EstilistaDto.class);
 }
+public List<EstilistaDto> buscarPorQuery(Long peluqueriaId, String q) {
+    List<Estilista> estilistas;
 
+    if (!StringUtils.hasText(q)) {
+        estilistas = estilistaRepository.findByPeluqueriaId(peluqueriaId);
+    } else {
+        estilistas = estilistaRepository.buscarPorQuery(peluqueriaId, q.trim());
+    }
+
+    // Mapear entidades a DTO
+    return estilistas.stream()
+            .map(e -> new EstilistaDto(
+                    e.getId(),                    // id
+                    e.getNombre(),                // nombre
+                    e.getEspecialidad(),          // especialidad
+                    e.getPeluqueria().getId(),    // peluqueriaId
+                    null,                         // archivoImagen (si aplica)
+                    e.getImagenPerfil()           // imagenPerfil
+            ))
+            .toList();
+}
 
 }
+
+
+
+
+
+

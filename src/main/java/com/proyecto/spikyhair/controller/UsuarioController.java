@@ -3,6 +3,7 @@ package com.proyecto.spikyhair.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.UsuarioDto;
+import com.proyecto.spikyhair.entity.Peluqueria;
 import com.proyecto.spikyhair.entity.Usuario;
+import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.UsuarioService;
 
 @Controller
@@ -27,9 +31,10 @@ import com.proyecto.spikyhair.service.UsuarioService;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-
-    public UsuarioController(UsuarioService usuarioService) {
+    private final PeluqueriaService peluqueriaService;
+    public UsuarioController(UsuarioService usuarioService, PeluqueriaService peluqueriaService) {
         this.usuarioService = usuarioService;
+        this.peluqueriaService = peluqueriaService;
     }
 
     @GetMapping("/home")
@@ -68,14 +73,17 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         File carpeta = new File(rutaCarpeta);
         if (!carpeta.exists()) carpeta.mkdirs();
 
+        // Procesar la nueva imagen
         if (imagen != null && !imagen.isEmpty()) {
             String originalFilename = imagen.getOriginalFilename();
-            String nombreOriginal = (originalFilename != null) ? originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_") : "archivo_sin_nombre";
-            String nombreArchivo = UUID.randomUUID() + "_" + nombreOriginal;
-            String ruta = rutaCarpeta + nombreArchivo;
+            String nombreOriginal = (originalFilename != null) ?
+                    originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_") :
+                    "archivo_sin_nombre";
 
-            imagen.transferTo(new File(ruta));
-            usuarioDto.setImagenPerfil(nombreArchivo); // SOLO EL NOMBRE
+            String nombreArchivo = UUID.randomUUID() + "_" + nombreOriginal;
+            imagen.transferTo(new File(rutaCarpeta + nombreArchivo));
+
+            usuarioDto.setImagenPerfil(nombreArchivo);
 
             // Eliminar imagen anterior si existe
             if (usuarioDto.getId() != null) {
@@ -85,15 +93,25 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
                     if (anterior.exists()) anterior.delete();
                 }
             }
-
         } else if (usuarioDto.getId() != null) {
+            // Mantener imagen anterior
             UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
             usuarioDto.setImagenPerfil(existente.getImagenPerfil());
         }
 
+        // Diferenciar creación vs actualización
         if (usuarioDto.getId() == null) {
+            // Nuevo usuario → contraseña obligatoria
+            if (usuarioDto.getContrasena() == null || usuarioDto.getContrasena().isEmpty()) {
+                throw new IllegalArgumentException("La contraseña es obligatoria para un nuevo usuario");
+            }
             usuarioService.save(usuarioDto);
         } else {
+            // Actualización → no tocar contraseña si es null o vacía
+            UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
+            if (usuarioDto.getContrasena() == null || usuarioDto.getContrasena().isEmpty()) {
+                usuarioDto.setContrasena(existente.getContrasena());
+            }
             usuarioService.update(usuarioDto.getId(), usuarioDto);
         }
 
@@ -101,17 +119,19 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         e.printStackTrace();
     }
 
-    var usuario = usuarioService.getUsuarioAutenticado();
-
-    if (usuario != null && usuario.getRol().getNombre().equals("ADMINISTRADOR")) {
-        return "redirect:/admin/dashboard";
-    } else if(usuario != null && usuario.getRol().getNombre().equals("DUEÑO")){
-        return "redirect:/owners/dashboard";
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+    if (usuario != null) {
+        String rol = usuario.getRol().getNombre();
+        switch (rol) {
+            case "ADMINISTRADOR": return "redirect:/admin/dashboard";
+            case "DUEÑO": return "redirect:/owners/dashboard";
+            default: return "redirect:/usuarios/home";
+        }
     }
-    else {
-        return "redirect:/usuarios/home";
-    }
+    return "redirect:/login";
 }
+
+
 
 @PostMapping("/cambiar-rol")
 @ResponseBody
@@ -123,21 +143,35 @@ public ResponseEntity<String> cambiarRol(@RequestBody Map<String, Long> payload)
 }
 
 
-    // Eliminar usuario
-    @GetMapping("/delete/{id}")
-    @ResponseBody
-    public ResponseEntity<String> deleteUsuario(@PathVariable Long id) {
-        var usuarioAutenticado = usuarioService.getUsuarioAutenticado();
+ @GetMapping("/delete/{id}")
+public String deleteUsuario(@PathVariable Long id, RedirectAttributes redirectAttrs) {
+    var usuarioAutenticado = usuarioService.getUsuarioAutenticado();
 
-        usuarioService.delete(id);
-
-        // Si el usuario autenticado eliminó su propia cuenta, debe cerrar sesión (redirigir al login)
-        if (usuarioAutenticado != null && usuarioAutenticado.getId().equals(id)) {
-            return ResponseEntity.status(205).body("Eliminado propio"); // 205 Reset Content (o usa otro status personalizado)
-        }
-
-        return ResponseEntity.ok("Usuario eliminado");
+    if (usuarioAutenticado == null) {
+        redirectAttrs.addFlashAttribute("error", "No autorizado");
+        return "redirect:/usuarios";
     }
+
+    // Eliminar peluquería asociada al usuario (si existe)
+    Optional<Peluqueria> optionalPeluqueria = peluqueriaService.findOptionalByUsuarioId(id);
+    optionalPeluqueria.ifPresent(peluqueria -> peluqueriaService.delete(peluqueria.getId()));
+
+    // Eliminar usuario
+    usuarioService.delete(id);
+
+    // Si el usuario eliminó su propia cuenta
+    if (usuarioAutenticado.getId().equals(id)) {
+        redirectAttrs.addFlashAttribute("warning", "Usuario eliminado y sesión cerrada");
+        return "redirect:/login";
+    }
+
+    // Si eliminó a otro usuario
+    redirectAttrs.addFlashAttribute("success", "Usuario eliminado correctamente");
+    return "redirect:/admin/dashboard";
+}
+
+
+
     @GetMapping("/count")
     public String countUsuarios(Model model) {
         long totalUsuarios = usuarioService.countUsers();

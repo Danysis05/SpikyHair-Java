@@ -1,6 +1,5 @@
 package com.proyecto.spikyhair.entity;
 
-
 import java.time.LocalDate;
 
 import com.proyecto.spikyhair.enums.Estado;
@@ -10,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -22,23 +22,21 @@ import lombok.Data;
 public class Reserva {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-
-    @Column(name = "id", unique = true, nullable = false, length = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @Column(name = "fecha", nullable = false, length = 50)
+    @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "hora", nullable = false, length = 50)
+    @Column(name = "hora", nullable = false)
     private String hora;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private Estado estado = Estado.PENDIENTE; // Valor inicial
 
-
-    @Column(name = "duracion", nullable = false, length = 50)
+    @Column(name = "duracion", nullable = false)
     private String duracion;
 
     @ManyToOne
@@ -46,15 +44,15 @@ public class Reserva {
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "servicios_id",nullable = false)
+    @JoinColumn(name = "servicios_id", nullable = false)
     private Servicios servicios;
 
+    // Estilista opcional
     @ManyToOne
-    @JoinColumn(name = "estilista_id", nullable = false)
+    @JoinColumn(name = "estilista_id", nullable = true)
     private Estilista estilista;
 
     @ManyToOne
     @JoinColumn(name = "peluqueria_id", nullable = false)
     private Peluqueria peluqueria;
-
 }

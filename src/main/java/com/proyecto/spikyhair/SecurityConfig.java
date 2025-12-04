@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .requestMatchers("/owners/**").hasAnyRole("DUEÑO", "ADMINISTRADOR")
                 .requestMatchers("/peluquerias/**").hasAnyRole("DUEÑO", "ADMINISTRADOR", "USUARIO")
                 .requestMatchers("/usuarios/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DUEÑO")
+                .requestMatchers("/reservas/eliminar/**").permitAll()
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

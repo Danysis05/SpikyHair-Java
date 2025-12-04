@@ -19,7 +19,7 @@
 
     <nav class="nav-user">
         <a th:href="@{/home/page}">Inicio</a>
-        <a th:href="@{/mis-reservas}">Mis Reservas</a>
+        <a th:href="@{/reservas/mostrar}">Mis Reservas</a>
         <a th:href="@{/logout}" class="btn-logout">
             <i class="fa-solid fa-right-from-bracket"></i>
             Cerrar Sesión
@@ -61,8 +61,7 @@
 
             <div class="info-box">
                 <h3>Información y Contacto</h3>
-                <p th:if="${peluqueria != null}" th:text="${peluqueria.descripcion}">Descripción de la peluquería...</p>
-                <p th:if="${peluqueria == null}">Descripción no disponible</p>
+                <p class="description-text" th:if="${peluqueria != null}" th:text="${peluqueria.descripcion}">Descripción de la peluquería...</p>
                 <div class="contact-details">
                     <p><i class="fa-solid fa-location-dot"></i> <span th:if="${peluqueria != null}" th:text="${peluqueria.direccion}">Dirección</span>
                        <span th:if="${peluqueria == null}">Dirección</span></p>

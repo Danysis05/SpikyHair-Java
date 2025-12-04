@@ -1,4 +1,5 @@
-     /* --- VARIABLES & RESET --- */
+ 
+        
         :root {
             --primary: #ff3b3b;
             --primary-dark: #c40000;
@@ -16,34 +17,32 @@
             background-color: var(--dark-bg);
             color: var(--text-main);
             height: 100vh;
-            overflow: hidden; /* Evita scroll en desktop */
+            overflow: hidden; 
         }
 
         h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
 
-        /* --- LAYOUT PRINCIPAL --- */
-        .split-screen {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-        }
+        /* --- LAYOUT --- */
+        .split-screen { display: flex; height: 100vh; width: 100%; }
 
-        /* --- PANTALLA IZQUIERDA (FORMULARIO) --- */
+        /* --- PANTALLA IZQUIERDA (FORM) --- */
         .left-pane {
             width: 40%;
             background: var(--dark-bg);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 40px 8%;
+            padding: 40px 8%; /* Padding lateral */
             position: relative;
             z-index: 2;
             box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto; /* Permitir scroll si la pantalla es muy bajita */
         }
 
+        /* Botón volver */
         .back-btn {
             position: absolute;
-            top: 40px;
+            top: 30px;
             left: 40px;
             color: var(--text-muted);
             text-decoration: none;
@@ -56,63 +55,50 @@
         }
         .back-btn:hover { color: var(--primary); transform: translateX(-5px); }
 
-        .header-content { margin-bottom: 2.5rem; }
-
-        .logo-login {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary-color);
-            margin-bottom: 1rem;
-            box-shadow: 0 0 20px rgba(217, 4, 41, 0.3);
-        }
+        .header-content { margin-top: 2rem; margin-bottom: 2rem; }
         
         .logo-text {
             font-family: 'Oswald', sans-serif;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: white;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             display: block;
         }
         .logo-text span { color: var(--primary); }
 
+        .header-content h2 { font-size: 2.2rem; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        .header-content .subtitle { color: var(--text-muted); font-size: 0.95rem; }
 
-        .header-content h2 { font-size: 2.5rem; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .header-content .subtitle { color: var(--text-muted); font-size: 1rem; }
-
-        /* --- FORMULARIO --- */
-        .input-group { margin-bottom: 1.5rem; }
+        /* --- FORM STYLING --- */
+        .input-group { margin-bottom: 1.2rem; } /* Un poco más compacto que el login */
+        
         .input-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: #ddd;
             letter-spacing: 0.5px;
         }
 
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
 
         .input-wrapper i {
             position: absolute;
             left: 15px;
             color: #666;
             transition: 0.3s;
+            pointer-events: none; /* Para que el click pase al input */
         }
 
         .input-wrapper input {
             width: 100%;
             background: var(--input-bg);
             border: 1px solid var(--border-color);
-            padding: 15px 15px 15px 45px; /* Espacio para el icono */
+            padding: 14px 14px 14px 45px;
             color: white;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-family: 'Manrope', sans-serif;
             transition: 0.3s;
             outline: none;
@@ -122,9 +108,12 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(255, 59, 59, 0.1);
         }
-        
-        .input-wrapper input:focus + i { color: var(--primary); }
+        .input-wrapper input:focus + i, 
+        .input-wrapper input:not(:placeholder-shown) + i { 
+            color: var(--primary); /* Icono se ilumina si hay foco o texto */
+        }
 
+        /* Botón Submit */
         button[type="submit"] {
             width: 100%;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -138,56 +127,44 @@
             letter-spacing: 1px;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             box-shadow: 0 4px 15px rgba(255, 59, 59, 0.3);
         }
-
         button[type="submit"]:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 59, 59, 0.5);
         }
 
-        /* --- ALERTAS --- */
-        .alert {
-            padding: 1rem;
+        /* Alerta de Error */
+        .alert-danger {
+            background: rgba(255, 59, 59, 0.1);
+            border: 1px solid rgba(255, 59, 59, 0.3);
+            color: #ff8080;
+            padding: 0.8rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 10px;
-            animation: fadeIn 0.5s ease;
-        }
-        .alert-danger {
-            background: rgba(255, 59, 59, 0.1);
-            border: 1px solid rgba(255, 59, 59, 0.3);
-            color: #ff8080;
-        }
-        .alert-success {
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            color: #2ecc71;
         }
 
-        /* --- FOOTER DEL FORM --- */
-        .register-footer {
-            margin-top: 2rem;
+        /* Footer Login Link */
+        .login-link {
+            margin-top: 1.5rem;
             text-align: center;
             font-size: 0.9rem;
             color: var(--text-muted);
+            padding-bottom: 20px;
         }
-        .register-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-        .register-footer a:hover { text-decoration: underline; }
+        .login-link a { color: var(--primary); text-decoration: none; font-weight: 600; margin-left: 5px; }
+        .login-link a:hover { text-decoration: underline; }
 
         /* --- PANTALLA DERECHA (IMAGEN) --- */
         .right-pane {
             width: 60%;
-            background: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop');
+            /* Imagen de herramientas/barbería premium */
+            background: url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             position: relative;
@@ -196,50 +173,44 @@
             padding: 4rem;
         }
 
-        /* Overlay degradado para leer texto */
         .right-pane::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, black 0%, transparent 80%),
-                        linear-gradient(to right, black 0%, transparent 20%);
+            background: linear-gradient(to top, black 0%, transparent 90%),
+                        linear-gradient(to right, black 0%, transparent 30%);
         }
 
         .showcase-content {
             position: relative;
             z-index: 10;
             color: white;
-            max-width: 500px;
+            max-width: 550px;
         }
 
-        .glass-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 0.8rem;
-            font-weight: 600;
+        .feature-badge {
+            background: rgba(255, 59, 59, 0.2);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
         }
 
-        .showcase-content h3 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 1rem; }
-        .showcase-content p { font-size: 1.1rem; color: #ccc; line-height: 1.6; }
+        .showcase-content h3 { font-size: 3rem; line-height: 1.1; margin-bottom: 1rem; }
+        .showcase-content p { font-size: 1.1rem; color: #ccc; line-height: 1.5; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- RESPONSIVE --- */
+        /* Responsive */
         @media (max-width: 900px) {
-            .split-screen { flex-direction: column; height: auto; min-height: 100vh; }
-            .left-pane { width: 100%; padding: 80px 20px 40px; order: 2; min-height: 60vh; }
-            .right-pane { width: 100%; height: 300px; order: 1; padding: 2rem; }
+            .split-screen { flex-direction: column; overflow-y: auto; }
+            .left-pane { width: 100%; order: 2; padding: 60px 20px; min-height: auto; }
+            .right-pane { width: 100%; height: 250px; order: 1; padding: 2rem; }
             .showcase-content h3 { font-size: 2rem; }
-            .back-btn { top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; }
+            .back-btn { top: 20px; left: 20px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; color: white;}
             body { overflow-y: auto; }
         }
- 
+     

@@ -1,38 +1,123 @@
+ 
+
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Peluqueria</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Crear Cuenta Propietario | SpikyHair</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/register.css}" />
+    <link rel="icon" type="image/x-icon" th:href="@{/uploads/favicon.png}">
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="register-container">
-        <a class="back" onclick="history.back()"><i class="fa-solid fa-arrow-left-long"></i></a>
-        <h2>Registro de Peluqueria</h2>
 
-        <form th:action="@{/peluquerias/crear}" method="post" th:object="${peluqueria}">
+    <div class="split-screen">
+
+        <div class="left-pane">
             
-            <label for="nombre">Nombre:</label>
-            <input type="text" th:field="*{nombre}" required />
+            <a onclick="history.back()" class="back-btn">
+                <i class="fa-solid fa-arrow-left-long"></i> <span>Volver</span>
+            </a>
 
-            <label for="direccion">Direccion:</label>
-            <input type="text" th:field="*{direccion}" required />
+            <div class="header-content">
+                <div class="logo-text"><i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span></div>
+                <h2>Crear Cuenta Propietario</h2>
+                <p class="subtitle">Únete a nuestra comunidad.</p>
+            </div>
 
-            <label for="email">Correo:</label>
-            <input type="email" th:field="*{email}" required />
+            <form th:action="@{/peluquerias/crear}" method="post" th:object="${peluqueria}">
 
-            <label for="telefono">Teléfono:</label>
-            <input type="text" th:field="*{telefono}" required />
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span th:text="${error}">Ha ocurrido un error.</span>
+                </div>
 
-            <label for="horarioApertura">Horario de Apertura:</label>
-            <input type="text" th:field="*{horarioApertura}" required />
+                <div class="input-group">
+                    <label for="nombre">Nombre </label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{nombre}" placeholder="SpikyHair" required autocomplete="name" />
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
 
-            <label for="horarioCierre">Horario de Cierre:</label>
-            <input type="text" th:field="*{horarioCierre}" required />
+                <div class="input-group">
+                    <label for="direccion">Dirección</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{direccion}" placeholder="Ej. Calle 123 #45-67" required autocomplete="address-line1"/>
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                </div>
 
-            <button type="submit">Registrar Salon de Belleza</button>
-        </form>
+                <div class="input-group">
+                    <label for="email">Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <input type="email" th:field="*{email}" placeholder="tu@email.com" required autocomplete="email"/>
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="telefono">Teléfono</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{telefono}" placeholder="Ej. 300 123 4567" required autocomplete="tel"/>
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="horarioApertura">Horario de Apertura</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{horarioApertura}" placeholder="Ej. 9:00 AM" required />
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="horarioCierre">Horario de Cierre</label>
+                    <div class="input-wrapper">
+                        <input type="text" th:field="*{horarioCierre}" placeholder="Ej. 6:00 PM" required />
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+
+                <button type="submit">
+                    Registrar Salon de Belleza <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+                </button>
+
+            </form>
+
+
+        </div>
+
+        <div class="right-pane">
+            <div class="showcase-content">
+                <div class="feature-badge">Administra tu Peluqueria</div>
+                <h3>Expertos en<br>tu mejor versión.</h3>
+                <p>Llena el formulario para formar parte de nuestra comunidad de dueños de peluquerías.</p>
+            </div>
+        </div>
+
     </div>
+
+    <script>
+        function togglePass() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
 </body>
 </html>

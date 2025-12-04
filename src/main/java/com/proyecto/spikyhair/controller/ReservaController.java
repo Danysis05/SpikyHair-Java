@@ -165,12 +165,12 @@ public String editReserva(@ModelAttribute("reserva") ReservasDto dto) {
 }
 
     // Eliminar reserva
-@PostMapping("/eliminar/{id}")
+@GetMapping("/eliminar/{id}")
 public String eliminarReserva(@PathVariable Long id, Authentication authentication) {
     reservasService.delete(id);
 
     if (authentication != null && authentication.getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"))) {
+            .anyMatch(a -> a.getAuthority().equals("ROLE_DUEÑO"))) {
         return "redirect:/admin/dashboard";
     } else {
         return "redirect:/reservas/mostrar"; // Asegúrate de que esta ruta exista
@@ -184,9 +184,9 @@ public ResponseEntity<Map<String, Object>> cambiarEstado(@PathVariable Long id) 
     Map<String, Object> response = new HashMap<>();
     Reserva reserva = reservasService.getReservaById(id);
 
-    if(reserva == null) {
+    if (reserva == null) {
         response.put("success", false);
-        response.put("error", "Reserva no encontrada");
+        response.put("error", "La reserva no existe o no se encontró.");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -194,14 +194,23 @@ public ResponseEntity<Map<String, Object>> cambiarEstado(@PathVariable Long id) 
     Estado nuevoEstado = (reserva.getEstado() == Estado.PENDIENTE)
             ? Estado.REALIZADA
             : Estado.PENDIENTE;
-    reserva.setEstado(nuevoEstado);
 
+    reserva.setEstado(nuevoEstado);
     reservasService.saveReserva(reserva);
 
     response.put("success", true);
     response.put("estado", nuevoEstado.name());
+
+    // 💬 Mensajes de confirmación
+    if (nuevoEstado == Estado.REALIZADA) {
+        response.put("successMessage", "La reserva fue marcada como REALIZADA.");
+    } else {
+        response.put("successMessage", "La reserva fue marcada como PENDIENTE.");
+    }
+
     return ResponseEntity.ok(response);
 }
+
 
 
 

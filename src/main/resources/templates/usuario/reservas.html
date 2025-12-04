@@ -1,200 +1,163 @@
 <!DOCTYPE html>
-<html lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Reservas - SpikyHair</title>
-  <link rel="stylesheet" th:href="@{/css/reservas.css}" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reservas | SpikyHair</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/reservas.css}" />
+    
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+      
+   
 </head>
+
 <body>
-<header>
-  <div class="menu">
-    <div class="contenedor"></div>
-    <img src="/uploads/logox.jpg" alt="" class="menu-icono">
-    <nav>
-      <ul class="lista-menu">
-        <li><a th:href="@{/usuarios/index}">Inicio</a></li>
-        <li><a th:href="@{/servicios/mostrar}">Servicios</a></li>
-        <li></li>
-        <div class="user-actions">
-          <a href="#" id="perfilBtn">
-            <img id="avatarIcon"
-                 th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
-                 alt="Avatar">
-          </a>
-          <form th:action="@{/logout}" method="post">
-            <button type="submit" class="logout-button"><i class="fa-solid fa-right-from-bracket"></i></button>
-          </form>
+
+    <header class="header-dashboard">
+        <a th:href="@{/}" class="header-logo">
+            <i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span>
+        </a>
+
+        <nav class="nav-user">
+            <a th:href="@{/servicios/mostrar}">Servicios</a>
+            
+            <a th:href="@{/perfil}" class="profile-link" title="Mi Perfil">
+                <img th:if="${usuario.imagenPerfil != null}" 
+                     th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}" 
+                     alt="Perfil">
+                <img th:unless="${usuario.imagenPerfil != null}" 
+                     th:src="@{/images/default-user.png}" 
+                     alt="Perfil">
+            </a>
+
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="reservations-container">
+
+        <h2 class="page-title">Reservas de <span th:text="${usuario.nombre}">Usuario</span></h2>
+
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="showTab('upcoming-reservations')">
+                <i class="fa-solid fa-calendar-check"></i> Mis Reservas
+            </button>
+            <button class="tab-btn" onclick="showTab('history-reservations')">
+                <i class="fa-solid fa-history"></i> Historial
+            </button>
         </div>
-      </ul>
-    </nav>
-  </div>
-  <div class="tex">
-    <h1 th:text="${usuario.nombre}"></h1>
-  </div>
-</header>
 
-<section class="reservas-fichas">
-  <h2 class="titulo-seccion">Tus Reservas</h2>
-  <div class="contenedor-fichas">
-    <div th:each="reserva : ${reservas}" class="ficha-reserva">
-      <h3 th:text="${reserva.servicioNombre}">Servicio</h3>
-      <p><strong>Fecha:</strong> <span th:text="${reserva.fecha}"></span></p>
-      <p><strong>Estado:</strong> <span th:text="${reserva.estado}"></span></p>
-      <p><strong>Hora:</strong> <span th:text="${reserva.hora}"></span></p>
+        <div id="upcoming-reservations" class="reservations-list">
+            
+            <div th:if="${reservas.empty}" style="text-align: center; color: #666; padding: 2rem; border: 1px dashed #333; border-radius: 10px;">
+                <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>No tienes reservas activas en este momento.</p>
+            </div>
 
-      <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post"
-            onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta reserva?')">
-        <button type="submit" class="btn-eliminar">Eliminar</button>
-      </form>
+            <div th:each="reserva : ${reservas}" class="appointment-card">
+                
+                <div class="info-col">
+                    <h4 th:text="${reserva.servicioNombre}">Nombre del Servicio</h4>
+                    <p><i class="fa-solid fa-calendar-day"></i> <strong th:text="${reserva.fecha}">Fecha</strong></p>
+                    <p><i class="fa-solid fa-clock"></i> Hora: <span th:text="${reserva.hora}">Hora</span></p>
+                </div>
 
-      <button class="btn-editar"
-              th:attr="data-reserva-id=${reserva.id}, data-fecha=${reserva.fecha}"
-              onclick="abrirEditarReserva(this)">Editar</button>
-    </div>
-  </div>
-</section>
+                <div class="status-col">
+                    <span class="status-badge" th:text="${reserva.estado}">Estado</span>
+                </div>
 
-<div class="separacion"></div>
-<main>
-  <div class="separacion"></div>
-</main>
+                <div class="actions-col">
+                    
+                    <button class="btn-action btn-modify"
+                            th:attr="data-reserva-id=${reserva.id}, data-fecha=${reserva.fecha}"
+                            onclick="abrirEditarReserva(this)">
+                        <i class="fa-solid fa-pencil"></i> Editar
+                    </button>
 
-<!-- MODAL PERFIL -->
-<div id="modalPerfil" class="modal hidden">
-  <div class="perfil-card">
-    <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
-      <div class="perfil-header">
-        <div class="avatar">
-          <img id="avatarPreview"
-               th:src="${usuario.imagenPerfil != null} ? @{/uploads/{img}(img=${usuario.imagenPerfil})} : @{/images/default-avatar.png}"
-               alt="Avatar">
-          <label for="imagenPerfil" class="edit-icon" title="Cambiar imagen">
-            <i class="fa-solid fa-camera"></i>
-          </label>
-          <input type="file" id="imagenPerfil" name="imagen" style="display: none;" accept="image/*">
+                    <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post"
+                          onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');" style="display:inline;">
+                        <button type="submit" class="btn-action btn-cancel">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <h2 th:text="${usuario.nombre}">Your Name</h2>
-        <p th:text="${usuario.email}">your.name@gmail.com</p>
-      </div>
 
-      <input type="hidden" name="id" th:value="${usuario.id}">
-      <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required>
-      <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required>
-      <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}">
-      <button type="submit" class="btn-edit">Editar Perfil</button>
-    </form>
+        <div id="history-reservations" class="reservations-list" style="display: none;">
+            <div style="text-align: center; color: #666; padding: 2rem;">
+                <p>Historial de reservas pasadas.</p>
+            </div>
+        </div>
 
-    <form th:action="@{/logout}" method="post">
-      <button type="submit" class="btn-logout">LOG OUT</button>
-    </form>
-    <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
-  </div>
-</div>
+    </main>
 
-<!-- MODAL CREAR RESERVA -->
-<div id="modalReserva" class="modal hidden">
-  <form id="formReserva" method="post" th:action="@{/reservas/crear}">
-    <!-- Opción 1: Servicio precargado -->
-    <div id="campoServicioFijo" class="hidden">
-      <input type="text" id="nombreServicio" readonly />
-      <input type="hidden" name="servicioId" id="servicioIdFijo" />
+    <div id="modalEditarReserva" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-modal-btn" onclick="cerrarModal('modalEditarReserva')">&times;</button>
+            <h3 class="modal-title">Modificar Reserva</h3>
+            
+            <form id="formEditarReserva" method="post" th:action="@{/reservas/editar}">
+                <input type="hidden" name="id" id="reservaIdEditar">
+                
+                <div class="form-group-modal">
+                    <label for="fechaEditar">Nueva Fecha:</label>
+                    <input type="date" name="fecha" id="fechaEditar" required />
+                </div>
+                
+                <button type="submit" class="btn-modal-submit">Guardar Cambios</button>
+            </form>
+        </div>
     </div>
 
-    <!-- Opción 2: Seleccionar servicio manual -->
-    <div id="campoServicioSelect" class="hidden">
-      <select name="servicioId" id="servicioSelect">
-        <option value="">Seleccionar servicio</option>
-        <option th:each="servicio : ${listaServicios}"
-                th:value="${servicio.id}"
-                th:text="${servicio.nombre}"></option>
-      </select>
-    </div>
+    <footer>
+        <p>© SpikyHair 2025 | Todos los derechos reservados.</p>
+    </footer>
 
-    <!-- Otros campos -->
-    <input type="date" name="fecha" required />
+    <script>
+        // --- LÓGICA TABS ---
+        function showTab(tabId) {
+            document.querySelectorAll('.reservations-list').forEach(list => list.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'flex';
+            
+            // Buscar el botón que llamó a la función o hacerlo por selector
+            const targetBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+            if(targetBtn) targetBtn.classList.add('active');
+        }
 
-    <button type="submit">Reservar</button>
-    <button type="button" onclick="cerrarModal('modalReserva')">Cancelar</button>
-  </form>
-  <span class="close-button" onclick="cerrarModal('modalReserva')">&times;</span>
-</div>
+        // --- LÓGICA MODAL EDITAR ---
+        function abrirEditarReserva(boton) {
+            const reservaId = boton.getAttribute('data-reserva-id');
+            const fecha = boton.getAttribute('data-fecha');
+            
+            document.getElementById('reservaIdEditar').value = reservaId;
+            document.getElementById('fechaEditar').value = fecha;
+            
+            document.getElementById('modalEditarReserva').classList.remove('hidden');
+        }
 
-<!-- MODAL EDITAR RESERVA -->
-<div id="modalEditarReserva" class="modal hidden">
-<form id="formEditarReserva" method="post" th:action="@{/reservas/editar}">
-    <input type="hidden" name="id" id="reservaIdEditar">
-    <label for="fechaEditar">Fecha:</label>
-    <input type="date" name="fecha" id="fechaEditar" required />
-    <button type="submit">Guardar Cambios</button>
-    <button type="button" onclick="cerrarModal('modalEditarReserva')">Cancelar</button>
-</form>
+        function cerrarModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
 
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditarReserva');
+            if (event.target == modal) {
+                cerrarModal('modalEditarReserva');
+            }
+        }
+    </script>
 
-  <span class="close-button" onclick="cerrarModal('modalEditarReserva')">&times;</span>
-</div>
-
-<footer>
-  <div class="contenedor-footer">
-    <div class="nav-footer">
-      <ul>
-        <li><a th:href="@{/usuarios/index}">Inicio</a></li>
-        <li><a th:href="@{/servicios/mostrar}">Servicios</a></li>
-        <li>|</li>
-        <li>
-          <form th:action="@{/logout}" method="POST" id="logout-form">
-            <button type="submit">LogOut</button>
-          </form>
-        </li>
-      </ul>
-    </div>
-    <div class="listas-footer">
-      <ul>
-        <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
-        <li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
-        <li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
-        <li><a href="#"><i class="fa-brands fa-tiktok"></i></a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-last"><p>© SpikyHair 2025</p></div>
-</footer>
-
-<script>
-  // Abrir modal perfil
-  document.getElementById('perfilBtn').addEventListener('click', function (e) {
-    e.preventDefault();
-    document.getElementById('modalPerfil').classList.remove('hidden');
-  });
-
-  // Cerrar modal genérico
-  function cerrarModal(id) {
-    document.getElementById(id).classList.add('hidden');
-  }
-
-  // Vista previa de imagen perfil
-  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById('avatarPreview').src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // Abrir modal editar reserva
-  function abrirEditarReserva(boton) {
-    const reservaId = boton.getAttribute('data-reserva-id');
-    const fecha = boton.getAttribute('data-fecha');
-    document.getElementById('reservaIdEditar').value = reservaId;
-    document.getElementById('fechaEditar').value = fecha;
-    document.getElementById('modalEditarReserva').classList.remove('hidden');
-  }
-</script>
 </body>
 </html>

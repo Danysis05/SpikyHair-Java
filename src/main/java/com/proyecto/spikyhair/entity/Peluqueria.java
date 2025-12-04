@@ -2,6 +2,7 @@ package com.proyecto.spikyhair.entity;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,16 +49,16 @@ public class Peluqueria {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "peluqueria")
+    @OneToMany(mappedBy = "peluqueria", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<Resena> resenas;
 
-    @OneToMany(mappedBy = "peluqueria")
+    @OneToMany(mappedBy = "peluqueria", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<Servicios> servicios;
 
-    @OneToMany(mappedBy = "peluqueria")
+    @OneToMany(mappedBy = "peluqueria", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<Estilista> estilistas;
 
-    @OneToMany(mappedBy = "peluqueria")
+    @OneToMany(mappedBy = "peluqueria", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas;
 
 
@@ -167,5 +168,8 @@ public class Peluqueria {
 
     public void setEstilistas(List<Estilista> estilistas) {
         this.estilistas = estilistas;
+    }
+    public List<Reserva> getReservas() {
+        return reservas;
     }
 }

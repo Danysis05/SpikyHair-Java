@@ -135,6 +135,27 @@ public List<PeluqueriaTopDto> obtenerTop5() {
     return lista;
 }
 
+public List<PeluqueriaTopDto> obtenerTop5PorReservas() {
+
+    List<Object[]> filas = peluqueriaRepository.findTop5PeluqueriasPorReservas();
+    List<PeluqueriaTopDto> lista = new ArrayList<>();
+
+    for (Object[] f : filas) {
+
+        PeluqueriaTopDto dto = new PeluqueriaTopDto(
+            ((Number) f[0]).longValue(),            // id
+            (String) f[1],                          // nombre
+            (String) f[2],                          // direccion
+            (String) f[3],                          // descripcion
+            f[4] != null ? f[4].toString() : null,  // imagenUrl
+            f[5] != null ? ((Number) f[5]).doubleValue() : 0.0 // totalReservas
+        );
+
+        lista.add(dto);
+    }
+
+    return lista;
 
 
+}
 }

@@ -44,7 +44,7 @@
       </div>
     </div>
 
-        <div class="mensajes-csv" style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
+        <div class="mensajes-csv" id="mensajesContainer" style="margin-top: 20px; width: 90%; max-width: 800px; margin: 20px auto;">
           <div th:if="${success}" class="alert alert-success" style="background: #28a745; color: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
               <i class="fa fa-check-circle"></i> <span th:text="${success}"></span>
           </div>
@@ -55,8 +55,8 @@
               <i class="fa fa-times-circle"></i> <span th:text="${error}"></span>
           </div>
         </div>
+        <div id="mensaje-dinamico"></div>
     <div id="panelContainer">
-
 
 <!-- PANEL USUARIOS -->
 <div id="usuarios" class="panel-usuarios panel">
@@ -180,13 +180,16 @@
 
 
     <!-- PAGINACIÓN -->
-    <div class="usuarios-paginacion" th:if="${totalPages > 0}">
-        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:classappend="${i == currentPage} ? 'pag-activa' : ''"
-           th:href="@{/admin/dashboard(page=${i})}"
-           class="usuarios-pag-btn"
-           th:text="${i + 1}"></a>
-    </div>
+<div class="pagination" 
+     th:if="${totalPagesUsuarios > 1}">
+    <a th:each="i : ${#numbers.sequence(0, totalPagesUsuarios - 1)}"
+       th:href="@{/admin/dashboard(pageUsuarios=${i}, activeTab='usuarios')}"
+       th:text="${i + 1}"
+       th:classappend="${i == pageUsuarios} ? 'active' : ''"
+       class="pagination-btn">
+    </a>
+</div>
+
 
 </div>
 
@@ -216,7 +219,7 @@
             <input type="text" name="q" placeholder="Buscar peluquería..." th:value="${q}">
             <button type="submit"><i class="fa fa-search"></i></button>
         </form>
-        <a th:href="@{/admin/pdf-Peluquerias}" class="btn-pdf btn-peluquerias">
+        <a th:href="@{/admin/pdf-peluquerias}" class="btn-pdf btn-peluquerias">
             <i class="fa fa-file-pdf"></i> Descargar PDF
         </a>
     </div>
@@ -230,19 +233,22 @@
                 <p th:text="${p.direccion}">Dirección</p>
                 <p th:text="${p.telefono}">Teléfono</p>
 
-                <button class="btn-eliminar btn-eliminar-peluqueria" onclick="eliminarPeluqueria(this)" th:data-id="${p.id}">
-                    <i class="fa-regular fa-trash-can"></i>
-                </button>
+
+                <a th:href="@{'/peluquerias/delete/' + ${p.id}}" class="btn-eliminar btn-eliminar-peluqueria"><i class="fa-regular fa-trash-can"></i></a>
             </div>
         </div>
 
         <!-- Paginación -->
-        <div class="pagination pagination-peluquerias" th:if="${totalPages > 0}">
-            <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-               th:classappend="${i == currentPage} ? 'active' : ''"
-               th:href="@{/admin/dashboard(page=${i}, activeTab='peluquerias')}"
-               class="pagination-btn" th:text="${i + 1}"></a>
-        </div>
+<div class="pagination" 
+     th:if="${totalPagesPeluquerias > 1}">
+    <a th:each="i : ${#numbers.sequence(0, totalPagesPeluquerias - 1)}"
+       th:href="@{/admin/dashboard(pagePeluquerias=${i}, activeTab='peluquerias')}"
+       th:text="${i + 1}"
+       th:classappend="${i == pagePeluquerias} ? 'active' : ''"
+       class="pagination-btn">
+    </a>
+</div>
+
     </div>
 </div>
 
@@ -286,352 +292,162 @@
 
   <!-- SCRIPTS -->
  <script>
-  function navigate(seccionId) {
-    document.querySelectorAll('.panel').forEach(seccion => seccion.classList.add('hidden'));
-    document.getElementById(seccionId).classList.remove('hidden');
-    localStorage.setItem('seccionActiva', seccionId); // Guarda la sección activa
-  }
+/* ==========================
+   NAVEGACIÓN ENTRE PANELES
+========================== */
+function navigate(tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
 
-  // Restaurar sección activa al cargar
-  window.addEventListener('DOMContentLoaded', () => {
-    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
-    navigate(seccionActiva);
-  });
+    const selectedPanel = document.getElementById(tabId);
+    if (selectedPanel) selectedPanel.classList.add('active');
 
-  document.getElementById('perfilBtn').addEventListener('click', function (e) {
-    e.preventDefault();
-    document.getElementById('modalPerfil').classList.remove('hidden');
-  });
+    const selectedNav = document.getElementById('nav-' + tabId);
+    if (selectedNav) selectedNav.classList.add('active');
 
-  function cerrarModal() {
-    document.getElementById('modalPerfil').classList.add('hidden');
-  }
-
-  document.getElementById('imagenPerfil').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        document.getElementById('avatarPreview').src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  function cambiarRol(selectElement) {
-    const userId = selectElement.getAttribute("data-id");
-    const nuevoRol = selectElement.value;
-    const confirmado = confirm(`¿Estás seguro de que quieres cambiar el rol del usuario a "${nuevoRol}"?`);
-    if (!confirmado) {
-      selectElement.selectedIndex = [...selectElement.options].findIndex(option => option.defaultSelected);
-      return;
-    }
-
-    const rolMap = {
-      "ADMINISTRADOR": 1,
-      "USUARIO": 2
-    };
-
-    fetch(`/usuarios/cambiar-rol`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuarioId: parseInt(userId),
-        rolId: rolMap[nuevoRol]
-      })
-    })
-    .then(response => response.ok ? alert('Rol actualizado correctamente') : alert('Error al actualizar el rol'))
-    .catch(error => {
-      console.error('Error en la solicitud:', error);
-      alert('Error al actualizar el rol');
-    });
-  }
-
-  function eliminarUsuario(boton) {
-    const userId = boton.getAttribute("data-id");
-    if (!confirm("¿Estás seguro de eliminar este usuario?")) return;
-
-    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
-      .then(response => {
-        if (response.status === 205) {
-          alert("Tu cuenta ha sido eliminada. Saliendo...");
-          window.location.href = "/auth/login";
-        } else if (response.ok) {
-          boton.closest(".usuario-card").remove();
-          alert("Usuario eliminado correctamente");
-        } else {
-          alert("Error al eliminar el usuario");
-        }
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("Error al eliminar el usuario");
-      });
-  }
-
-  function abrirModalServicio() {
-    const form = document.getElementById('formServicio');
-    form.reset();
-    form.action = '/servicios/create';
-    document.getElementById('servicioId').value = '';
-    const preview = document.getElementById('imagenPreview');
-    preview.src = '';
-    preview.classList.add('hidden');
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
-
-  function editarServicio(boton) {
-    const form = document.getElementById('formServicio');
-    const id = boton.getAttribute('data-id');
-    const nombre = boton.getAttribute('data-nombre');
-    const duracion = boton.getAttribute('data-duracion');
-    const descripcion = boton.getAttribute('data-descripcion');
-    const precio = boton.getAttribute('data-precio');
-    const imagen = boton.getAttribute('data-imagen');
-    document.getElementById('servicioId').value = id;
-    document.getElementById('nombre').value = nombre;
-    document.getElementById('duracion').value = duracion;
-    document.getElementById('descripcion').value = descripcion;
-    document.getElementById('precio').value = precio;
-    form.action = '/servicios/update/' + id;
-    const preview = document.getElementById('imagenPreview');
-    if (imagen) {
-      preview.src = '/uploads/servicios/' + imagen;
-      preview.classList.remove('hidden');
-    } else {
-      preview.src = '';
-      preview.classList.add('hidden');
-    }
-    document.getElementById('modalServicio').classList.remove('hidden');
-  }
-
-  function cerrarModalServicio() {
-    document.getElementById('modalServicio').classList.add('hidden');
-  }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:inline="javascript">
-/*<![CDATA[*/
-  // Datos Thymeleaf
-  var meses = /*[[${meses}]]*/ [];
-  var reservasPorMes = /*[[${reservasPorMes}]]*/ [];
-
-  // USUARIOS
-  var mesesUsuarios = /*[[${mesesUsuarios}]]*/ [];
-var usuariosPorMes = /*[[${usuariosPorMes}]]*/ [];
-
-var uCanvas = document.getElementById('usuariosChart');
-if (uCanvas) {
-  new Chart(uCanvas.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: mesesUsuarios,
-      datasets: [{
-        label: 'Usuarios Nuevos',
-        data: usuariosPorMes,
-        backgroundColor: 'rgba(54,162,235,0.7)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { precision: 0 }
-        }
-      }
-    }
-  });
+    localStorage.setItem('seccionActiva', tabId);
 }
 
-  // SERVICIOS
+window.addEventListener('DOMContentLoaded', () => {
+    const seccionActiva = localStorage.getItem('seccionActiva') || 'usuarios';
+    navigate(seccionActiva);
 
-    var serviciosLabels = /*[[${serviciosLabels}]]*/ [];
-    var serviciosValues = /*[[${serviciosValues}]]*/ [];
+    // Ocultar automáticamente los mensajes Thymeleaf
+    const mensajes = document.querySelectorAll('#mensajesContainer .alert');
+    mensajes.forEach(mensaje => {
+        setTimeout(() => {
+            mensaje.style.transition = "all 0.5s ease";
+            mensaje.style.opacity = "0";
+            mensaje.style.transform = "translateY(-10px)";
+            setTimeout(() => mensaje.remove(), 500);
+        }, 3000);
+    });
+});
 
-    console.log("Labels:", serviciosLabels);
-    console.log("Values:", serviciosValues);
+/* ==========================
+   MENSAJES DINÁMICOS
+========================== */
+function mostrarMensajeDinamico(data) {
+    const contenedor = document.getElementById("mensaje-dinamico");
+    contenedor.innerHTML = "";
 
-    var sCanvas = document.getElementById('serviciosChart');
-    if (sCanvas) {
-        new Chart(sCanvas.getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: serviciosLabels,
-                datasets: [{
-                    label: 'Servicios más usados',
-                    data: serviciosValues,
-                    backgroundColor: [
-                        'rgba(220,53,69,0.7)',
-                        'rgba(40,167,69,0.7)',
-                        'rgba(255,193,7,0.7)'
-                    ]
-                }]
-            }
-        });
+    let tipo = "", icono = "", texto = "";
+
+    if (data.success) { tipo="alert-success"; icono="fa-check-circle"; texto=data.success; }
+    else if (data.warning) { tipo="alert-warning"; icono="fa-exclamation-triangle"; texto=data.warning; }
+    else if (data.error) { tipo="alert-danger"; icono="fa-times-circle"; texto=data.error; }
+
+    const div = document.createElement("div");
+    div.className = `alert ${tipo}`;
+    div.style = `
+        padding: 15px; border-radius: 8px; margin-bottom: 10px; 
+        display: flex; align-items: center; gap: 10px; color: white;
+    `;
+
+    if (tipo === "alert-success") div.style.background = "#28a745";
+    if (tipo === "alert-warning") div.style.background = "#f0ad4e";
+    if (tipo === "alert-danger") div.style.background = "#d93b3b";
+
+    div.innerHTML = `<i class="fa ${icono}"></i> <span>${texto}</span>`;
+    contenedor.appendChild(div);
+
+    // desaparecer solo después de 3.8s
+    setTimeout(() => {
+        div.style.transition = "all 0.5s ease";
+        div.style.opacity = "0";
+        div.style.transform = "translateY(-10px)";
+        setTimeout(() => div.remove(), 500);
+    }, 3000);
+}
+
+/* ==========================
+   CAMBIO DE ROL DE USUARIOS
+========================== */
+function cambiarRol(selectElement) {
+    const userId = selectElement.getAttribute("data-id");
+    const nuevoRol = selectElement.value;
+    if (!confirm(`¿Estás seguro de cambiar el rol del usuario a "${nuevoRol}"?`)) {
+        selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
+        return;
     }
-  
-  
 
-  function cambiarEstadoReserva(boton) {
-    const id = boton.getAttribute("data-id");
-    const estadoActual = boton.getAttribute("data-estado");
-    const nuevoEstado = estadoActual === "PENDIENTE" ? "REALIZADA" : "PENDIENTE";
+    const rolMap = { "ADMINISTRADOR": 1, "USUARIO": 2 };
 
-    // Confirmación
-    if (!confirm(`¿Deseas cambiar el estado a "${nuevoEstado}"?`)) return;
-
-    fetch(`/reservas/cambiar-estado/${id}`, {
+    fetch(`/usuarios/cambiar-rol`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuarioId: parseInt(userId), rolId: rolMap[nuevoRol] })
     })
-    .then(res => {
-        if (!res.ok) throw new Error('Error al actualizar el estado');
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
+        mostrarMensajeDinamico(data);
         if (data.success) {
-            // Actualiza la tarjeta sin recargar
-            const estadoP = boton.closest('.reserva-card').querySelector('.estado');
-            if (estadoP) {
-                estadoP.innerText = data.estado; // nuevo estado
-                estadoP.className = 'estado ' + data.estado.toLowerCase(); // clases CSS
-            }
-            boton.setAttribute('data-estado', data.estado); // actualizar atributo
-            alert('Estado actualizado correctamente');
+            [...selectElement.options].forEach(opt => opt.defaultSelected = false);
+            selectElement.options[selectElement.selectedIndex].defaultSelected = true;
         } else {
-            alert('Error: ' + (data.message || data.error));
+            selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
         }
     })
     .catch(err => {
         console.error(err);
-        alert('Error en el servidor');
+        mostrarMensajeDinamico({ error: "Error de comunicación con el servidor." });
+        selectElement.selectedIndex = [...selectElement.options].findIndex(opt => opt.defaultSelected);
     });
 }
 
-
-
-
-</script>
-<script>
 /* ==========================
-    NAVEGACIÓN ENTRE PANELES - ANIMADA
-========================== */
-
-/* ================= GESTIÓN DE PESTAÑAS ================= */
-    function navigate(tabId) {
-        // Ocultar todos los paneles
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        // Quitar clase active de navs
-        document.querySelectorAll('.nav li').forEach(li => li.classList.remove('active'));
-        
-        // Activar el seleccionado (CON VALIDACIÓN DE SEGURIDAD)
-        const selectedPanel = document.getElementById(tabId);
-        if(selectedPanel) {
-            selectedPanel.classList.add('active');
-        } else {
-            console.error("Panel no encontrado: " + tabId);
-        }
-        
-        const selectedNav = document.getElementById('nav-' + tabId);
-        if(selectedNav) selectedNav.classList.add('active');
-
-        // Guardar estado
-        localStorage.setItem('activeOwnerTab', tabId);
-    }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const seccionActiva = localStorage.getItem('seccionActiva') || 'estilistas';
-    navigate(seccionActiva);
-
-    const btnPerfil = document.getElementById('perfilBtn');
-    if (btnPerfil) {
-        btnPerfil.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('modalPerfil').classList.add('show');
-        });
-    }
-});
-
-
-/* ==========================
-    MODAL PERFIL
-========================== */
-function cerrarModalPerfil() {
-  document.getElementById('modalPerfil').classList.remove('show');
-}
-
-
-/* ==========================
-    FUNCIÓN PREVIEW IMAGE GENERAL
-========================== */
-function previewImage(input, previewId) {
-  const preview = document.getElementById(previewId);
-  const file = input.files?.[0];
-  
-  if (preview && file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      preview.src = e.target.result;
-      preview.classList.remove('hidden');
-    }
-    reader.readAsDataURL(file);
-  }
-}
-
-
-
-
-
-
-
-
-
-/* ==========================
-    PREVIEW ESTILISTA
-========================== */
-const inputEstilista = document.getElementById("estilistaImagenFile");
-if (inputEstilista) {
-  inputEstilista.addEventListener("change", function() {
-    previewImage(this, 'estilistaImagenPreview');
-  });
-}
-
-
-/* ==========================
-    ELIMINAR Usuario
+   ELIMINAR USUARIO
 ========================== */
 function eliminarUsuario(boton) {
-  const estilistaId = boton.getAttribute('data-id');
-  if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-    window.location.href = '/estilistas/delete/' + estilistaId;
-  }
+    const userId = boton.getAttribute('data-id');
+    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+    fetch(`/usuarios/delete/${userId}`, { method: 'GET' })
+        .then(resp => {
+            if (resp.status === 205) {
+                alert("Tu cuenta ha sido eliminada. Saliendo...");
+                window.location.href = "/auth/login";
+            } else if (resp.ok) {
+                boton.closest(".usuario-card").remove();
+                mostrarMensajeDinamico({ success: "Usuario eliminado correctamente." });
+            } else {
+                mostrarMensajeDinamico({ error: "Error al eliminar el usuario." });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            mostrarMensajeDinamico({ error: "Error al eliminar el usuario." });
+        });
 }
 
-        // Auto-dismiss alertas
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        a.classList.add('hide'); // activa la animación
-        setTimeout(() => a.remove(), 500); // elimina del DOM después de que termine la transición
+/* ==========================
+   MODAL PERFIL
+========================== */
+function abrirModalPerfil() { document.getElementById('modalPerfil').classList.add('show'); }
+function cerrarModalPerfil() { document.getElementById('modalPerfil').classList.remove('show'); }
+window.addEventListener('click', event => {
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (event.target === modal) modal.classList.remove('show');
     });
-}, 5000);
-
+});
 
 /* ==========================
-    CERRAR MODALS AL CLIC FUERA
+   PREVIEW IMÁGENES
 ========================== */
-window.addEventListener('click', function(event) {
-  const modals = document.querySelectorAll('.modal');
-  modals.forEach(modal => {
-    if (event.target === modal) {
-      modal.classList.remove('show');
+function previewImage(input, previewId) {
+    const file = input.files?.[0];
+    const preview = document.getElementById(previewId);
+    if (file && preview) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.classList.remove('hidden'); };
+        reader.readAsDataURL(file);
     }
-  });
-});
+}
+
+/* ==========================
+   DESCARGAR PDF PELOQUERIAS + MENSAJE
+========================== */
+
 </script>
+
 </body>
 </html>

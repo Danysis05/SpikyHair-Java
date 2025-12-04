@@ -2,6 +2,7 @@ package com.proyecto.spikyhair.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -225,16 +228,22 @@ public List<UsuarioDto> buscarPorQuery(String query) {
             .stream()
             .map(u -> modelMapper.map(u, UsuarioDto.class))
             .toList();
+}   
+public UsuarioDto obtenerUsuarioPorPeluqueriaId(Long peluqueriaId) {
+    Usuario usuario = usuarioRepository.findUsuarioByPeluqueriaId(peluqueriaId);
+    if (usuario == null) {
+        return null; // o lanzar excepción si prefieres
+    }
+    return modelMapper.map(usuario, UsuarioDto.class);
 }
 
-
-
-
-
+public Collection<? extends GrantedAuthority> getAuthorities(Long usuarioId) {
+    Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     
+    // Convertir el rol a GrantedAuthority (Spring Security requiere "ROLE_" + nombreRol)
+    return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()));
 }
-
-
-
+}
 
 

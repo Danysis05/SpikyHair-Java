@@ -6,8 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collection;
 import java.util.List;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -20,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
+import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.PeluqueriaService;
 import com.proyecto.spikyhair.service.UsuarioService;
@@ -42,15 +48,27 @@ public class PeluqueriaController {
         return "Dashboard/peluquerias";
     }
 
-    @PostMapping("/crear")
-    public String crearPeluqueria(PeluqueriaDto peluqueriaDto) {
-        Usuario usuario = usuarioService.getUsuarioAutenticado();
-        Long usuarioId = usuario.getId();
-        peluqueriaDto.setUsuarioId(usuarioId);
-        usuarioService.actualizarRol(usuarioId, 3L);
-        peluqueriaService.save(peluqueriaDto);
-        return "redirect:/owners/dashboard";
-    }
+@PostMapping("/crear")
+public String crearPeluqueria(PeluqueriaDto peluqueriaDto) {
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+    Long usuarioId = usuario.getId();
+    peluqueriaDto.setUsuarioId(usuarioId);
+
+    // Cambiar rol en BD
+    usuarioService.actualizarRol(usuarioId, 3L); // DUEÑO
+
+    // Guardar peluquería
+    peluqueriaService.save(peluqueriaDto);
+
+    // Actualizar roles en la sesión de Spring Security
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Collection<? extends GrantedAuthority> updatedAuthorities = usuarioService.getAuthorities(usuarioId);
+    Authentication newAuth = new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), updatedAuthorities);
+    SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+    return "redirect:/owners/dashboard";
+}
+
 
     @GetMapping("/nuevo")
     public String mostrarFormularioCrear(Model model) {
@@ -116,5 +134,18 @@ public String actualizarPeluqueria(
     return "redirect:/owners/dashboard";
 }
 
+@GetMapping("/delete/{id}")
+public String eliminarPeluqueria(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    try {
+        UsuarioDto usuario = usuarioService.obtenerUsuarioPorPeluqueriaId(id);        
+        Long usuarioId = usuario.getId();
+        usuarioService.actualizarRol(usuarioId, 2L);
+        peluqueriaService.delete(id);
+        redirectAttributes.addFlashAttribute("success", "Peluquería eliminada correctamente.");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "Error al eliminar la peluquería.");
+    }
+    return "redirect:/admin/dashboard";
 
+}
 }

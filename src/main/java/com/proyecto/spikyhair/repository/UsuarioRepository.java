@@ -30,6 +30,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
         LOWER(u.rol.nombre) LIKE LOWER(CONCAT('%', :query, '%'))
     """)
     List<Usuario> buscarPorQuery(@Param("query") String query);
+    @Query("SELECT u FROM Usuario u JOIN u.peluquerias p WHERE p.id = :peluqueriaId")
+Usuario findUsuarioByPeluqueriaId(@Param("peluqueriaId") Long peluqueriaId);
+
 
     
 }

@@ -23,16 +23,19 @@
         </a>
 
         <nav class="nav-user">
-            <a th:href="@{/servicios/mostrar}">Servicios</a>
+            <a th:href="@{/home/page}">Inicio</a>
             
-            <a th:href="@{/perfil}" class="profile-link" title="Mi Perfil">
-                <img th:if="${usuario.imagenPerfil != null}" 
-                     th:src="@{/uploads/{img}(img=${usuario.imagenPerfil})}" 
-                     alt="Perfil">
-                <img th:unless="${usuario.imagenPerfil != null}" 
-                     th:src="@{/images/default-user.png}" 
-                     alt="Perfil">
-            </a>
+        <a href="#" class="perfil-nav" onclick="openPerfil()">
+    <img th:if="${usuario.imagenPerfil != null}"
+         th:src="@{'/uploads/' + ${usuario.imagenPerfil}}"
+         alt="Perfil">
+
+    <img th:if="${usuario.imagenPerfil == null}"
+         src="/images/default-user.png"
+         alt="Perfil">
+
+
+</a>
 
             <form th:action="@{/logout}" method="post" style="display: inline;">
                 <button type="submit" class="btn-logout">
@@ -41,62 +44,101 @@
             </form>
         </nav>
     </header>
-
+                <a onclick="history.back()" class="back-btn">
+                <i class="fa-solid fa-arrow-left-long"></i>
+            </a>
     <main class="reservations-container">
 
-        <h2 class="page-title">Reservas de <span th:text="${usuario.nombre}">Usuario</span></h2>
+ <h2 class="page-title">Reservas de <span th:text="${usuario.nombre}">Usuario</span></h2>
 
-        <div class="tab-navigation">
-            <button class="tab-btn active" onclick="showTab('upcoming-reservations')">
-                <i class="fa-solid fa-calendar-check"></i> Mis Reservas
+<div class="tab-navigation">
+    <button class="tab-btn active" onclick="showTab('upcoming-reservations')">
+        <i class="fa-solid fa-calendar-check"></i> Mis Reservas
+    </button>
+    <button class="tab-btn" onclick="showTab('history-reservations')">
+        <i class="fa-solid fa-history"></i> Historial
+    </button>
+</div>
+
+<!-- ========================= MIS RESERVAS (PENDIENTE) ========================= -->
+<div id="upcoming-reservations" class="reservations-list">
+
+    <!-- Cuando NO hay PENDIENTE -->
+    <div th:if="${#lists.isEmpty(reservas.?[estado.toString() == 'PENDIENTE'])}"
+         style="text-align: center; color: #666; padding: 2rem; border: 1px dashed #333; border-radius: 10px;">
+        <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 10px;"></i>
+        <p>No tienes reservas activas en este momento.</p>
+    </div>
+
+    <!-- Mostrar solo PENDIENTE -->
+    <div th:each="reserva : ${reservas}"
+         th:if="${reserva.estado.toString() == 'PENDIENTE'}"
+         class="appointment-card">
+
+        <div class="info-col">
+            <h4 th:text="${reserva.servicioNombre}">Nombre del Servicio</h4>
+            <p><i class="fa-solid fa-calendar-day"></i>
+                <strong th:text="${reserva.fecha}">Fecha</strong>
+            </p>
+            <p><i class="fa-solid fa-clock"></i>
+                Hora: <span th:text="${reserva.hora}">Hora</span>
+            </p>
+        </div>
+
+        <div class="status-col">
+            <span class="status-badge" th:text="${reserva.estado}"></span>
+        </div>
+
+        <div class="actions-col">
+            <button class="btn-action btn-modify"
+                    th:attr="data-reserva-id=${reserva.id}, data-fecha=${reserva.fecha}"
+                    onclick="abrirEditarReserva(this)">
+                <i class="fa-solid fa-pencil"></i> Editar
             </button>
-            <button class="tab-btn" onclick="showTab('history-reservations')">
-                <i class="fa-solid fa-history"></i> Historial
-            </button>
+
+            <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post"
+                  onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');"
+                  style="display:inline;">
+                <button type="submit" class="btn-action btn-cancel">
+                    <i class="fa-solid fa-times"></i> Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= HISTORIAL (REALIZADA) ========================= -->
+<div id="history-reservations" class="reservations-list" style="display: none;">
+
+    <!-- Si no hay REALIZADA -->
+    <div th:if="${#lists.isEmpty(reservas.?[estado.toString() == 'REALIZADA'])}"
+         style="text-align: center; color: #666; padding: 2rem;">
+        <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
+        <p>No tienes reservas pasadas.</p>
+    </div>
+
+    <!-- Mostrar solo REALIZADA -->
+    <div th:each="reserva : ${reservas}"
+         th:if="${reserva.estado.toString() == 'REALIZADA'}"
+         class="appointment-card">
+
+        <div class="info-col">
+            <h4 th:text="${reserva.servicioNombre}"></h4>
+            <p><i class="fa-solid fa-calendar-day"></i>
+                <strong th:text="${reserva.fecha}"></strong>
+            </p>
+            <p><i class="fa-solid fa-clock"></i>
+                Hora: <span th:text="${reserva.hora}"></span>
+            </p>
         </div>
 
-        <div id="upcoming-reservations" class="reservations-list">
-            
-            <div th:if="${reservas.empty}" style="text-align: center; color: #666; padding: 2rem; border: 1px dashed #333; border-radius: 10px;">
-                <i class="fa-solid fa-calendar-xmark" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                <p>No tienes reservas activas en este momento.</p>
-            </div>
-
-            <div th:each="reserva : ${reservas}" class="appointment-card">
-                
-                <div class="info-col">
-                    <h4 th:text="${reserva.servicioNombre}">Nombre del Servicio</h4>
-                    <p><i class="fa-solid fa-calendar-day"></i> <strong th:text="${reserva.fecha}">Fecha</strong></p>
-                    <p><i class="fa-solid fa-clock"></i> Hora: <span th:text="${reserva.hora}">Hora</span></p>
-                </div>
-
-                <div class="status-col">
-                    <span class="status-badge" th:text="${reserva.estado}">Estado</span>
-                </div>
-
-                <div class="actions-col">
-                    
-                    <button class="btn-action btn-modify"
-                            th:attr="data-reserva-id=${reserva.id}, data-fecha=${reserva.fecha}"
-                            onclick="abrirEditarReserva(this)">
-                        <i class="fa-solid fa-pencil"></i> Editar
-                    </button>
-
-                    <form th:action="@{'/reservas/eliminar/' + ${reserva.id}}" method="post"
-                          onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');" style="display:inline;">
-                        <button type="submit" class="btn-action btn-cancel">
-                            <i class="fa-solid fa-times"></i> Cancelar
-                        </button>
-                    </form>
-                </div>
-            </div>
+        <div class="status-col">
+            <span class="status-badge" th:text="${reserva.estado}"></span>
         </div>
+    </div>
+</div>
 
-        <div id="history-reservations" class="reservations-list" style="display: none;">
-            <div style="text-align: center; color: #666; padding: 2rem;">
-                <p>Historial de reservas pasadas.</p>
-            </div>
-        </div>
+
 
     </main>
 
@@ -117,6 +159,61 @@
             </form>
         </div>
     </div>
+    <div id="modalPerfil" class="modal-overlay" onclick="closePerfil(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+        <button class="modal-close" onclick="closePerfil()">×</button>
+
+        <h2>Mi Perfil</h2>
+
+        <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post" enctype="multipart/form-data">
+
+            <!-- ID oculto -->
+            <input type="hidden" th:field="*{id}"/>
+
+            <!-- Imagen -->
+            <div class="profile-img-container">
+                <img th:if="${usuario.imagenPerfil != null}"
+                     th:src="@{'/uploads/' + ${usuario.imagenPerfil}}"
+                     id="previewPerfil"
+                     alt="Foto de perfil">
+
+                <img th:if="${usuario.imagenPerfil == null}"
+                     src="/images/default-user.png"
+                     id="previewPerfil"
+                     alt="Foto de perfil">
+
+                <label class="btn-upload">
+                    <i class="fa-solid fa-camera"></i> Cambiar Foto
+                    <input type="file" name="imagen" id="inputImagenPerfil" accept="image/*" hidden>
+                </label>
+            </div>
+
+            <div class="modal-group">
+                <label>Nombre</label>
+                <input type="text" th:field="*{nombre}" required>
+            </div>
+
+            <div class="modal-group">
+                <label>Email</label>
+                <input type="email" th:field="*{email}" required>
+            </div>
+
+            <div class="modal-group">
+                <label>Teléfono</label>
+                <input type="text" th:field="*{telefono}">
+            </div>
+
+            <div class="modal-group">
+                <label>Contraseña (solo si deseas cambiarla)</label>
+                <input type="password" th:field="*{contrasena}" placeholder="Nueva contraseña (opcional)">
+            </div>
+
+            <button type="submit" class="modal-btn">Guardar Cambios</button>
+        </form>
+
+    </div>
+</div>
 
     <footer>
         <p>© SpikyHair 2025 | Todos los derechos reservados.</p>
@@ -157,6 +254,28 @@
                 cerrarModal('modalEditarReserva');
             }
         }
+        // Mostrar alerta si la reserva fue actualizada correctamente
+    window.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("actualizado") === "true") {
+            alert("¡Tu reserva ha sido actualizada correctamente!");
+        }
+    });
+           function openPerfil() {
+    document.getElementById("modalPerfil").style.display = "flex";
+}
+
+function closePerfil() {
+    document.getElementById("modalPerfil").style.display = "none";
+}
+
+document.getElementById("inputImagenPerfil")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+        document.getElementById("previewPerfil").src = URL.createObjectURL(file);
+    }
+});
+
     </script>
 
 </body>

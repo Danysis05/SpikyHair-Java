@@ -57,4 +57,10 @@ public class ResenasDto {
     public void setPeluqueriaId(Long peluqueriaId) {
         this.peluqueriaId = peluqueriaId;
     }
+    
+    public String getNombreUsuario() {
+        return usuario != null ? usuario.getNombre() : "Desconocido";
+    }
+
+
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.proyecto.spikyhair.DTO.EstilistaDto;
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
@@ -161,21 +162,28 @@ public String editReserva(@ModelAttribute("reserva") ReservasDto dto) {
     }
 
     reservasService.update(dto.getId(), dto);
-    return "redirect:/reservas/mostrar";
+    return "redirect:/reservas/mostrar?actualizado=true";
 }
 
     // Eliminar reserva
-@GetMapping("/eliminar/{id}")
-public String eliminarReserva(@PathVariable Long id, Authentication authentication) {
-    reservasService.delete(id);
+@PostMapping("/eliminar/{id}")
+public String eliminarReserva(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
+    try {
+        reservasService.delete(id);
+        redirectAttributes.addFlashAttribute("success", "Reserva eliminada correctamente.");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "No se pudo eliminar la reserva.");
+    }
 
     if (authentication != null && authentication.getAuthorities().stream()
             .anyMatch(a -> a.getAuthority().equals("ROLE_DUEÑO"))) {
-        return "redirect:/admin/dashboard";
+        return "redirect:/owners/dashboard";
     } else {
-        return "redirect:/reservas/mostrar"; // Asegúrate de que esta ruta exista
+        return "redirect:/reservas/mostrar";
     }
 }
+
+
 
 // En tu controlador (ej: DashboardController o ReservaController)
 @PostMapping("/cambiar-estado/{id}")

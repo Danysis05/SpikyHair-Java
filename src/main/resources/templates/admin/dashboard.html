@@ -422,14 +422,17 @@ function eliminarUsuario(boton) {
 /* ==========================
    MODAL PERFIL
 ========================== */
-function abrirModalPerfil() { document.getElementById('modalPerfil').classList.add('show'); }
-function cerrarModalPerfil() { document.getElementById('modalPerfil').classList.remove('show'); }
-window.addEventListener('click', event => {
-    document.querySelectorAll('.modal').forEach(modal => {
-        if (event.target === modal) modal.classList.remove('show');
-    });
-});
+    function cerrarModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
 
+    const perfilBtn = document.getElementById('perfilBtn');
+    if(perfilBtn){
+        perfilBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('modalPerfil').classList.add('show');
+        });
+    }
 /* ==========================
    PREVIEW IMÁGENES
 ========================== */

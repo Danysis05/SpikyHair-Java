@@ -124,19 +124,32 @@
 
       <div id="reseñas" class="panel">
         <h2>Reseñas de Clientes</h2>
-        <div class="usuarios-grid mb-4">
-            <div class="card text-center p-3">
-                <h5>Total Reseñas</h5>
-                <h2 th:text="${totalReseñas}">0</h2>
-            </div>
-            <div class="card text-center p-3">
-                <h5>Calificación Promedio</h5>
-                <h2 th:text="${promedioPuntación}">0</h2>
-            </div>
-        </div>
+<div class="usuarios-grid mb-4">
+    <div class="card text-center p-3">
+        <h5>
+            <i class="fas fa-comment me-2"></i> <!-- ícono de comentario -->
+            Total Reseñas
+        </h5>
+        <h2 th:text="${totalResenas}">0</h2>
+    </div>
+    <div class="card text-center p-3">
+        <h5>
+            <i class="fas fa-star me-2"></i> <!-- ícono de estrella -->
+            Calificación Promedio
+        </h5>
+        <h2 th:text="${promedioPuntacion}">0</h2>
+    </div>
+</div>
+
+        <a th:href="@{/owners/pdf-Resenas(q=${q})}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
+        <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
+            <input type="hidden" name="activeTab" value="reseñas">
+            <input type="text" name="q" placeholder="Buscar reseñas..." th:value="${q}" />
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
         <div class="datos-container">
             <div class="usuarios-grid">
-                <div class="usuario-card" th:each="r : ${reseñas}">
+                <div class="usuario-card" th:each="r : ${resenas}">
                     <img th:src="@{${r.usuario.imagenPerfil != null ? '/uploads/' + r.usuario.imagenPerfil : '/images/default-avatar.png'}}" class="avatar-img" loading="lazy"/>
                     <h3 th:text="${r.usuario.nombre}">Usuario</h3>
                     <div class="stars" style="color: gold; margin: 5px 0;">
@@ -145,8 +158,14 @@
                     <p th:text="${r.comentario}" style="font-style: italic;">Comentario</p>
                 </div>
             </div>
+         <div class="pagination" th:if="${totalPagesResenas > 0}">
+                <a th:each="i : ${#numbers.sequence(0, totalPagesResenas - 1)}"
+                   th:classappend="${i == pageResenas} ? 'active' : ''"
+                   th:href="@{/owners/dashboard(pageResenas=${i}, activeTab='reseñas')}"
+                   class="pagination-btn" th:text="${i + 1}"></a>
         </div>
       </div>
+        </div>
 
       <div id="servicios" class="panel">
         <h2>Catálogo de Servicios</h2>
@@ -288,12 +307,14 @@
 
                 <!-- ACCIONES -->
                 <div class="acciones">
+                    <form th:action="@{'/reservas/eliminar/' + ${r.id}}" method="post"
+                        onsubmit="return confirm('¿Estás seguro de que deseas cancelar esta reserva?');"
+                        style="display:inline;">
+                        <button type="submit" class="btn-eliminar">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </form>
 
-                    <a th:href="@{'/reservas/eliminar/' + ${r.id}}"
-                       class="btn-eliminar"
-                       onclick="return confirm('¿Eliminar reserva?');">
-                        <i class="fa-regular fa-trash-can"></i>
-                    </a>
                 </div>
             </div>
 

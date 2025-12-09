@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:if="${peluqueria != null}" th:text="${peluqueria.nombre} + ' | SpikyHair'">SpikyHair</title>
+    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
     <title th:if="${peluqueria == null}">SpikyHair</title>
     <link rel="stylesheet" th:href="@{/css/perfilPeluqueria.css}" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
+    
+    <style>
+       
+
+    </style>
 </head>
 
 <body>
@@ -24,6 +29,7 @@
             <i class="fa-solid fa-right-from-bracket"></i>
             Cerrar Sesión
         </a>
+        
     </nav>
 </header>
 
@@ -43,14 +49,12 @@
             <h1 th:if="${peluqueria != null}" th:text="${peluqueria.nombre}">Nombre Peluquería</h1>
             <h1 th:if="${peluqueria == null}">Nombre Peluquería</h1>
             <div class="rating-info">
-<span th:if="${peluqueria != null and peluqueria.horarioApertura != null and peluqueria.horarioCierre != null}"
-      th:text="'Horario: ' + ${peluqueria.horarioApertura} + ' - ' + ${peluqueria.horarioCierre}">
-</span>
-<span th:if="${peluqueria == null or peluqueria.horarioApertura == null or peluqueria.horarioCierre == null}">
-  Horario no disponible
-</span>
-
-
+                <span th:if="${peluqueria != null and peluqueria.horarioApertura != null and peluqueria.horarioCierre != null}"
+                      th:text="'Horario: ' + ${peluqueria.horarioApertura} + ' - ' + ${peluqueria.horarioCierre}">
+                </span>
+                <span th:if="${peluqueria == null or peluqueria.horarioApertura == null or peluqueria.horarioCierre == null}">
+                  Horario no disponible
+                </span>
             </div>
         </div>
     </section>
@@ -74,77 +78,216 @@
 
             <div class="info-box">
                 <h3>Nuestros Servicios</h3>
-                <div class="services-grid">
-                    <div th:if="${servicios != null}" th:each="servicio : ${servicios}" class="service-item">
-                        <span th:text="${servicio.nombre}">Nombre Servicio</span>
-                        <span class="price" th:text="'$' + ${servicio.precio}">$0</span>
+
+                <div class="carousel-wrapper">
+                    <button class="carousel-btn prev-btn" onclick="moveCarousel('servicios-track', 'prev')">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <div class="services-grid carousel-track" id="servicios-track">
+                        <div th:if="${servicios != null}" th:each="servicio : ${servicios}" class="service-item">
+                            <div class="service-image-container">
+                                <img th:src="@{/uploads/{img}(img=${servicio.imagen})}" loading="lazy" onerror="this.src='/images/default-service.png'"/>
+                            </div>
+                            <div class="service-details">
+                                <span class="service-name" th:text="${servicio.nombre}">Nombre Servicio</span>
+                                <span class="service-price" th:text="'$' + ${servicio.precio}">$0</span>
+                            </div>
+                        </div>
+
+                        <div th:if="${servicios == null or #lists.isEmpty(servicios)}" class="no-services" style="width: 100%; text-align:center;">
+                            <p>No hay servicios disponibles.</p>
+                        </div>
                     </div>
-                    <div th:if="${servicios == null or #lists.isEmpty(servicios)}">
-                        <p>No hay servicios disponibles.</p>
-                    </div>
+
+                    <button class="carousel-btn next-btn" onclick="moveCarousel('servicios-track', 'next')">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
+
 
             <div class="info-box">
                 <h3>Conoce a Nuestros Estilistas</h3>
-                <div class="barberos-grid">
-                    <div th:if="${estilistas != null}" th:each="estilista : ${estilistas}" class="barbero-card">
-                        <img th:if="${estilista.imagenPerfil != null}" th:src="@{/uploads/estilistas/{img}(img=${estilista.imagenPerfil})}" alt="Estilista">
-                        <img th:if="${estilista.imagenPerfil == null}" src="https://via.placeholder.com/150" alt="Estilista por defecto">
-                        <h4 th:text="${estilista.nombre}">Nombre Estilista</h4>
-                        <small th:text="${estilista.especialidad}">Especialidad</small>
+                
+                <div class="carousel-wrapper">
+                    <button class="carousel-btn prev-btn" onclick="moveCarousel('estilistas-track', 'prev')">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <div class="barberos-grid carousel-track" id="estilistas-track">
+                        <div th:if="${estilistas != null}" th:each="estilista : ${estilistas}" class="barbero-card">
+                            <img th:if="${estilista.imagenPerfil != null}" th:src="@{/uploads/estilistas/{img}(img=${estilista.imagenPerfil})}" alt="Estilista">
+                            <img th:if="${estilista.imagenPerfil == null}" src="https://via.placeholder.com/150" alt="Estilista por defecto">
+                            <h4 th:text="${estilista.nombre}">Nombre Estilista</h4>
+                            <small th:text="${estilista.especialidad}">Especialidad</small>
+                        </div>
+                        
+                        <div th:if="${estilistas == null or #lists.isEmpty(estilistas)}" style="width: 100%; text-align:center;">
+                            <p>No hay estilistas registrados.</p>
+                        </div>
                     </div>
-                    <div th:if="${estilistas == null or #lists.isEmpty(estilistas)}">
-                        <p>No hay estilistas registrados.</p>
-                    </div>
+
+                    <button class="carousel-btn next-btn" onclick="moveCarousel('estilistas-track', 'next')">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
 
         </div>
 
-        <div class="booking-column">
-            <div class="booking-module">
-                <h3>Reserva tu Cita</h3>
-                <form th:action="@{/reservas/crear}" method="post">
-                    <input type="hidden" name="peluqueriaId" th:value="${peluqueria.id}" />
 
-                    <div class="booking-group">
-                        <label for="servicio">Servicio</label>
-                        <select id="servicio" name="servicioId" required>
-                            <option value="" disabled selected>Selecciona un servicio</option>
-                            <option th:each="s : ${servicios}" th:value="${s.id}" th:text="${s.nombre} + ' ($' + ${s.precio} + ')'">Servicio</option>
-                        </select>
+ 
+        
+        
+            <!-- === MODAL RESERVA === -->
+<div id="modalReserva" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+        <button class="modal-close" onclick="closeModal()">×</button>
+
+        <h2>Reservar Cita</h2>
+
+        <form th:action="@{/reservas/crear}" method="post">
+            <input type="hidden" name="peluqueriaId" th:value="${peluqueria.id}" />
+
+            <div class="modal-group">
+                <label for="servicio">Servicio</label>
+                <select id="servicio" name="servicioId" required>
+                    <option value="" disabled selected>Selecciona un servicio</option>
+                    <option th:each="s : ${servicios}" th:value="${s.id}"
+                            th:text="${s.nombre} + ' ($' + ${s.precio} + ')'"></option>
+                </select>
+            </div>
+
+            <div class="modal-group">
+                <label for="estilista">Estilista (Opcional)</label>
+                <select id="estilista" name="estilistaId">
+                    <option value="">Cualquiera disponible</option>
+                    <option th:each="e : ${estilistas}"
+                            th:value="${e.id}" th:text="${e.nombre}"></option>
+                </select>
+            </div>
+
+            <div class="modal-group">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="modal-group">
+                <label for="hora">Hora</label>
+                <div class="modal-group">
+                    <label for="hora">Hora</label>
+                    <input type="time" id="hora" name="hora" required
+                        th:attr="min=${peluqueria.horarioApertura}, max=${peluqueria.horarioCierre}">
+                </div>
+
+            </div>
+
+            <button type="submit" class="modal-btn">Reservar Ahora</button>
+        </form>
+    </div>
+</div>
+
+    </div>
+    <button onclick="openModal()" class="btn-book-now">Reservar Ahora</button>
+    <section class="reviews-section">
+            <h2>Comentarios de Clientes</h2>
+            <div class="reviews-list">
+                <div th:if="${resenas != null}" th:each="r : ${resenas}" class="review-card">
+                    <div class="review-header">
+                        <div class="foto-contenedor">
+                            <img th:if="${r.usuario.imagenPerfil != null}"
+                                 th:src="@{'/uploads/' + ${r.usuario.imagenPerfil}}"
+                                 class="foto-usuario">
+                            <i th:if="${r.usuario.imagenPerfil == null}"
+                            class="fas fa-user-circle icono-usuario"></i>
+                        </div>
+
+                        <strong th:text="${r.usuario.nombre}">Nombre Usuario</strong>
+
+                        <div class="stars">
+                            <i class="fa-solid fa-star"
+                               th:each="i : ${#numbers.sequence(1, r.puntuacion)}"></i>
+                        </div>
                     </div>
 
-                    <div class="booking-group">
-                        <label for="estilista">Estilista (Opcional)</label>
-                        <select id="estilista" name="estilistaId">
-                            <option value="">Cualquiera disponible</option>
-                            <option th:each="e : ${estilistas}" th:value="${e.id}" th:text="${e.nombre}">Estilista</option>
-                        </select>
-                    </div>
+                    <p class="review-comment" th:text="${r.comentario}">
+                        Comentario...
+                    </p>
+                </div>
 
-                    <div class="booking-group">
-                        <label for="fecha">Fecha</label>
-                        <input type="date" id="fecha" name="fecha" required>
-                    </div>
+                <div th:if="${resenas == null or #lists.isEmpty(resenas)}" class="no-reviews">
+                    <p>¡Sé el primero en dejar un comentario!</p>
+                </div>
+            </div>
 
-                    <div class="booking-group">
-                        <label for="hora">Hora</label>
-                        <input type="time" id="hora" name="hora" min="09:00" max="18:00" required>
-                    </div>
+            <div class="add-review">
+                <h3>Deja tu Comentario</h3>
+                <form th:action="@{/resenas/crear/{id}(id=${peluqueria.id})}" method="post">
+                    <label for="puntuacion">Puntuación</label>
+                    <select name="puntuacion" id="puntuacion" required>
+                        <option value="">Selecciona una puntuación</option>
+                        <option value="1">★ 1</option>
+                        <option value="2">★★ 2</option>
+                        <option value="3">★★★ 3</option>
+                        <option value="4">★★★★ 4</option>
+                        <option value="5">★★★★★ 5</option>
+                    </select>
 
-                    <button type="submit" class="btn-book-now">Reservar Ahora</button>
+                    <label for="comentario">Comentario</label>
+                    <textarea name="comentario" id="comentario" required maxlength="255"></textarea>
+
+                    <button type="submit" class="btn-add-review">Enviar Reseña</button>
                 </form>
             </div>
-        </div>
-    </div>
+        </section>
 
 </main>
 
 <footer>
     <p>© SpikyHair 2025 | Reserva con estilo. Tu look, nuestro compromiso.</p>
 </footer>
+
+<script>
+    function moveCarousel(elementId, direction) {
+        const container = document.getElementById(elementId);
+        
+        if (container) {
+            // Calculamos el ancho visible para saber cuánto desplazar
+            // Esto asegura que si se ven 4 items, se desplace un bloque de 4 items.
+            const scrollAmount = container.clientWidth;
+            
+            const position = direction === 'next' ? scrollAmount : -scrollAmount;
+            
+            container.scrollBy({
+                left: position,
+                behavior: 'smooth'
+            });
+        }
+    }
+function openModal() {
+    document.getElementById("modalReserva").style.display = "flex";
+}
+
+function closeModal(event) {
+    document.getElementById("modalReserva").style.display = "none";
+}
+
+    const form = document.querySelector('#modalReserva form');
+    form.addEventListener('submit', function(e) {
+        const horaInput = document.getElementById('hora');
+        const hora = horaInput.value;
+        const minHora = horaInput.min;
+        const maxHora = horaInput.max;
+
+        if (hora < minHora || hora > maxHora) {
+            e.preventDefault();
+            alert(`Por favor selecciona una hora entre ${minHora} y ${maxHora}`);
+        }
+    });
+
+</script>
 
 </body>
 </html>

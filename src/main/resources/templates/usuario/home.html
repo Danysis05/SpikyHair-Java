@@ -25,54 +25,59 @@
             <a th:href="@{/peluquerias/nuevo}" class="nav-link">
                 <i class="fa-solid fa-plus"></i> Registrar Peluquería
             </a>
-            <a th:href="@{/miperfil}">Mi Perfil</a>
+            
             <a th:href="@{/reservas/mostrar}">Mis Reservas</a>
             <a th:href="@{/logout}" class="btn-logout">
             <i class="fa-solid fa-right-from-bracket"></i>
             Cerrar Sesión
         </a>
+        <a href="#" class="perfil-nav" onclick="openPerfil()">
+            <img th:if="${usuario.imagenPerfil != null}"
+                th:src="@{'/uploads/' + ${usuario.imagenPerfil}}"
+                alt="Perfil">
+
+            <img th:if="${usuario.imagenPerfil == null}"
+                src="/images/default-user.png"
+                alt="Perfil">
+
+
+        </a>
+
+
         </nav>
     </header>
 
     <div class="main-content">
         
-        <aside class="sidebar">
-            <h3>Filtros de Búsqueda</h3>
+       <aside class="sidebar">
+    <h3>Filtros de Búsqueda</h3>
 
-            <div class="filter-group">
-                <label>Buscar Barbería</label>
-                <input type="text" placeholder="Nombre, barrio..." />
+    <form method="GET" action="/home/page">
+
+        <div class="filter-group">
+            <label>Buscar Barbería</label>
+            <input type="text" name="nombre" placeholder="Nombre" value="">
+        </div>
+
+        <div class="filter-group">
+            <label>Calificación Mínima</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <label style="font-weight: normal; font-size: 0.85rem;">
+                    <input type="radio" name="estrellas" value="5" ${param.estrellas == '5' ? 'checked' : ''}> 5 Estrellas
+                </label>
+
+                <label style="font-weight: normal; font-size: 0.85rem;">
+                    <input type="radio" name="estrellas" value="4" ${param.estrellas == '4' ? 'checked' : ''}> 4+ Estrellas
+                </label>
             </div>
+        </div>
 
-            <div class="filter-group">
-                <label>Ubicación</label>
-                <select>
-                    <option value="">Todas las zonas</option>
-                    <option value="centro">Centro</option>
-                    <option value="norte">Zona Norte</option>
-                    <option value="sur">Zona Sur</option>
-                </select>
-            </div>
+        <button class="btn-filter">
+            <i class="fa-solid fa-magnifying-glass"></i> Aplicar Filtros
+        </button>
+    </form>
+</aside>
 
-            <div class="filter-group">
-                <label>Tipo de Servicio</label>
-                <select>
-                    <option value="">Cualquier servicio</option>
-                    <option value="corte">Corte de Cabello</option>
-                    <option value="barba">Diseño de Barba</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label>Calificación Mínima</label>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <label style="font-weight: normal; font-size: 0.85rem;"><input type="radio" name="stars"> 5 Estrellas</label>
-                    <label style="font-weight: normal; font-size: 0.85rem;"><input type="radio" name="stars"> 4+ Estrellas</label>
-                </div>
-            </div>
-
-            <button class="btn-filter"><i class="fa-solid fa-magnifying-glass"></i> Aplicar Filtros</button>
-        </aside>
 
         <section class="barberias-list">
             
@@ -121,6 +126,63 @@
             </div>
         </section>
     </div>
+    <!-- ================= MODAL PERFIL USUARIO ================= -->
+<div id="modalPerfil" class="modal-overlay" onclick="closePerfil(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+        <button class="modal-close" onclick="closePerfil()">×</button>
+
+        <h2>Mi Perfil</h2>
+
+        <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post" enctype="multipart/form-data">
+
+            <!-- ID oculto -->
+            <input type="hidden" th:field="*{id}"/>
+
+            <!-- Imagen -->
+            <div class="profile-img-container">
+                <img th:if="${usuario.imagenPerfil != null}"
+                     th:src="@{'/uploads/' + ${usuario.imagenPerfil}}"
+                     id="previewPerfil"
+                     alt="Foto de perfil">
+
+                <img th:if="${usuario.imagenPerfil == null}"
+                     src="/images/default-user.png"
+                     id="previewPerfil"
+                     alt="Foto de perfil">
+
+                <label class="btn-upload">
+                    <i class="fa-solid fa-camera"></i> Cambiar Foto
+                    <input type="file" name="imagen" id="inputImagenPerfil" accept="image/*" hidden>
+                </label>
+            </div>
+
+            <div class="modal-group">
+                <label>Nombre</label>
+                <input type="text" th:field="*{nombre}" required>
+            </div>
+
+            <div class="modal-group">
+                <label>Email</label>
+                <input type="email" th:field="*{email}" required>
+            </div>
+
+            <div class="modal-group">
+                <label>Teléfono</label>
+                <input type="text" th:field="*{telefono}">
+            </div>
+
+            <div class="modal-group">
+                <label>Contraseña (solo si deseas cambiarla)</label>
+                <input type="password" th:field="*{contrasena}" placeholder="Nueva contraseña (opcional)">
+            </div>
+
+            <button type="submit" class="modal-btn">Guardar Cambios</button>
+        </form>
+
+    </div>
+</div>
+
 
      <footer>
         <div class="footer-grid">
@@ -135,14 +197,7 @@
                 </div>
             </div>
             
-            <div class="footer-links">
-                <h4>Plataforma</h4>
-                <ul>
-                    <li><a th:href="@{/auth/login}">Iniciar Sesión</a></li>
-                    <li><a th:href="@{/auth/new}">Registrarse</a></li>
-                    <li><a th:href="@{/auth/login}">Ver Peluquerias</a></li>
-                </ul>
-            </div>
+
 
             <div class="footer-links">
                 <h4>Legal</h4>
@@ -165,6 +220,20 @@
                 card.style.animationDelay = (index * 0.1) + 's';
             });
         });
+        function openPerfil() {
+    document.getElementById("modalPerfil").style.display = "flex";
+}
+
+function closePerfil() {
+    document.getElementById("modalPerfil").style.display = "none";
+}
+
+document.getElementById("inputImagenPerfil")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+        document.getElementById("previewPerfil").src = URL.createObjectURL(file);
+    }
+});
     </script>
 
 </body>

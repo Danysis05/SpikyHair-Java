@@ -34,29 +34,28 @@ public String crearResena(
         @Valid ResenasDto resenaDto,
         BindingResult result) {
 
-    // Validar datos del formulario
     if (result.hasErrors()) {
-        return "redirect:/peluquerias/perfil/" + peluqueriaId + "?error=datosInvalidos";
+        return "redirect:/home/perfilPeluqueria/" + peluqueriaId + "?error=datosInvalidos";
     }
 
     try {
-        // 1. Obtener usuario autenticado
         Usuario usuario = usuarioService.getUsuarioAutenticado();
+        if (usuario == null) {
+            return "redirect:/login?error=Debe iniciar sesión para comentar";
+        }
+
         UsuarioDto usuarioDto = new UsuarioDto(usuario);
 
-        // 2. Completar DTO
         resenaDto.setUsuario(usuarioDto);
         resenaDto.setPeluqueriaId(peluqueriaId);
 
-        // 3. Guardar
         reseñaService.save(resenaDto);
 
     } catch (Exception e) {
-        return "redirect:/peluquerias/perfil/" + peluqueriaId + "?error=" + e.getMessage();
+        return "redirect:/home/perfilPeluqueria/" + peluqueriaId + "?error=" + e.getMessage();
     }
 
-    // 4. Redirigir al perfil
-    return "redirect:/peluquerias/perfil/" + peluqueriaId;
+    return "redirect:/home/perfilPeluqueria/" + peluqueriaId + "?success=resenaCreada";
 }
 
 }

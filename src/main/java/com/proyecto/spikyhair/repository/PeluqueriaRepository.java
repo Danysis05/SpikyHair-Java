@@ -57,6 +57,30 @@ List<Object[]> findTop5PeluqueriasWithPromedioRaw();
     LIMIT 5
     """, nativeQuery = true)
 List<Object[]> findTop5PeluqueriasPorReservas();
+@Query(value = """
+    SELECT 
+        p.id AS id,
+        p.nombre AS nombre,
+        p.direccion AS direccion,
+        p.descripcion AS descripcion,
+        p.imagen_url AS imagenUrl,
+        COALESCE(AVG(r.puntuacion), 0) AS promedio
+    FROM peluqueria p
+    LEFT JOIN resena r ON r.peluqueria_id = p.id
+    WHERE
+        (:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+    GROUP BY p.id
+    HAVING
+        (:estrellas IS NULL OR promedio >= :estrellas)
+    ORDER BY promedio DESC
+    """, nativeQuery = true)
+List<Object[]> buscarConFiltrosRaw(
+        @Param("nombre") String nombre,
+        @Param("estrellas") Integer estrellas
+);
+
+
+
 
 
 

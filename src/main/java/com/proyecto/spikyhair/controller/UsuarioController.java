@@ -65,8 +65,7 @@ public class UsuarioController {
         return "usuarios/form";
     }
 
-    // Guardar o actualizar usuario (unificado)
-@PostMapping("/guardar")
+ @PostMapping("/guardar")
 public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
                              @RequestParam(value = "imagen", required = false) MultipartFile imagen) {
     try {
@@ -74,7 +73,7 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         File carpeta = new File(rutaCarpeta);
         if (!carpeta.exists()) carpeta.mkdirs();
 
-        // Procesar la nueva imagen
+        // Procesar nueva imagen
         if (imagen != null && !imagen.isEmpty()) {
             String originalFilename = imagen.getOriginalFilename();
             String nombreOriginal = (originalFilename != null) ?
@@ -86,7 +85,7 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
 
             usuarioDto.setImagenPerfil(nombreArchivo);
 
-            // Eliminar imagen anterior si existe
+            // Eliminar imagen anterior
             if (usuarioDto.getId() != null) {
                 UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
                 if (existente.getImagenPerfil() != null && !existente.getImagenPerfil().isEmpty()) {
@@ -108,11 +107,16 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
             }
             usuarioService.save(usuarioDto);
         } else {
-            // Actualización → no tocar contraseña si es null o vacía
+            // Actualización → NO tocar contraseña si viene vacía
             UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
+
+            // ⛔ NO copiar la contraseña encriptada al DTO
+            //   (esto causaba doble encriptación dentro del service)
             if (usuarioDto.getContrasena() == null || usuarioDto.getContrasena().isEmpty()) {
-                usuarioDto.setContrasena(existente.getContrasena());
+                usuarioDto.setContrasena(null);  // 🔥 importante
             }
+
+            // El service ya debe verificar si contrasena == null para no encriptarla
             usuarioService.update(usuarioDto.getId(), usuarioDto);
         }
 
@@ -126,7 +130,7 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
         switch (rol) {
             case "ADMINISTRADOR": return "redirect:/admin/dashboard";
             case "DUEÑO": return "redirect:/owners/dashboard";
-            default: return "redirect:/usuarios/home";
+            default: return "redirect:/home/page";
         }
     }
     return "redirect:/login";

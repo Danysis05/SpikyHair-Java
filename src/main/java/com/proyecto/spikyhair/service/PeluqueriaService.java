@@ -158,4 +158,20 @@ public List<PeluqueriaTopDto> obtenerTop5PorReservas() {
 
 
 }
+public List<PeluqueriaTopDto> buscarConFiltros(String nombre, Integer estrellas) {
+    List<Object[]> resultados = peluqueriaRepository.buscarConFiltrosRaw(nombre, estrellas);
+
+    return resultados.stream()
+        .map(r -> new PeluqueriaTopDto(
+                ((Number) r[0]).longValue(),     // id
+                (String) r[1],                   // nombre
+                (String) r[2],                   // direccion
+                (String) r[3],                   // descripcion
+                (String) r[4],                   // imagenUrl
+                ((Number) r[5]).doubleValue()    // promedio
+        ))
+        .toList();
+}
+
+
 }

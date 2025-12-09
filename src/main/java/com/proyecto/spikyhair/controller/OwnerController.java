@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
@@ -320,5 +321,83 @@ public void generarPdfEstilistas(
     document.close();
 }
 
+@GetMapping("/pdf-Resenas")
+public void generarPdfResenas(
+        @RequestParam(required = false) String q, 
+        HttpServletResponse response) throws IOException, DocumentException {
+
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
+    Long peluqueriaId = peluqueriaService.findByUsuarioId(usuario.getId()).getId();
+
+    List<ResenasDto> resenas = resenaService.buscarPorQuery(peluqueriaId, q);
+    System.out.println("PDF Reseñas: peluqueriaId=" + peluqueriaId + ", q=" + q + ", resenas.size=" + resenas.size());
+
+    response.setContentType("application/pdf");
+    response.setHeader("Content-Disposition", "attachment; filename=resenas.pdf");
+
+    Document document = new Document();
+    PdfWriter.getInstance(document, response.getOutputStream());
+    document.open();
+
+    // Título
+    Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+    Paragraph title = new Paragraph("Reporte de Reseñas", titleFont);
+    title.setAlignment(Element.ALIGN_CENTER);
+    title.setSpacingAfter(20);
+    document.add(title);
+
+    // Tabla de reseñas
+    PdfPTable table = new PdfPTable(4);
+    table.setWidthPercentage(100);
+    table.setWidths(new float[]{3, 4, 2, 2}); // Usuario, Comentario, Puntuación, Fecha
+
+    Stream.of("Usuario", "Comentario", "Puntuación", "Fecha").forEach(header -> {
+        PdfPCell cell = new PdfPCell(new Phrase(header));
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        cell.setPadding(5);
+        table.addCell(cell);
+    });
+
+    for (ResenasDto resena : resenas) {
+        table.addCell(resena.getNombreUsuario());   // Nombre del usuario
+        table.addCell(resena.getComentario());      // Comentario
+        table.addCell(String.valueOf(resena.getPuntuacion())); // Puntuación
+        table.addCell(resena.getId().toString());   // Podrías reemplazar con fecha si la agregas al DTO
+    }
+
+    document.add(table);
+
+    // Gráfico de distribución de puntuaciones
+    Map<Integer, Long> distribucionPuntuaciones = resenas.stream()
+            .collect(Collectors.groupingBy(ResenasDto::getPuntuacion, Collectors.counting()));
+
+    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    distribucionPuntuaciones.forEach((puntuacion, cantidad) -> {
+        dataset.addValue(cantidad, "Reseñas", String.valueOf(puntuacion));
+    });
+
+    JFreeChart chart = ChartFactory.createBarChart(
+            "Distribución de Puntuaciones",
+            "Puntuación",
+            "Cantidad de reseñas",
+            dataset
+    );
+
+    CategoryPlot plot = chart.getCategoryPlot();
+    BarRenderer renderer = (BarRenderer) plot.getRenderer();
+    renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+    renderer.setDefaultItemLabelsVisible(true);
+    plot.setRangeGridlinesVisible(true);
+
+    BufferedImage chartImage = chart.createBufferedImage(500, 300);
+    ByteArrayOutputStream chartBaos = new ByteArrayOutputStream();
+    ImageIO.write(chartImage, "png", chartBaos);
+    Image chartPdfImage = Image.getInstance(chartBaos.toByteArray());
+    chartPdfImage.setAlignment(Element.ALIGN_CENTER);
+    chartPdfImage.setSpacingBefore(20);
+    document.add(chartPdfImage);
+
+    document.close();
+}
 
 }

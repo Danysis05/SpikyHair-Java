@@ -7,14 +7,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.proyecto.spikyhair.DTO.EstilistaDto;
 import com.proyecto.spikyhair.DTO.PeluqueriaDto;
 import com.proyecto.spikyhair.DTO.PeluqueriaTopDto;
+import com.proyecto.spikyhair.DTO.ResenasDto;
 import com.proyecto.spikyhair.DTO.ServiciosDto;
+import com.proyecto.spikyhair.DTO.UsuarioDto;
 import com.proyecto.spikyhair.entity.Usuario;
 import com.proyecto.spikyhair.service.EstilistaService;
 import com.proyecto.spikyhair.service.PeluqueriaService;
+import com.proyecto.spikyhair.service.ResenaService;
 import com.proyecto.spikyhair.service.ServiciosService;
 import com.proyecto.spikyhair.service.UsuarioService;
 
@@ -28,32 +32,49 @@ public class HomeController {
     private final PeluqueriaService peluqueriaService;
     private final ServiciosService serviciosService;
     private final EstilistaService estilistaService;
+    private final ResenaService reseñaService;
 
     public HomeController(UsuarioService usuarioService, PeluqueriaService peluqueriaService,
-         ServiciosService serviciosService, EstilistaService estilistaService){
+         ServiciosService serviciosService, EstilistaService estilistaService, ResenaService reseñaService) {
         this.usuarioService = usuarioService;
         this.peluqueriaService = peluqueriaService;
         this.serviciosService = serviciosService;
         this.estilistaService = estilistaService;
-
+        this.reseñaService = reseñaService;
     }
-    @GetMapping("page")
-    public String page(Model model){
-        Usuario usuario = usuarioService.getUsuarioAutenticado();
-        List<PeluqueriaTopDto> peluqueriasTop = peluqueriaService.obtenerTop5();
-        model.addAttribute("peluqueriasTop", peluqueriasTop);
-        model.addAttribute("usuario", usuario);
-        return "usuario/home";
+@GetMapping("page")
+public String page(
+        @RequestParam(required = false) String nombre,
+        @RequestParam(required = false) Integer estrellas,
+        Model model
+){
+    Usuario usuario = usuarioService.getUsuarioAutenticado();
 
-    }
+    // Llamamos al servicio con filtros
+    List<PeluqueriaTopDto> peluqueriasTop = peluqueriaService.buscarConFiltros(nombre, estrellas);
+
+    model.addAttribute("peluqueriasTop", peluqueriasTop);
+    model.addAttribute("usuario", usuario);
+
+    // Para mantener los valores en el form
+    model.addAttribute("nombre", nombre);
+    model.addAttribute("estrellas", estrellas);
+
+    return "usuario/home";
+}
+
     @GetMapping("perfilPeluqueria/{id}")
     public String peluqueria(@PathVariable Long id, Model model){
         PeluqueriaDto peluqueria = peluqueriaService.getById(id);
         List<ServiciosDto> servicios = serviciosService.getByPeluqueriaId(id);
         List<EstilistaDto> estilistas = estilistaService.getByPeluqueriaId(id);
+        List<ResenasDto> resenas = reseñaService.getByPeluqueriaId(id);
+        List<UsuarioDto> usuarios = usuarioService.getAll();
         model.addAttribute("peluqueria", peluqueria);
         model.addAttribute("servicios", servicios);
         model.addAttribute("estilistas",estilistas);
+        model.addAttribute("resenas", resenas);
+        model.addAttribute("usuarios", usuarios);
         if (peluqueria == null) {
     return "redirect:/home/page"; // o mostrar error personalizado
 }

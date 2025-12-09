@@ -174,25 +174,128 @@
         }
         .contact-details i { color: var(--primary); margin-right: 12px; width: 15px; text-align: center; }
 
-        /* Sección Servicios */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-        }
-        .service-item {
-            background: var(--input-bg);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.3s ease;
-        }
-        .service-item:hover { transform: translateY(-3px); background: #222; }
-        .service-item span { font-weight: 500; }
-        .service-item .price { color: var(--primary-light); font-weight: 700; }
+/* ===== GRID ===== */
+/* ===== GRID MODERNO ===== */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 15px;
+}
+
+
+/* ===== TARJETA DE SERVICIO ===== */
+.service-item {
+    background: linear-gradient(135deg, #1a1a1a, #111);
+    padding: 14px 15px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.55);
+}
+
+
+/* ===== CONTENEDOR DE IMAGEN ===== */
+.service-image-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0f0f0f;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* ===== IMAGEN DEL SERVICIO ===== */
+.service-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+/* ===== DETALLES DEL SERVICIO ===== */
+.service-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.service-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f3f3f3;
+    letter-spacing: 0.3px;
+}
+
+.service-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-light);
+    margin-top: 4px;
+}
+
+
+/* ===== CUANDO NO HAY SERVICIOS ===== */
+.no-services {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    color: #ccc;
+    border: 1px dashed #333;
+}
+
+/* si usas 'onerror' para ocultar la img, el icono (hermano previo) seguirá visible */
+
+
+/* ===== DETALLES ===== */
+.service-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.service-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f3f3f3;
+    letter-spacing: 0.3px;
+}
+
+.service-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-light);
+    margin-top: 4px;
+}
+
+/* ===== NO HAY SERVICIOS ===== */
+.no-services {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    color: #ccc;
+    border: 1px dashed #333;
+}
+
+
 
         /* Sección Estilistas/Barberos */
         .barberos-grid {
@@ -361,3 +464,517 @@
             .services-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
             .barberos-grid { justify-content: start; }
         }
+
+/* ============================= */
+/* SECCIÓN DE RESEÑAS */
+/* ============================= */
+
+.reviews-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: #0a0a0a;
+    border-top: 3px solid crimson;
+    color: #fff;
+    border-radius: 10px;
+}
+
+/* ===== LISTA DE RESEÑAS ===== */
+
+.reviews-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+
+/* ===== TARJETA DE RESEÑA ===== */
+
+.review-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+
+
+/* ===== ENCABEZADO DE RESEÑA ===== */
+
+.review-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+/* ===== FOTO DEL USUARIO ===== */
+
+.foto-contenedor {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.foto-usuario {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid crimson;
+}
+
+.icono-usuario {
+    font-size: 45px;
+    color: #aaa;
+}
+
+
+/* ===== NOMBRE DEL USUARIO ===== */
+
+.review-header strong {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+
+/* ===== ESTRELLAS ===== */
+
+.stars {
+    margin-left: auto;
+    display: flex;
+    gap: 3px;
+}
+
+.stars i {
+    color: #FFD700; /* dorado */
+    font-size: 18px;
+}
+
+
+/* ===== COMENTARIO ===== */
+
+.review-comment {
+    margin-top: 5px;
+    color: #444;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+
+/* ===== MENSAJE DE SIN RESEÑAS ===== */
+
+.no-reviews {
+    text-align: center;
+    padding: 20px;
+    background: #fafafa;
+    border-radius: 10px;
+    color: #666;
+    font-size: 16px;
+    border: 1px dashed #ccc;
+}
+
+
+/* FORMULARIO */
+.add-review {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid crimson;
+}
+
+.add-review h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: crimson;
+    font-size: 22px;
+}
+
+.add-review label {
+    font-weight: bold;
+    color: #fff;
+    display: block;
+    margin-top: 10px;
+}
+
+.add-review select,
+.add-review textarea {
+    width: 100%;
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid crimson;
+    background: #0d0d0d;
+    color: #fff;
+    resize: none;
+}
+
+.add-review textarea {
+    height: 90px;
+}
+
+.btn-add-review {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: crimson;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.btn-add-review:hover {
+    background: #8b0000;
+}
+ .foto-contenedor {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.foto-usuario {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid crimson;
+}
+
+.icono-usuario {
+    font-size: 45px;
+    color: #aaa;
+}
+ /* --- CORRECCIONES Y ESTILOS PARA EL CARRUSEL --- */
+
+.carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    overflow: hidden; /* Oculta cualquier cosa que se salga, como los bordes de los botones si quedan justos */
+    padding: 0;
+}
+
+/* El track ya no es un grid, sino un contenedor flex que se desplaza */
+.carousel-track {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 15px; /* Ajustamos el espacio entre tarjetas */
+    padding: 10px 0; /* Padding vertical, no horizontal */
+    
+    
+    /* Ocultar scrollbars */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* --- LÓGICA DE MOSTRAR DE A 4 ITEMS --- */
+
+/* Sobrescribimos el display: grid de .services-grid y .barberos-grid */
+.services-grid, .barberos-grid {
+    display: flex !important; 
+    /* El resto de estilos se manejan con .carousel-track */
+}
+
+.service-item, .barbero-card {
+    /* Forzamos 4 ítems. 100% / 4 = 25%. Restamos 12px para el gap de 15px. */
+    flex: 0 0 calc(25% - 12px) !important; 
+    min-width: 0; 
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+/* --- RESPONSIVIDAD AJUSTADA (Mantiene el control de 4, 3, 2, 1) --- */
+
+@media (max-width: 1024px) {
+    .service-item, .barbero-card {
+        flex: 0 0 calc(33.33% - 10px) !important; /* 3 items */
+    }
+}
+
+@media (max-width: 768px) {
+    .service-item, .barbero-card {
+        flex: 0 0 calc(50% - 8px) !important; /* 2 items */
+    }
+}
+
+@media (max-width: 480px) {
+    .service-item, .barbero-card {
+        flex: 0 0 100% !important; /* 1 item */
+    }
+}
+
+/* --- ESTILOS DE LOS BOTONES (CORREGIDOS) --- */
+
+.carousel-btn {
+    background-color: rgba(0, 0, 0, 0.6); /* Botón semi-transparente */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: background 0.2s, transform 0.2s;
+}
+
+.carousel-btn:hover { background-color: rgba(0, 0, 0, 0.9); }
+.carousel-btn:active { transform: translateY(-50%) scale(0.9); }
+
+/* Posición: Los movemos ADENTRO para que no provoquen el desbordamiento horizontal */
+.prev-btn { left: 10px; } 
+.next-btn { right: 10px; }
+.info-box{
+    overflow: hidden; /* Asegura que nada se desborde */
+    width: 50%; /* Asegura que ocupe todo el ancho disponible */
+}
+/* === OVERLAY === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* === CONTENIDO DEL MODAL === */
+.modal-content {
+    background: #111;
+    padding: 25px 30px;
+    border-radius: 14px;
+    width: 420px;
+    max-width: 90%;
+    color: white;
+    position: relative;
+    animation: modalShow 0.28s ease-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+/* Animación */
+@keyframes modalShow {
+    from {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Botón cerrar */
+.modal-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    color: #fff;
+    font-size: 26px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Inputs */
+.modal-group {
+    margin-bottom: 15px;
+}
+
+.modal-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.modal-group input,
+.modal-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #222;
+    color: white;
+    font-size: 15px;
+}
+
+.modal-group input:focus,
+.modal-group select:focus {
+    outline: 2px solid crimson;
+}
+
+/* Botón reservar */
+.modal-btn {
+    width: 100%;
+    padding: 12px;
+    background: crimson;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.modal-btn:hover {
+    background: #b30027;
+}
+       
+     /* === OVERLAY === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* === CONTENIDO === */
+.modal-content {
+    background: #111;
+    padding: 25px 30px;
+    border-radius: 14px;
+    width: 420px;
+    max-width: 90%;
+    color: white;
+    position: relative;
+    animation: modalShow 0.28s ease-out;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+@keyframes modalShow {
+    from { opacity: 0; transform: translateY(-25px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    color: #fff;
+    font-size: 26px;
+    border: none;
+    cursor: pointer;
+}
+
+/* === FORM === */
+.modal-group {
+    margin-bottom: 15px;
+}
+
+.modal-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.modal-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #222;
+    color: white;
+    font-size: 15px;
+}
+
+.modal-group input:focus {
+    outline: 2px solid crimson;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 12px;
+    background: crimson;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.modal-btn:hover {
+    background: #b00028;
+}
+
+/* === FOTO PERFIL === */
+.profile-img-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-img-container img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid crimson;
+}
+
+.btn-upload {
+    display: inline-block;
+    margin-top: 10px;
+    background: #222;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.btn-upload:hover {
+    background: #333;
+}
+.perfil-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.perfil-nav img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}

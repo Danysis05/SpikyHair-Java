@@ -26,6 +26,10 @@
   <div class="main">
 
     <div class="header">
+        <button class="btn-hamburger" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
       <div>
         <h1>Bienvenido, Administrador</h1>
         <p th:text="${usuario.nombre}">Nombre de Usuario</p>
@@ -59,140 +63,129 @@
     <div id="panelContainer">
 
 <!-- PANEL USUARIOS -->
-<div id="usuarios" class="panel-usuarios panel">
+<div id="usuarios" class="panel panel-usuarios">
 
     <h2>Gestión de Usuarios</h2>
 
     <!-- RESUMEN -->
-<div class="usuarios-resumen-grid mb-4">
+    <div class="usuarios-resumen-grid">
 
-    <!-- Total Usuarios -->
-    <div class="usr-resumen-card text-center p-2">
-        <i class="fa fa-users resumen-icono"></i> <!-- correcto: grupo de personas -->
-        <div class="resumen-info">
-            <h6>Total Usuarios</h6>
-            <span class="resumen-num" th:text="${totalUsuarios}">0</span>
+        <div class="usr-resumen-card">
+            <i class="fa fa-users resumen-icono"></i>
+            <div class="resumen-info">
+                <h6>Total Usuarios</h6>
+                <span class="resumen-num" th:text="${totalUsuarios}">0</span>
+            </div>
         </div>
+
+        <div class="usr-resumen-card">
+            <i class="fa fa-user-shield resumen-icono"></i>
+            <div class="resumen-info">
+                <h6>Administradores</h6>
+                <span class="resumen-num" th:text="${totalAdmins}">0</span>
+            </div>
+        </div>
+
+        <div class="usr-resumen-card">
+            <i class="fa fa-user resumen-icono"></i>
+            <div class="resumen-info">
+                <h6>Usuarios</h6>
+                <span class="resumen-num" th:text="${totalUsers}">0</span>
+            </div>
+        </div>
+
+        <div class="usr-resumen-card">
+            <i class="fa fa-user-tie resumen-icono"></i>
+            <div class="resumen-info">
+                <h6>Propietarios</h6>
+                <span class="resumen-num" th:text="${totalOwners}">0</span>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Administradores -->
-    <div class="usr-resumen-card text-center p-2">
-        <i class="fa fa-user-shield resumen-icono"></i> <!-- correcto: usuario con escudo -->
-        <div class="resumen-info">
-            <h6>Administradores</h6>
-            <span class="resumen-num" th:text="${totalAdmins}">0</span>
-        </div>
-    </div>
-
-    <!-- Usuarios normales -->
-    <div class="usr-resumen-card text-center p-2">
-        <i class="fa fa-user resumen-icono"></i> <!-- correcto: usuario individual -->
-        <div class="resumen-info">
-            <h6>Usuarios</h6>
-            <span class="resumen-num" th:text="${totalUsers}">0</span>
-        </div>
-    </div>
-
-    <!-- Propietarios -->
-    <div class="usr-resumen-card text-center p-2">
-        <i class="fa fa-user-tie resumen-icono"></i> <!-- mejor: usuario con corbata representa propietario/empresa -->
-        <div class="resumen-info">
-            <h6>Propietarios</h6>
-            <span class="resumen-num" th:text="${totalOwners}">0</span>
-        </div>
-    </div>
-
-</div>
-
-
-<!-- BOTÓN DESCARGAR PDF (mantiene filtros nombreUsuario, rol y q) -->
-<a th:href="@{/admin/dashboard/pdf-usuarios(
-        nombreUsuario=${nombreUsuario},
-        rol=${rolSeleccionado},
-        q=${q}
-    )}"
-   class="usuarios-btn-pdf"
-   target="_blank" rel="noopener">
-    <i class="fa fa-file-pdf"></i>
-    Descargar PDF
-</a>
-
-
-    <!-- BUSCADOR -->
-    <form th:action="@{/admin/dashboard}" method="get" class="usuarios-buscador">
-        <input type="text" name="q" placeholder="Buscar..." th:value="${q}">
-        <button type="submit"><i class="fa fa-search"></i></button>
-    </form>
-
-    <!-- LISTA DE USUARIOS -->
-<div class="usuarios-lista">
-    <div class="usuario-item" th:each="u : ${usuarios}" th:attr="data-id=${u.id}">
-
-        <!-- FOTO -->
-        <img class="usuario-foto"
-             th:src="${u.imagenPerfil != null} ? @{/uploads/{img}(img=${u.imagenPerfil})} : @{/images/default-avatar.png}">
-
-        <!-- DATOS -->
-        <h3 th:text="${u.nombre}">Nombre Usuario</h3>
-        <p th:text="${u.email}">email@ejemplo.com</p>
-        <p th:text="${u.telefono}">00000000</p>
-
-        <!-- BADGE -->
-        <span class="usuario-badge"
-              th:classappend="
-                  ${u.rol.nombre} == 'ADMINISTRADOR' ? ' ub-admin' :
-                  (${u.rol.nombre} == 'USUARIO' ? ' ub-user' : ' ub-dueno')
-              "
-              th:text="${u.rol.nombre}">
-        </span>
-
-        <p class="label-rol">Rol actual:</p>
-
-        <!-- SELECT ROL -->
-        <select class="usuario-select-rol"
-                th:data-id="${u.id}"
-                onchange="cambiarRol(this)"
-                th:disabled="${u.rol.nombre == 'DUEÑO'}">
-
-            <option value="ADMINISTRADOR"
-                    th:selected="${u.rol.nombre == 'ADMINISTRADOR'}">
-                ADMINISTRADOR
-            </option>
-
-            <option value="USUARIO"
-                    th:selected="${u.rol.nombre == 'USUARIO'}">
-                USUARIO
-            </option>
-
-        </select>
-
-        <!-- Botón para eliminar usuario -->
-        <form th:action="@{'/usuarios/delete/' + ${u.id}}" method="get" style="display: inline;">
-            <button type="submit" 
-                    onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?');" 
-                    class="usuario-btn-eliminar">
-                <i class="fa fa-trash"></i>
-            </button>
+    <!-- ACCIONES -->
+    <div class="usuarios-acciones">
+        
+        <!-- BUSCADOR -->
+        <form th:action="@{/admin/dashboard}" method="get" class="usuarios-buscador">
+            <input type="text" name="q" placeholder="Buscar..." th:value="${q}">
+            <button type="submit"><i class="fa fa-search"></i></button>
         </form>
 
+        <a th:href="@{/admin/dashboard/pdf-usuarios(
+            nombreUsuario=${nombreUsuario},
+            rol=${rolSeleccionado},
+            q=${q}
+        )}" class="usuarios-btn-pdf" target="_blank">
+            <i class="fa fa-file-pdf"></i> PDF
+        </a>
     </div>
-</div>
 
+    <!-- LISTA -->
+    <div class="usuarios-lista">
+        <div class="usuario-item" th:each="u : ${usuarios}" th:attr="data-id=${u.id}">
+
+            <img class="usuario-foto"
+                th:src="${u.imagenPerfil != null} ? @{/uploads/{img}(img=${u.imagenPerfil})} : @{/images/default-avatar.png}">
+
+            <h3 th:text="${u.nombre}">Nombre</h3>
+            <p th:text="${u.email}"></p>
+            <p th:text="${u.telefono}"></p>
+
+            <span class="usuario-badge"
+                th:classappend="
+                    ${u.rol.nombre} == 'ADMINISTRADOR' ? ' ub-admin' :
+                    (${u.rol.nombre} == 'USUARIO' ? ' ub-user' : ' ub-dueno')
+                "
+                th:text="${u.rol.nombre}">
+            </span>
+
+            <p class="label-rol">Rol actual:</p>
+
+<select class="usuario-select-rol"
+        th:data-id="${u.id}"
+        onchange="cambiarRol(this)"
+        th:disabled="${u.id == 1 or u.rol.nombre == 'DUEÑO'}">
+
+    <option value="ADMINISTRADOR"
+            th:selected="${u.rol.nombre == 'ADMINISTRADOR'}">
+        ADMINISTRADOR
+    </option>
+
+    <option value="USUARIO"
+            th:selected="${u.rol.nombre == 'USUARIO'}">
+        USUARIO
+    </option>
+</select>
+<!-- BOTÓN ELIMINAR (Solo si NO es el usuario 1) -->
+<form th:if="${u.id != 1}" 
+      th:action="@{'/usuarios/delete/' + ${u.id}}" 
+      method="get">
+
+    <button type="submit" class="usuario-btn-eliminar"
+            onclick="return confirm('¿Eliminar este usuario?');">
+        <i class="fa fa-trash"></i>
+    </button>
+
+</form>
+
+
+        </div>
+    </div>
 
     <!-- PAGINACIÓN -->
-<div class="pagination" 
-     th:if="${totalPagesUsuarios > 1}">
-    <a th:each="i : ${#numbers.sequence(0, totalPagesUsuarios - 1)}"
-       th:href="@{/admin/dashboard(pageUsuarios=${i}, activeTab='usuarios')}"
-       th:text="${i + 1}"
-       th:classappend="${i == pageUsuarios} ? 'active' : ''"
-       class="pagination-btn">
-    </a>
+    <div class="usuarios-pagination"
+        th:if="${totalPagesUsuarios > 1}">
+        <a th:each="i : ${#numbers.sequence(0, totalPagesUsuarios - 1)}"
+           th:href="@{/admin/dashboard(pageUsuarios=${i}, activeTab='usuarios')}"
+           th:text="${i + 1}"
+           th:classappend="${i == pageUsuarios} ? 'active' : ''"
+           class="usuarios-pag-btn">
+        </a>
+    </div>
+
 </div>
-
-
-</div>
-
 
 
 
@@ -213,12 +206,12 @@
 
     <!-- Acciones superiores -->
     <div class="accionesSuperiores">
-
         <form th:action="@{/admin/dashboard}" method="get" class="buscador-universal buscador-peluquerias">
             <input type="hidden" name="activeTab" value="peluquerias">
             <input type="text" name="q" placeholder="Buscar peluquería..." th:value="${q}">
             <button type="submit"><i class="fa fa-search"></i></button>
         </form>
+
         <a th:href="@{/admin/pdf-peluquerias}" class="btn-pdf btn-peluquerias">
             <i class="fa fa-file-pdf"></i> Descargar PDF
         </a>
@@ -226,67 +219,72 @@
 
     <!-- Tarjetas -->
     <div class="datos-container">
-        <div class="usuarios-grid grid-peluquerias">
+        <div class="grid-peluquerias">
             <div class="usuario-card peluqueria-card" th:each="p : ${peluquerias}">
                 <img th:src="@{${p.imagenUrl != null ? '/uploads/peluquerias/' + p.imagenUrl : '/images/default-salon.png'}}" alt="Imagen Peluquería">
                 <h3 th:text="${p.nombre}">Nombre Peluquería</h3>
                 <p th:text="${p.direccion}">Dirección</p>
                 <p th:text="${p.telefono}">Teléfono</p>
 
-
-                <a th:href="@{'/peluquerias/delete/' + ${p.id}}" class="btn-eliminar btn-eliminar-peluqueria"><i class="fa-regular fa-trash-can"></i></a>
+                <a th:href="@{'/peluquerias/delete/' + ${p.id}}" class="btn-eliminar btn-eliminar-peluqueria">
+                    <i class="fa-regular fa-trash-can"></i>
+                </a>
             </div>
         </div>
 
         <!-- Paginación -->
-<div class="pagination" 
-     th:if="${totalPagesPeluquerias > 1}">
-    <a th:each="i : ${#numbers.sequence(0, totalPagesPeluquerias - 1)}"
-       th:href="@{/admin/dashboard(pagePeluquerias=${i}, activeTab='peluquerias')}"
-       th:text="${i + 1}"
-       th:classappend="${i == pagePeluquerias} ? 'active' : ''"
-       class="pagination-btn">
-    </a>
-</div>
-
+        <div class="pagination-peluquerias" th:if="${totalPagesPeluquerias > 1}">
+            <a th:each="i : ${#numbers.sequence(0, totalPagesPeluquerias - 1)}"
+               th:href="@{/admin/dashboard(pagePeluquerias=${i}, activeTab='peluquerias')}"
+               th:text="${i + 1}"
+               th:classappend="${i == pagePeluquerias} ? 'active' : ''"
+               class="pagination-btn">
+            </a>
+        </div>
     </div>
 </div>
 
 
-
-    </div>
-  </div>
-
-
-  <!-- MODAL PERFIL -->
-  <div id="modalPerfil" class="modal">
+ <div id="modalPerfil" class="modal">
     <div class="modal-content">
-      <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
+        <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
 
-      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
         <h2 class="modal-title">Mi Perfil</h2>
 
-        <div class="preview-container">
-          <img id="avatarPreviewUser"
-               th:src="@{${usuario.imagenPerfil != null ? '/uploads/' + usuario.imagenPerfil : '/images/default-avatar.png'}}"
-               class="imagen-preview">
+        <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+            
+            <div class="preview-container">
+                <img id="avatarPreviewUser"
+                     th:src="@{${usuario.imagenPerfil != null ? '/uploads/' + usuario.imagenPerfil : '/images/default-avatar.png'}}"
+                     class="imagen-preview" 
+                     alt="Foto de perfil">
+                
+                <input type="file" id="imagenPerfilUser" name="imagen" accept="image/*" class="input-file-hidden" onchange="previewImage(event, '#avatarPreviewUser')">
+                <label for="imagenPerfilUser" class="btn-upload">
+                    <i class="fa-solid fa-camera"></i> Cambiar foto
+                </label>
+            </div>
 
-          <label for="imagenPerfilUser" class="btn-guardar">
-            <i class="fa-solid fa-camera"></i> Cambiar imagen
-          </label>
+            <input type="hidden" name="id" th:value="${usuario.id}">
 
-          <input type="file" id="imagenPerfilUser" name="imagen" accept="image/*">
-        </div>
+            <div class="form-group">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" name="nombre" th:value="${usuario.nombre}" class="form-input" required placeholder="Tu nombre">
+            </div>
 
-        <input type="hidden" name="id" th:value="${usuario.id}">
-        <input type="text" name="nombre" th:value="${usuario.nombre}" class="form-input" required>
-        <input type="email" name="email" th:value="${usuario.email}" class="form-input" required>
-        <input type="text" name="telefono" th:value="${usuario.telefono}" class="form-input">
 
-        <button type="submit" class="btn-guardar">Guardar</button>
-      </form>
+            <div class="form-group">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="telefono" th:value="${usuario.telefono}" class="form-input" placeholder="+57 300 123 4567">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancelar" onclick="cerrarModal('modalPerfil')">Cancelar</button>
+                <button type="submit" class="btn-guardar">Guardar Cambios</button>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
 
 
 
@@ -445,12 +443,34 @@ function previewImage(input, previewId) {
         reader.readAsDataURL(file);
     }
 }
+/* ==========================
+   TOGGLE SIDEBAR - MOVIL
+========================== */
+function toggleSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+
+    sidebar.classList.toggle("show");
+    overlay.classList.toggle("show");
+}
+function previewImage(event, querySelector) {
+	const input = event.target;
+	if (input.files && input.files[0]) {
+		const reader = new FileReader();
+		reader.onload = function(e) {
+			const img = document.querySelector(querySelector);
+			img.src = e.target.result;
+		}
+		reader.readAsDataURL(input.files[0]);
+	}
+}
 
 /* ==========================
    DESCARGAR PDF PELOQUERIAS + MENSAJE
 ========================== */
 
 </script>
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 </body>
 </html>

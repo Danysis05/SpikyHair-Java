@@ -66,6 +66,7 @@ public String page(
     @GetMapping("perfilPeluqueria/{id}")
     public String peluqueria(@PathVariable Long id, Model model){
         PeluqueriaDto peluqueria = peluqueriaService.getById(id);
+        Usuario usuario = usuarioService.getUsuarioAutenticado();
         List<ServiciosDto> servicios = serviciosService.getByPeluqueriaId(id);
         List<EstilistaDto> estilistas = estilistaService.getByPeluqueriaId(id);
         List<ResenasDto> resenas = reseñaService.getByPeluqueriaId(id);
@@ -75,6 +76,7 @@ public String page(
         model.addAttribute("estilistas",estilistas);
         model.addAttribute("resenas", resenas);
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("usuarioLogeado", usuario);
         if (peluqueria == null) {
     return "redirect:/home/page"; // o mostrar error personalizado
 }

@@ -213,4 +213,8 @@
             .back-btn { top: 20px; left: 20px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; color: white;}
             body { overflow-y: auto; }
         }
-     
+      .alert.slide-out {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}

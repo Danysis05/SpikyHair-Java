@@ -36,6 +36,9 @@
   <div class="main">
     
     <div class="header">
+        <button class="btn-hamburger" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
       <div>
         <h1>Bienvenido, Propietario</h1>
         <p th:text="${usuario.nombre}">Usuario</p>
@@ -66,80 +69,131 @@
 
     <div id="panelContainer">
 
-      <div id="estilistas" class="panel">
-        <h2>Gestión de Estilistas</h2>
-        <div class="usuarios-grid mb-4">
-            <div class="card text-center p-3">
-                <h5>Total estilistas</h5>
-                <div class="content">
-                    <i class="fas fa-cut"></i>
-                    <h2 th:text="${totalEstilistas}">0</h2>
-                </div>
+<div id="estilistas" class="panel panel-est">
+
+    <h2 class="panel-est-title">Gestión de Estilistas</h2>
+
+    <!-- RESUMEN SUPERIOR -->
+    <div class="panel-est-stats-box">
+        <div class="panel-est-stats-card">
+            <h5>Total Estilistas</h5>
+            <div class="panel-est-stats-content">
+                <i class="fas fa-cut"></i>
+                <h2 th:text="${totalEstilistas}">0</h2>
             </div>
         </div>
+    </div>
 
-        <div class="accionesSuperiores">
-            <button onclick="abrirModalEstilista()" class="agregarServicio">NUEVO ESTILISTA</button>
-            <form class="form-importar" th:action="@{/estilistas/importar-csv}" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInputEstilistas','fileNameEstilistas')" id="fileInputEstilistas">
-                <span id="fileNameEstilistas" style="margin-left: 10px; font-weight: 500; color: #fff;"></span>
-                <button type="submit" class="btn-importar"><i class="fa fa-cloud-upload"></i> Subir Archivo</button>
-            </form>
-            <a th:href="@{/owners/pdf-Estilistas}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
-        </div>
+    <!-- ACCIONES SUPERIORES -->
+    <div class="panel-est-actions">
 
-        <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
-            <input type="hidden" name="activeTab" value="estilistas">
-            <input type="text" name="q" placeholder="Buscar estilista..." th:value="${q}" />
-            <button type="submit"><i class="fa fa-search"></i></button>
+        <button onclick="abrirModalEstilista()" class="panel-est-btn">
+            <i class="fa fa-plus"></i> Nuevo Estilista
+        </button>
+
+        <form class="panel-est-import-form"
+              th:action="@{/estilistas/importar-csv}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <label class="panel-est-import-label">
+                <i class="fa fa-cloud-upload"></i> Importar CSV
+                <input type="file" name="file"
+                       accept=".csv" required
+                       onchange="updateFileName('fileInputEst','fileNameEst')"
+                       id="fileInputEst">
+            </label>
+
+            <span id="fileNameEst" class="panel-est-file-name"></span>
+
+            <button type="submit" class="panel-est-send-btn">
+                Subir Archivo
+            </button>
         </form>
 
-        <div class="datos-container">
-            <div class="usuarios-grid">
-                <div class="usuario-card" th:each="e : ${estilistas}" th:attr="data-id=${e.id}">
-                    <img th:src="@{${e.imagenPerfil != null ? '/uploads/estilistas/' + e.imagenPerfil : '/images/default-stylist.png'}}" class="avatar-img" 
-                         loading="lazy" onerror="this.src='/images/default-avatar.png'">
-                    <h3 th:text="${e.nombre}">Nombre</h3>
-                    <p th:text="${e.especialidad}">Especialidad</p>
-                    <div class="acciones">
-                        <button class="btn-editar" onclick="editarEstilista(this)" 
-                            th:data-id="${e.id}" th:data-nombre="${e.nombre}" th:data-especialidad="${e.especialidad}" th:data-imagen="${e.imagenPerfil}">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </button>
-                        <button class="btn-eliminar" onclick="eliminarEstilista(this)" th:data-id="${e.id}">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                    </div>
+        <a th:href="@{/owners/pdf-Estilistas}" class="panel-est-btn pdf">
+            <i class="fa fa-file-pdf"></i> PDF
+        </a>
+    </div>
+
+    <!-- BUSCADOR -->
+    <form th:action="@{/owners/dashboard}" method="get" class="panel-est-search">
+        <input type="hidden" name="activeTab" value="estilistas">
+        <input type="text" name="q" placeholder="Buscar estilista..." th:value="${q}">
+        <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+
+    <!-- LISTA DE ESTILISTAS -->
+    <div class="panel-est-grid">
+        <div class="panel-est-card" th:each="e : ${estilistas}">
+
+            <div class="panel-est-img-wrapper">
+                <img th:if="${e.imagenPerfil != null}"
+                     th:src="@{'/uploads/estilistas/' + ${e.imagenPerfil}}"
+                     loading="lazy">
+
+                <div class="panel-est-no-img" th:if="${e.imagenPerfil == null}">
+                    <i class="fas fa-user"></i>
                 </div>
             </div>
-            
-            <div class="pagination" th:if="${totalPagesEstilistas > 0}">
-                <a th:each="i : ${#numbers.sequence(0, totalPagesEstilistas - 1)}"
-                   th:classappend="${i == pageEstilistas} ? 'active' : ''"
-                   th:href="@{/owners/dashboard(pageEstilistas=${i}, activeTab='estilistas')}"
-                   class="pagination-btn" th:text="${i + 1}"></a>
+
+            <h3 th:text="${e.nombre}">Nombre</h3>
+            <p class="panel-est-specialty" th:text="${e.especialidad}">Especialidad</p>
+
+            <div class="panel-est-card-actions">
+                <button class="panel-est-card-btn editar"
+                        onclick="editarEstilista(this)"
+                        th:data-id="${e.id}"
+                        th:data-nombre="${e.nombre}"
+                        th:data-especialidad="${e.especialidad}"
+                        th:data-imagen="${e.imagenPerfil}">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+
+                <button class="panel-est-card-btn eliminar"
+                        onclick="eliminarEstilista(this)"
+                        th:data-id="${e.id}">
+                    <i class="fa-regular fa-trash-can"></i>
+                </button>
             </div>
         </div>
-      </div>
+    </div>
 
-      <div id="reseñas" class="panel">
+    <!-- PAGINACIÓN -->
+    <div class="panel-est-pagination" th:if="${totalPagesEstilistas > 0}">
+        <a th:each="i : ${#numbers.sequence(0, totalPagesEstilistas - 1)}"
+           th:classappend="${i == pageEstilistas} ? 'active' : ''"
+           th:href="@{/owners/dashboard(pageEstilistas=${i}, activeTab='estilistas')}"
+           class="panel-est-page-btn"
+           th:text="${i + 1}"></a>
+    </div>
+
+</div>
+
+
+
+      <div id="reseñas" class="panel panel-resenas">
         <h2>Reseñas de Clientes</h2>
 <div class="usuarios-grid mb-4">
-    <div class="card text-center p-3">
+
+    <div class="card datos-card text-center p-3">
         <h5>
-            <i class="fas fa-comment me-2"></i> <!-- ícono de comentario -->
+            <i class="fas fa-comment me-2"></i>
             Total Reseñas
         </h5>
         <h2 th:text="${totalResenas}">0</h2>
     </div>
-    <div class="card text-center p-3">
+
+    <div class="card datos-card text-center p-3">
         <h5>
-            <i class="fas fa-star me-2"></i> <!-- ícono de estrella -->
+            <i class="fas fa-star me-2"></i>
             Calificación Promedio
         </h5>
         <h2 th:text="${promedioPuntacion}">0</h2>
     </div>
+
 </div>
+
 
         <a th:href="@{/owners/pdf-Resenas(q=${q})}" class="btn-pdf"><i class="fa fa-file-pdf"></i> Descargar PDF</a>
         <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
@@ -167,64 +221,111 @@
       </div>
         </div>
 
-      <div id="servicios" class="panel">
-        <h2>Catálogo de Servicios</h2>
-        <div class="usuarios-grid mb-4">
-            <div class="card text-center p-3">
-                <h5>Servicios Activos</h5>
-                <div class="content">
-                    <i class="las la-store-alt"></i>
-                    <h2 th:text="${totalServicios}">0</h2>
-                </div>
-            </div>
-        </div>
+<div id="servicios" class="panel panel-servicios">
 
-        <div class="accionesSuperiores">
-            <button onclick="abrirModalServicio()" class="agregarServicio">NUEVO SERVICIO</button>
-            <form class="form-importar" th:action="@{/servicios/importar-csv}" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" class="input-archivo" accept=".csv" required onchange="updateFileName('fileInput','fileName')" id="fileInput">
-                <span id="fileName" style="margin-left: 10px; font-weight: 500; color: #fff;"></span>
-                <button type="submit" class="btn-importar"><i class="fa fa-cloud-upload"></i> Subir Archivo</button>
-            </form>
-            <a th:href="@{/owners/pdf-Servicios(q=${q})}" class="btn-pdf">
+    <h2 class="serv-panel-title">Catálogo de Servicios</h2>
 
-            <i class="fa fa-file-pdf"></i> Descargar PDF
-        </a>
+    <!-- FICHAS SUPERIORES -->
+    <div class="serv-panel-stats-box">
+        <div class="serv-panel-stat-card">
+            <h5><i class="las la-store-alt"></i> Servicios Activos</h5>
+            <h2 th:text="${totalServicios}">0</h2>
         </div>
-        <form th:action="@{/owners/dashboard}" method="get" class="buscador-universal">
-            <input type="hidden" name="activeTab" value="servicios">
-            <input type="text" name="q" placeholder="Buscar servicio..." th:value="${q}" />
-            <button type="submit"><i class="fa fa-search"></i></button>
+    </div>
+
+    <!-- ACCIONES SUPERIORES -->
+    <div class="serv-panel-actions">
+
+        <button onclick="abrirModalServicio()" class="serv-panel-btn-new">
+            Nuevo Servicio
+        </button>
+
+        <form class="serv-panel-import-form" 
+              th:action="@{/servicios/importar-csv}" 
+              method="post" enctype="multipart/form-data">
+
+            <label class="serv-panel-btn-import-label">
+                <i class="fa fa-cloud-upload"></i> Importar CSV
+                <input type="file" name="file" class="serv-panel-file-input"
+                       accept=".csv" required
+                       onchange="updateFileName('fileInputServicios','fileNameServicios')"
+                       id="fileInputServicios">
+            </label>
+
+            <span id="fileNameServicios" class="serv-panel-file-name"></span>
+
+            <button type="submit" class="serv-panel-btn-upload">
+                Subir Archivo
+            </button>
         </form>
 
-        <div class="datos-container">
-            <div class="usuarios-grid">
-                <div class="usuario-card" th:each="s : ${servicios}">
-                    <img th:src="@{/uploads/{img}(img=${s.imagen})}" class="avatar-img" loading="lazy" onerror="this.src='/images/default-service.png'"/>
-                    <h3 th:text="${s.nombre}">Servicio</h3>
-                    <p><i class="far fa-clock"></i> <span th:text="${s.duracion}"></span></p>
-                    <p th:text="${s.descripcion}" style="font-size: 0.9em; color: #aaa;"></p>
-                    <h4 th:text="'$' + ${s.precio}" style="color: var(--primary-color);">Precio</h4>
-                    <div class="acciones">
-                        <button class="btn-editar" type="button" onclick="editarServicio(this)" 
-                            th:data-id="${s.id}" th:data-nombre="${s.nombre}" th:data-duracion="${s.duracion}" 
-                            th:data-descripcion="${s.descripcion}" th:data-precio="${s.precio}" th:data-imagen="${s.imagen}">
-                            <i class="fa-regular fa-pen-to-square"></i>
-                        </button>
-                        <a th:href="@{'/servicios/delete/' + ${s.id}}" class="btn-eliminar" onclick="return confirm('¿Eliminar servicio?');">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </a>
-                    </div>
-                </div>
+        <a th:href="@{/owners/pdf-Servicios(q=${q})}" class="serv-panel-btn-pdf">
+            <i class="fa fa-file-pdf"></i> PDF
+        </a>
+    </div>
+
+    <!-- BUSCADOR -->
+    <form th:action="@{/owners/dashboard}" method="get" class="serv-panel-search">
+        <input type="hidden" name="activeTab" value="servicios">
+        <input type="text" name="q" placeholder="Buscar servicio..." th:value="${q}">
+        <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+
+    <!-- GRID -->
+    <div class="serv-panel-grid">
+        <div class="serv-panel-card" th:each="s : ${servicios}">
+
+            <div class="serv-panel-img-wrap">
+                <img th:src="@{/uploads/{img}(img=${s.imagen})}" loading="lazy"
+                     onerror="this.parentElement.classList.add('no-img')">
             </div>
-             <div class="pagination" th:if="${totalPagesServicios > 0}">
-                <a th:each="i : ${#numbers.sequence(0, totalPagesServicios - 1)}"
-                   th:classappend="${i == pageServicios} ? 'active' : ''"
-                   th:href="@{/owners/dashboard(pageServicios=${i}, activeTab='servicios')}"
-                   class="pagination-btn" th:text="${i + 1}"></a>
+
+            <h3 th:text="${s.nombre}">Servicio</h3>
+
+            <p class="serv-panel-duration">
+                <i class="far fa-clock"></i>
+                <span th:text="${s.duracion}"></span>
+            </p>
+
+            <p class="serv-panel-description" th:text="${s.descripcion}"></p>
+
+            <h4 class="serv-panel-price" th:text="'$' + ${s.precio}">Precio</h4>
+
+            <div class="serv-panel-actions-card">
+                <button type="button" class="serv-panel-btn-edit"
+                        onclick="editarServicio(this)"
+                        th:data-id="${s.id}"
+                        th:data-nombre="${s.nombre}"
+                        th:data-duracion="${s.duracion}"
+                        th:data-descripcion="${s.descripcion}"
+                        th:data-precio="${s.precio}"
+                        th:data-imagen="${s.imagen}">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+
+                <a th:href="@{'/servicios/delete/' + ${s.id}}"
+                   onclick="return confirm('¿Eliminar servicio?');"
+                   class="serv-panel-btn-delete">
+                    <i class="fa-regular fa-trash-can"></i>
+                </a>
             </div>
+
         </div>
-      </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="serv-panel-pagination" th:if="${totalPagesServicios > 0}">
+        <a th:each="i : ${#numbers.sequence(0, totalPagesServicios - 1)}"
+           th:classappend="${i == pageServicios} ? 'active' : ''"
+           th:href="@{/owners/dashboard(pageServicios=${i}, activeTab='servicios')}"
+           class="serv-panel-pagination-btn"
+           th:text="${i + 1}">
+        </a>
+    </div>
+
+</div>
+
+
  <div id="reservas" class="panel">
     <h2>Listado de Reservas</h2>
 
@@ -336,107 +437,147 @@
 
 
       <div id="peluqueria" class="panel">
-        
-        <form th:action="@{/peluquerias/actualizar/{id}(id=${peluqueria.id})}"
-              method="post" enctype="multipart/form-data" id="form-peluqueria">
 
-            <div class="salon-header-bg">
-                <img th:src="${peluqueria.imagenUrl != null} 
-                            ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
-                            : @{/images/default-salon.png}"
-                     alt="Portada del salón" loading="lazy">
+    <form th:action="@{/peluquerias/actualizar/{id}(id=${peluqueria.id})}"
+          method="post" enctype="multipart/form-data" id="form-peluqueria">
+
+        <!-- PORTADA -->
+        <div class="pelu-header-bg">
+            <img th:src="${peluqueria.imagenUrl != null} 
+                        ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
+                        : @{/images/default-salon.png}"
+                 alt="Portada del salón" loading="lazy">
+        </div>
+
+        <!-- TÍTULO -->
+        <div class="pelu-header-title">
+            <h1 th:text="${peluqueria.nombre}">Nombre Peluquería</h1>
+        </div>
+
+        <!-- GRID PRINCIPAL -->
+        <div class="pelu-grid-layout">
+
+            <!-- TARJETA DE FOTO -->
+            <aside class="pelu-photo-card">
+                <div class="pelu-avatar-wrapper">
+                    <img id="preview-logo-salon"
+                         th:src="${peluqueria.imagenUrl != null} 
+                                  ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
+                                  : @{/images/default-salon.png}"
+                         alt="Logo Peluquería" loading="lazy">
+
+                    <label for="input-logo-salon" class="pelu-avatar-overlay">
+                        <i class="fa-solid fa-camera fa-2x"></i>
+                        <span>Cambiar</span>
+                    </label>
+
+                    <input type="file" name="archivoImagen" id="input-logo-salon"
+                           hidden onchange="genericImagePreview(this, 'preview-logo-salon')">
+                </div>
+
+                <p class="pelu-photo-hint">Logo / Fachada del Salón</p>
+            </aside>
+
+            <!-- FORMULARIO -->
+            <section class="pelu-form-card">
+
+                <h3 class="pelu-form-title">Información de Contacto</h3>
+
+                <div class="pelu-input-group">
+                    <div>
+                        <label class="pelu-label">Nombre</label>
+                        <input type="text" name="nombre" th:value="${peluqueria.nombre}" class="pelu-input">
+                    </div>
+                    <div>
+                        <label class="pelu-label">Dirección</label>
+                        <input type="text" name="direccion" th:value="${peluqueria.direccion}" class="pelu-input" placeholder="Ej: Calle 123">
+                    </div>
+                    <div>
+                        <label class="pelu-label">Teléfono</label>
+                        <input type="text" name="telefono" th:value="${peluqueria.telefono}" class="pelu-input" placeholder="Ej: 300 123 4567">
+                    </div>
+                </div>
+
+                <div class="pelu-input-group full">
+                    <div>
+                        <label class="pelu-label">Correo Electrónico</label>
+                        <input type="email" name="email" th:value="${peluqueria.email}" class="pelu-input">
+                    </div>
+                </div>
+
+                <h3 class="pelu-form-title">Configuración</h3>
+
+                <div class="pelu-input-group">
+                    <div>
+                        <label class="pelu-label">Apertura</label>
+                        <input type="time" name="horarioApertura" th:value="${peluqueria.horarioApertura}" class="pelu-input">
+                    </div>
+                    <div>
+                        <label class="pelu-label">Cierre</label>
+                        <input type="time" name="horarioCierre" th:value="${peluqueria.horarioCierre}" class="pelu-input">
+                    </div>
+                </div>
+
+                <div class="pelu-input-group full">
+                    <div>
+                        <label class="pelu-label">Descripción</label>
+                        <textarea name="descripcion" rows="4" class="pelu-input" th:text="${peluqueria.descripcion}"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="pelu-btn-save">Guardar Cambios</button>
+
+            </section>
+
+        </div>
+
+    </form>
+
+</div>
+
+     </div>
+     </div> 
+   <div id="modalPerfil" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
+
+        <h2 class="modal-title">Mi Perfil</h2>
+
+        <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
+            
+            <div class="preview-container">
+                <img id="avatarPreviewUser"
+                     th:src="@{${usuario.imagenPerfil != null ? '/uploads/' + usuario.imagenPerfil : '/images/default-avatar.png'}}"
+                     class="imagen-preview" 
+                     alt="Foto de perfil">
+                
+                <input type="file" id="imagenPerfilUser" name="imagen" accept="image/*" class="input-file-hidden" onchange="previewImage(event, '#avatarPreviewUser')">
+                <label for="imagenPerfilUser" class="btn-upload">
+                    <i class="fa-solid fa-camera"></i> Cambiar foto
+                </label>
             </div>
 
-            <div class="salon-header-title">
-                <h1 th:text="${peluqueria.nombre}">Nombre Peluquería</h1>
+            <input type="hidden" name="id" th:value="${usuario.id}">
+
+            <div class="form-group">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" name="nombre" th:value="${usuario.nombre}" class="form-input" required placeholder="Tu nombre">
             </div>
 
-            <div class="salon-grid-layout">
-                <aside class="salon-photo-card">
-                    <div class="salon-avatar-wrapper">
-                        <img id="preview-logo-salon"
-                             th:src="${peluqueria.imagenUrl != null} 
-                                      ? @{/uploads/peluquerias/{img}(img=${peluqueria.imagenUrl})} 
-                                      : @{/images/default-salon.png}"
-                             alt="Logo Peluquería" loading="lazy">
-                        <label for="input-logo-salon" class="salon-avatar-overlay">
-                            <i class="fa-solid fa-camera fa-2x"></i>
-                            <span>Cambiar</span>
-                        </label>
-                        <input type="file" name="archivoImagen" id="input-logo-salon"
-                               hidden onchange="genericImagePreview(this, 'preview-logo-salon')">
-                    </div>
-                    <p class="salon-photo-hint">Logo / Fachada del Salón</p>
-                </aside>
 
-                <section class="salon-form-card">
-                    <h3 class="form-section-title">Información de Contacto</h3>
+            <div class="form-group">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="telefono" th:value="${usuario.telefono}" class="form-input" placeholder="+57 300 123 4567">
+            </div>
 
-                    <div class="modern-input-group">
-                        <div>
-                            <label class="modern-label">Nombre</label>
-                            <input type="text" name="nombre" th:value="${peluqueria.nombre}" class="modern-input">
-                        </div>
-                        <div>
-                            <label class="modern-label">Dirección</label>
-                            <input type="text" name="direccion" th:value="${peluqueria.direccion}" class="modern-input" placeholder="Ej: Calle 123">
-                        </div>
-                        <div>
-                            <label class="modern-label">Teléfono</label>
-                            <input type="text" name="telefono" th:value="${peluqueria.telefono}" class="modern-input" placeholder="Ej: 300 123 4567">
-                        </div>
-                    </div>
-                    <div class="modern-input-group full">
-                        <div>
-                            <label class="modern-label">Correo Electrónico</label>
-                            <input type="email" name="email" th:value="${peluqueria.email}" class="modern-input">
-                        </div>
-                    </div>
-
-                    <h3 class="form-section-title">Configuración</h3>
-                    <div class="modern-input-group">
-                        <div>
-                            <label class="modern-label">Apertura</label>
-                            <input type="time" name="horarioApertura" th:value="${peluqueria.horarioApertura}" class="modern-input">
-                        </div>
-                        <div>
-                            <label class="modern-label">Cierre</label>
-                            <input type="time" name="horarioCierre" th:value="${peluqueria.horarioCierre}" class="modern-input">
-                        </div>
-                    </div>
-                    <div class="modern-input-group full">
-                        <div>
-                            <label class="modern-label">Descripción</label>
-                            <textarea name="descripcion" rows="4" class="modern-input" th:text="${peluqueria.descripcion}"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="btn-save-container">
-                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
-                    </div>
-                </section>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancelar" onclick="cerrarModal('modalPerfil')">Cancelar</button>
+                <button type="submit" class="btn-guardar">Guardar Cambios</button>
             </div>
         </form>
-      </div> </div> </div> <div id="modalPerfil" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="cerrarModal('modalPerfil')">&times;</span>
-      <form action="/usuarios/guardar" method="post" enctype="multipart/form-data" class="perfil-form">
-        <h2 class="modal-title">Mi Perfil</h2>
-        <div class="preview-container">
-           <img id="avatarPreviewUser" th:src="@{${usuario.imagenPerfil != null ? '/uploads/' + usuario.imagenPerfil : '/images/default-avatar.png'}}" class="imagen-preview">
-           <label for="imagenPerfilUser" class="btn-guardar" style="margin-top: 10px; display: inline-block; cursor: pointer;">
-             <i class="fa-solid fa-camera"></i> Cambiar imagen
-           </label>
-           <input type="file" id="imagenPerfilUser" name="imagen" style="display: none;" accept="image/*" onchange="genericImagePreview(this, 'avatarPreviewUser')">
-        </div>
-        <input type="hidden" name="id" th:value="${usuario.id}">
-        <input type="text" name="nombre" placeholder="Nombre" th:value="${usuario.nombre}" required class="form-input">
-        <input type="email" name="email" placeholder="Email" th:value="${usuario.email}" required class="form-input">
-        <input type="text" name="telefono" placeholder="Teléfono" th:value="${usuario.telefono}" class="form-input">
-        <button type="submit" class="btn-guardar">Guardar</button>
-      </form>
     </div>
-  </div>
+</div>
+
 
   <div id="modalServicio" class="modal">
     <div class="modal-content">
@@ -701,9 +842,18 @@ function mostrarMensaje(tipo, mensaje) {
         setTimeout(() => alerta.remove(), 800);
     }, 3000);
 }
+/* ==========================
+   TOGGLE SIDEBAR - MOVIL
+========================== */
+function toggleSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
 
-
+    sidebar.classList.toggle("show");
+    overlay.classList.toggle("show");
+}
 
   </script>
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 </body>
 </html>

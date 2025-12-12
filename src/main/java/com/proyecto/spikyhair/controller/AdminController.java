@@ -165,7 +165,7 @@ public String generarPdfUsuarios(
 
         // Título
         Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-        Paragraph title = new Paragraph("Reporte de Usuarios", titleFont);
+        Paragraph title = new Paragraph("SpikyHair - Reporte de Usuarios", titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         title.setSpacingAfter(20);
         document.add(title);
@@ -219,13 +219,15 @@ public String generarPdfUsuarios(
         // --- GRÁFICO 2: Usuarios vs Administradores ---
         long totalAdmins = usuarioService.countAdmins();
         long totalUsuarios = usuarioService.countUsers();
+        long totalOwners = usuarioService.countOwners();
 
         DefaultCategoryDataset datasetRoles = new DefaultCategoryDataset();
         datasetRoles.addValue(totalUsuarios, "Usuarios", "Usuarios");
         datasetRoles.addValue(totalAdmins, "Administradores", "Administradores");
+        datasetRoles.addValue(totalOwners, "Propietarios", "Propietarios");
 
         JFreeChart chartRoles = ChartFactory.createBarChart(
-                "Usuarios vs Administradores",
+                "Usuarios vs Administradores vs Propietarios",
                 "Rol",
                 "Cantidad",
                 datasetRoles

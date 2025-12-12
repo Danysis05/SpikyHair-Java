@@ -1275,102 +1275,135 @@ body {
     pointer-events: none;
 }
 
-/* ==== CONTENEDOR GENERAL ==== */
+/* PANEL GENERAL */
 .panel-usuarios {
-    padding: 20px;
+    padding: 25px;
     color: white;
-    width: 98%;
+    width: 96%;
+    margin: auto;
 }
 
-/* ==== TARJETAS RESUMEN ==== */
+/* TITULO */
+.panel-usuarios h2 {
+    font-size: 34px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-weight: 600;
+}
+
+
+/* ================= RESUMEN ================= */
 .usuarios-resumen-grid {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-start; /* si quieres alineación a la izquierda */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
 .usr-resumen-card {
-    background-color: #111; /* negro oscuro */
-    color: #fff;
-    border-radius: 10px;
-    padding: 10px 15px;
-    flex: 1;
+    background: #111;
+    padding: 20px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    height: 100px;
+    gap: 15px;
+    transition: .2s ease;
+    border: 1px solid #222;
 }
 
 .usr-resumen-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(220,20,60,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(220,20,60,0.35);
 }
 
 .resumen-icono {
-    font-size: 24px; /* más pequeño */
-    color: crimson; 
+    font-size: 30px;
+    color: crimson;
 }
 
 .resumen-info h6 {
+    font-size: 16px;
     margin: 0;
-    font-size: 25px;
-    color: #f0f0f0;
 }
 
 .resumen-num {
-    display: block;
-    font-size: 30px;
-    font-weight: 700;
-    color: #fff;
+    font-size: 26px;
+    font-weight: bold;
 }
 
 
+/* ================= ACCIONES ================= */
+.usuarios-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
 
-/* ==== BUSCADOR ==== */
+/* BUSCADOR */
 .usuarios-buscador {
     display: flex;
-    margin: 20px 0;
-}
-.usuarios-buscador input {
     flex: 1;
-    padding: 10px;
-    background: #101010;
-    border: 1px solid #222;
-    color: white;
-    border-radius: 8px 0 0 8px;
-}
-.usuarios-buscador button {
-    padding: 10px 16px;
-    background: crimson;
-    border: none;
-    border-radius: 0 8px 8px 0;
-    color: white;
+    min-width: 260px;
 }
 
-/* ==== LISTA DE USUARIOS ==== */
+.usuarios-buscador input {
+    flex: 1;
+    background: #121212;
+    color: white;
+    border: 1px solid #333;
+    padding: 10px 12px;
+    border-radius: 10px 0 0 10px;
+}
+
+.usuarios-buscador button {
+    background: crimson;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 0 10px 10px 0;
+}
+
+/* BOTÓN PDF */
+.usuarios-btn-pdf {
+    padding: 10px 18px;
+    background: crimson;
+    border-radius: 10px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    transition: .2s ease;
+}
+
+.usuarios-btn-pdf:hover {
+    background: #9d0c28;
+}
+
+
+/* ================= LISTA ================= */
 .usuarios-lista {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 22px;
 }
 
-/* ==== TARJETA USUARIO ==== */
 .usuario-item {
     background: #111;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 20px;
-    border: 1px solid #242424;
     text-align: center;
+    border: 1px solid #222;
     transition: .25s ease;
 }
+
 .usuario-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 0 18px rgba(220, 20, 60, .5);
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(220,20,60,.4);
 }
 
-/* ==== FOTO ==== */
+/* FOTO */
 .usuario-foto {
     width: 95px;
     height: 95px;
@@ -1380,139 +1413,108 @@ body {
     margin-bottom: 10px;
 }
 
-/* ==== BADGE ==== */
+/* BADGES */
 .usuario-badge {
-    padding: 6px 14px;
-    border-radius: 22px;
-    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: .85rem;
     color: white;
-    display: inline-block;
     margin-bottom: 10px;
+    display: inline-block;
 }
 
 .ub-admin { background: crimson; }
-.ub-user  { background: #a10000; }
-.ub-dueno { background: #ff0033; font-weight: bold; }
+.ub-user  { background: #880012; }
+.ub-dueno { background: #ff0033; }
 
-/* ==== SELECT === */
+/* SELECT */
 .usuario-select-rol {
     width: 100%;
     padding: 8px;
-    background: #171717;
+    background: #161616;
     color: white;
     border: 1px solid #333;
     border-radius: 10px;
-    margin-top: 8px;
+    margin-bottom: 12px;
 }
 
-/* ==== BOTÓN ELIMINAR ==== */
+/* BOTÓN ELIMINAR */
 .usuario-btn-eliminar {
-    margin-top: 10px;
     width: 100%;
-    background: transparent;
-    border: 1px solid crimson;
-    color: crimson;
     padding: 10px;
-    border-radius: 12px;
+    border-radius: 10px;
+    border: 1px solid crimson;
+    background: transparent;
+    color: crimson;
     transition: .2s;
 }
+
 .usuario-btn-eliminar:hover {
     background: crimson;
     color: white;
 }
 
-/* ==== PAGINACIÓN ==== */
-.usuarios-paginacion {
+/* ================= PAGINACION ================= */
+.usuarios-pagination {
     margin-top: 25px;
     text-align: center;
 }
 
 .usuarios-pag-btn {
-    padding: 8px 16px;
     background: #111;
-    border: 1px solid #252525;
+    border: 1px solid #333;
+    padding: 7px 14px;
+    color: white;
     margin: 0 4px;
     border-radius: 6px;
-    color: white;
     text-decoration: none;
+    transition: .2s;
 }
 
-.pag-activa {
-    background: crimson !important;
-    border-color: crimson !important;
-}
-/* BOTÓN DESCARGAR PDF - panel usuarios (crimson palette) */
-.usuarios-btn-pdf {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+.usuarios-pag-btn:hover,
+.usuarios-pag-btn.active {
     background: crimson;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 10px;
-    border: 1px solid #b01030;
-    font-weight: 600;
-    transition: transform .12s ease, box-shadow .12s ease;
-    margin-left: 10px; /* separacion respecto al buscador si lo pones al lado */
+    border-color: crimson;
 }
-
-.usuarios-btn-pdf i { font-size: 14px; }
-
-.usuarios-btn-pdf:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(220,20,60,0.25);
-    background: #b01030;
-    border-color: #8a0c22;
-}
-
-/* --- PANEL PELUQUERIAS --- */
 .panel-peluquerias {
-    background-color: #0d0d0d; /* negro profundo */
+    background-color: #0d0d0d;
     color: #fff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-    width: 90%;
-    margin-left: 50px;
+    width: 95%;
+    margin: auto;
 }
 
 /* Título */
 .panel-peluquerias h2 {
-    color: #ffffff; /* crimson */
+    color: #ffffff;
     margin-bottom: 20px;
     font-family: 'Segoe UI', sans-serif;
     font-weight: 600;
-    font-size: 40px;
-
+    font-size: 34px;
+    text-align: center;
 }
 
 /* Resumen */
 .peluquerias-resumen-grid {
     display: flex;
     gap: 20px;
-    width: 300px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .peluqueria-resumen-card {
     background-color: #1a1a1a;
-    flex: 1;
     display: flex;
     align-items: center;
     gap: 15px;
     padding: 15px 20px;
     border-radius: 10px;
+    min-width: 250px;
+    justify-content: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     transition: transform 0.2s;
-}
-
-.peluqueria-resumen-card:hover {
-    transform: translateY(-5px);
-}
-
-.peluqueria-resumen-card i {
-    font-size: 36px;
-    color: #dc143c;
 }
 
 /* Acciones superiores */
@@ -1520,56 +1522,52 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.btn-peluquerias {
-    background-color: #dc143c;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: background 0.3s;
-    text-decoration: none;
+/* Buscador */
+.buscador-peluquerias {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
 }
 
-.btn-peluquerias:hover {
-    background-color: #a50b2e;
-}
-.buscador-peluquerias{
-    width: 600px;
-}
 .buscador-peluquerias input {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 8px 0 0 8px;
     border: none;
     outline: none;
     background-color: #1a1a1a;
     color: #fff;
-    margin-right: -40px;
-    width: 1000px !important;
+    flex: 1;
 }
-
 
 .buscador-peluquerias button {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 0 8px 8px 0;
     border: none;
-    background-color: #dc143c !important;
+    background-color: #dc143c;
     color: #fff;
     cursor: pointer;
-    transition: background 0.3s;
+    margin-left: -5%;
 }
 
-.buscador-peluquerias button:hover {
-    background-color: #a50b2e;
+/* Botón PDF */
+.btn-peluquerias {
+    background-color: #dc143c;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
 }
 
 /* Tarjetas */
 .grid-peluquerias {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
 }
 
 .peluqueria-card {
@@ -1577,33 +1575,15 @@ body {
     border-radius: 12px;
     padding: 15px;
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
-    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .peluqueria-card img {
     width: 100%;
-    height: 150px;
+    height: 160px;
     object-fit: cover;
     border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.peluqueria-card h3 {
-    color: #dc143c;
-    margin-bottom: 5px;
-}
-
-.peluqueria-card p {
-    font-size: 14px;
-    color: #ddd;
-    margin: 2px 0;
-}
-
-.peluqueria-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
 }
 
 /* Botón eliminar */
@@ -1613,23 +1593,18 @@ body {
     right: 10px;
     background-color: #dc143c;
     border: none;
-    padding: 6px 8px;
+    padding: 6px 10px;
     border-radius: 8px;
     color: #fff;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.btn-eliminar-peluqueria:hover {
-    background-color: #a50b2e;
 }
 
 /* Paginación */
 .pagination-peluquerias {
-    margin-top: 20px;
+    margin-top: 25px;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .pagination-peluquerias .pagination-btn {
@@ -1638,37 +1613,1160 @@ body {
     padding: 6px 12px;
     border-radius: 6px;
     text-decoration: none;
-    transition: background 0.3s;
 }
 
-.pagination-peluquerias .pagination-btn:hover,
-.pagination-peluquerias .pagination-btn.active {
+.pagination-btn.active,
+.pagination-btn:hover {
     background-color: #dc143c;
-    color: #fff;
-}
-.alert {
-    transition: all 0.5s ease; /* suaviza cambios de opacidad y margen */
-    opacity: 1;
-    margin-top: 0;
 }
 
-.alert.hide {
-    opacity: 0;
-    margin-top: -20px; /* se mueve hacia arriba */
-    height: 0;
-    padding: 0 15px; /* opcional, para reducir padding */
-    overflow: hidden;
+/* Responsividad fuerte */
+@media (max-width: 768px) {
+    .accionesSuperiores {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-peluquerias {
+        width: 100%;
+        text-align: center;
+    }
 }
 
-.reservaIcon{
-    font-size: 50px;
+@media (max-width: 480px) {
+    .panel-peluquerias h2 {
+        font-size: 28px;
+    }
+
+    .peluquerias-resumen-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+/* ==== SIDEBAR ==== */
+.sidebar {
+    width: 260px;
+    background-color: #111;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+/* Oculta la sidebar en móviles */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-260px);
+        z-index: 2000;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .btn-hamburger {
+        display: block;
+    }
+}
+
+/* Overlay */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 1500;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* Botón hamburguesa */
+.btn-hamburger {
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: white;
+    cursor: pointer;
+    display: none; /* solo visible en móviles */
+}
+
+@media (max-width: 768px) {
+    .btn-hamburger {
+        display: block;
+    }
+}
+
+/* Ajuste del main cuando sidebar está oculta */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
+}
+/* ==========================
+   PANEL ESTILISTAS - DARK
+   Clases: panel-est-*
+   ========================== */
+
+.panel-est {
+  background: transparent;
+  padding: 20px;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  --crimson: #dc143c;
+  --black-1: #0d0d0d;
+  --black-2: #111;
+  --card-bg: #121212;
+  --muted: #bfbfbf;
+}
+
+/* Title */
+.panel-est .panel-est-title {
+  color: var(--crimson);
+  font-size: 26px;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+}
+
+/* STATS */
+.panel-est .panel-est-stats-box {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.panel-est .panel-est-stats-card {
+  flex: 1 1 220px;
+  min-width: 220px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+}
+
+.panel-est .panel-est-stats-card h5 {
+  color: #fff;
+  margin: 0;
+  font-size: 14px;
+  opacity: .95;
+}
+
+.panel-est .panel-est-stats-content {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:10px;
+}
+
+.panel-est .panel-est-stats-content i {
+  font-size: 30px;
+  color: var(--crimson);
+}
+
+.panel-est .panel-est-stats-content h2 {
+  margin:0;
+  font-size: 28px;
+  color: #fff;
+}
+
+/* ACTIONS */
+.panel-est .panel-est-actions {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom: 18px;
+}
+
+.panel-est .panel-est-btn {
+  background: var(--crimson);
+  color: #fff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.25);
+  cursor:pointer;
+  font-weight:600;
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.panel-est .panel-est-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(220,20,60,0.18);
+}
+
+.panel-est .panel-est-btn.pdf {
+  background: transparent;
+  color: var(--crimson);
+  border: 1px solid rgba(220,20,60,0.12);
+}
+
+/* IMPORT CSV */
+.panel-est .panel-est-import-form {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.panel-est .panel-est-import-label {
+  background: rgba(255,255,255,0.02);
+  color: #fff;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.panel-est .panel-est-import-label i { color: var(--crimson); }
+.panel-est .panel-est-import-label input { display:none; }
+
+.panel-est .panel-est-file-name {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-est .panel-est-send-btn {
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.03);
+  padding:8px 12px;
+  border-radius:10px;
+}
+
+/* SEARCH */
+.panel-est .panel-est-search {
+  display:flex;
+  gap:8px;
+  margin: 12px 0 20px 0;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.panel-est .panel-est-search input {
+  flex:1 1 260px;
+  padding:10px 12px;
+  border-radius:10px;
+  background: var(--black-2);
+  border: 1px solid rgba(255,255,255,0.03);
+  color: #fff;
+  outline: none;
+}
+
+.panel-est .panel-est-search button {
+  background: var(--crimson);
+  border: none;
+  color: #fff;
+  padding:10px 14px;
+  border-radius:10px;
+}
+
+/* GRID / CARDS */
+.panel-est .panel-est-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:18px;
+  margin-bottom: 18px;
+}
+
+.panel-est .panel-est-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.03);
+  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+.panel-est .panel-est-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+}
+
+/* image wrapper */
+.panel-est .panel-est-img-wrapper {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  overflow:hidden;
+  background: rgba(255,255,255,0.02);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border: 2px solid rgba(255,255,255,0.03);
+}
+
+.panel-est .panel-est-img-wrapper img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* no image */
+.panel-est .panel-est-no-img {
+  color: rgba(255,255,255,0.35);
+  font-size: 36px;
+}
+
+/* texts */
+.panel-est .panel-est-card h3 {
+  margin: 10px 0 6px;
+  color: #fff;
+  font-size: 18px;
+  line-height:1.1;
+}
+
+.panel-est .panel-est-specialty {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* card actions */
+.panel-est .panel-est-card-actions {
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:8px;
+}
+
+.panel-est .panel-est-card-btn {
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  border: none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  transition: transform .12s ease;
+}
+
+.panel-est .panel-est-card-btn.editar {
+  background: rgba(0,129,223,0.12);
+  color: #83c7ff;
+}
+
+.panel-est .panel-est-card-btn.editar:hover { transform: translateY(-3px); }
+
+.panel-est .panel-est-card-btn.eliminar {
+  background: rgba(220,20,60,0.12);
+  color: var(--crimson);
+}
+
+.panel-est .panel-est-card-btn.eliminar:hover { transform: translateY(-3px); }
+
+/* PAGINATION */
+.panel-est .panel-est-pagination {
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top: 18px;
+}
+
+.panel-est .panel-est-page-btn {
+  padding:8px 12px;
+  border-radius:8px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.03);
+  cursor:pointer;
+}
+
+.panel-est .panel-est-page-btn.active {
+  background: var(--crimson);
+  border-color: var(--crimson);
+}
+
+/* scrollbar for grids / long lists */
+.panel-est .panel-est-grid::-webkit-scrollbar { height:8px; width:8px; }
+.panel-est .panel-est-grid::-webkit-scrollbar-thumb { background: rgba(220,20,60,0.28); border-radius:8px; }
+
+/* RESPONSIVE ADJUSTS */
+@media (max-width: 900px) {
+  .panel-est .panel-est-stats-card { padding:12px; }
+  .panel-est .panel-est-img-wrapper { width:100px; height:100px; }
+}
+
+@media (max-width: 600px) {
+  .panel-est {
+    padding: 14px;
+  }
+  .panel-est .panel-est-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panel-est .panel-est-import-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .panel-est .panel-est-search {
+    flex-direction: column;
+  }
+  .panel-est .panel-est-stats-box { gap:10px; }
+  .panel-est .panel-est-grid { gap:12px; }
+}
+/* ============================
+   PANEL SERVICIOS (AISLADO)
+   ============================ */
+
+.panel-servicios {
+    padding: 20px;
+    background: #0a0a0a;
+    color: white;
+    width: 95%;
+    margin: auto;
+    margin-left: 1%;
+    border-radius: 15px;
+}
+
+/* TITULO */
+.serv-panel-title {
     color: crimson;
+    margin-bottom: 20px;
+    font-weight: 700;
 }
-.estado-select{
-    padding: 6px 10px;
+
+/* ============================
+   STATS TOP
+   ============================ */
+.serv-panel-stats-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.serv-panel-stat-card {
+    background: #111;
+    border-left: 4px solid crimson;
+    padding: 18px;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 240px;
+    box-shadow: 0 0 12px rgba(0,0,0,.4);
+}
+
+.serv-panel-stat-card h5 {
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.serv-panel-stat-card h2 {
+    margin: 0;
+}
+
+/* ============================
+   ACCIONES SUPERIORES
+   ============================ */
+
+.serv-panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 25px;
+}
+
+.serv-panel-btn-new {
+    background: crimson;
+    color: white;
+    padding: 10px 16px;
     border-radius: 8px;
     border: none;
-    outline: none;
-    background-color: #1a1a1a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+.serv-panel-btn-new:hover { background: #ff2d58; }
+
+/* CSV IMPORT */
+.serv-panel-import-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.serv-panel-btn-import-label {
+    background: #111;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: crimson;
+    border: 1px solid crimson;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.serv-panel-btn-import-label:hover {
+    background: crimson;
+    color: white;
+}
+
+.serv-panel-file-input { display: none; }
+.serv-panel-file-name {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.serv-panel-btn-upload {
+    background: #111;
+    color: crimson;
+    border: 1px solid crimson;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: .2s;
+}
+.serv-panel-btn-upload:hover {
+    background: crimson;
+    color: white;
+}
+
+/* PDF */
+.serv-panel-btn-pdf {
+    background: #111;
+    border: 1px solid crimson;
+    padding: 10px 14px;
+    color: crimson;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: .2s;
+}
+.serv-panel-btn-pdf:hover { background: crimson; color: white; }
+
+/* ============================
+   BUSCADOR
+   ============================ */
+.serv-panel-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+.serv-panel-search input {
+    flex: 1;
+    background: #121212;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 6px;
     color: #fff;
+}
+.serv-panel-search button {
+    background: crimson;
+    padding: 10px 14px;
+    border-radius: 6px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+/* ============================
+   GRID
+   ============================ */
+.serv-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.serv-panel-card {
+    background: #111;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #222;
+    transition: .2s;
+}
+.serv-panel-card:hover { border-color: crimson; }
+
+.serv-panel-img-wrap {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    background: black;
+    border-radius: 10px;
+}
+.serv-panel-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* TEXTO */
+.serv-panel-duration,
+.serv-panel-description {
+    color: #ccc;
+}
+.serv-panel-price {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: white;
+}
+
+/* BOTONES */
+.serv-panel-actions-card {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.serv-panel-btn-edit {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: .2s;
+}
+.serv-panel-btn-edit:hover { background: crimson; }
+
+.serv-panel-btn-delete {
+    background: #111;
+    color: crimson;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid crimson;
+    transition: .2s;
+}
+.serv-panel-btn-delete:hover { background: crimson; color: white; }
+
+/* ============================
+   PAGINACIÓN
+   ============================ */
+.serv-panel-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+.serv-panel-pagination-btn {
+    background: #111;
+    border: 1px solid #222;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+}
+.serv-panel-pagination-btn:hover {
+    border-color: crimson;
+}
+.serv-panel-pagination-btn.active {
+    background: crimson;
+    border-color: crimson;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================ */
+
+@media (max-width: 768px) {
+    .serv-panel-actions { flex-direction: column; }
+    .serv-panel-import-form { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .serv-panel-btn-new,
+    .serv-panel-btn-pdf,
+    .serv-panel-btn-upload,
+    .serv-panel-btn-import-label {
+        width: 100%;
+        text-align: center;
+    }
+}
+/* ===============================
+   PANEL PELUQUERÍA — ESTILO DARK
+   =============================== */
+
+#peluqueria.panel {
+    color: #fff;
+    padding: 20px;
+    width: 98%;
+}
+
+/* ===============================
+   CABECERA / PORTADA
+   =============================== */
+.pelu-header-bg {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    background: #111;
+}
+
+.pelu-header-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pelu-header-title {
+    text-align: center;
+    margin: 15px 0 25px;
+}
+
+.pelu-header-title h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: crimson;
+}
+
+/* ===============================
+   GRID PRINCIPAL
+   =============================== */
+.pelu-grid-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 900px) {
+    .pelu-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===============================
+   TARJETA DE FOTO
+   =============================== */
+.pelu-photo-card {
+    background: #111;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #222;
+}
+
+.pelu-avatar-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+}
+
+.pelu-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 2px solid crimson;
+}
+
+.pelu-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    opacity: 0;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.pelu-avatar-wrapper:hover .pelu-avatar-overlay {
+    opacity: 1;
+}
+
+.pelu-photo-hint {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+/* ===============================
+   FORMULARIO
+   =============================== */
+.pelu-form-card {
+    background: #111;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #222;
+}
+
+.pelu-form-title {
+    font-size: 1.3rem;
+    color: crimson;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+/* ===============================
+   INPUT GROUPS
+   =============================== */
+.pelu-input-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.pelu-input-group.full {
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 900px) {
+    .pelu-input-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pelu-label {
+    display: block;
+    color: #ddd;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* ===============================
+   INPUTS
+   =============================== */
+.pelu-input {
+    width: 95%;
+    background: #0c0c0c;
+    border: 1px solid #333;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: white;
+    transition: 0.2s;
+}
+
+.pelu-input:focus {
+    border-color: crimson;
+    outline: none;
+    box-shadow: 0 0 5px crimson;
+}
+
+/* TEXTAREA */
+.pelu-input textarea {
+    resize: none;
+}
+
+/* ===============================
+   BOTÓN GUARDAR
+   =============================== */
+.pelu-btn-save {
+    width: 100%;
+    background: crimson;
+    color: white;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.pelu-btn-save:hover {
+    background: #e31945;
+    box-shadow: 0 0 10px crimson;
+}
+/* =======================
+   MODAL BASE
+======================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65); /* Un poco más oscuro para mejor contraste */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centrado vertical */
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+    padding: 20px; /* Evita que el modal toque los bordes en móviles */
+}
+
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* =======================
+   CONTENIDO DEL MODAL
+======================= */
+.modal-content,
+.perfil-card {
+    background: #111;
+    padding: 35px 30px; /* Más padding interno = más aire */
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh; /* Permite que sea un poco más alto */
+    overflow-y: auto; /* Scroll si el contenido es muy largo */
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(220, 20, 60, 0.25);
+    border: 1px solid #222; /* Borde sutil */
+    animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Animación más fluida */
+    display: flex;
+    flex-direction: column;
+    /* IMPORTANTE: Esto separa el título del form y del resto */
+    gap: 25px; 
+}
+
+/* Scrollbar personalizado para que no se vea feo */
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 10px;
+}
+
+@keyframes fadeUp {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* =======================
+   TÍTULO
+======================= */
+.modal-title {
+    color: crimson;
+    margin: 0; /* Quitamos margin porque usamos gap en el padre */
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* =======================
+   FORMULARIOS
+======================= */
+.perfil-card form,
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* MÁS espacio entre cada input */
+}
+
+/* Estilo para LABELS (Recomendado usarlos) */
+.form-label {
+    display: block;
+    color: #bbb;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-input,
+.form-textarea,
+.perfil-form input {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 16px 18px; /* Inputs más altos, más fáciles de tocar */
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    font-size: 16px; /* Letra legible impide zoom en iPhone */
+    outline: none;
+}
+
+.form-textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: crimson;
+    background: #0f0f0f;
+    box-shadow: 0 0 0 4px rgba(220, 20, 60, 0.15); /* Glow sutil en vez de sombra dura */
+}
+
+/* =======================
+   BOTONES (ACCIONES)
+======================= */
+/* Agrupa tus botones en un div con esta clase para ponerlos lado a lado */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px; /* Separación extra del último input */
+}
+
+.btn-guardar,
+.btn-cancelar,
+.btn-edit,
+.btn-logout {
+    padding: 16px;
+    border: none;
+    font-weight: 600;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    font-size: 16px;
+    /* Flex grow permite que llenen el espacio disponible */
+    flex: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-guardar:active,
+.btn-cancelar:active {
+    transform: scale(0.98);
+}
+
+.btn-guardar {
+    background: crimson;
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+}
+.btn-guardar:hover {
+    background: rgb(225, 40, 75);
+}
+
+.btn-cancelar {
+    background: transparent;
+    border: 1px solid #333;
+    color: #ccc;
+}
+.btn-cancelar:hover {
+    background: #222;
+    color: #fff;
+    border-color: #555;
+}
+
+.btn-logout {
+    width: 100%; /* El logout suele ir solo */
+    background: #1a1a1a;
+    color: crimson;
+    border: 1px solid rgba(220, 20, 60, 0.3);
+}
+
+/* =======================
+   PREVIEW IMAGEN
+======================= */
+.preview-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.imagen-preview {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%; /* Círculo suele verse más moderno en perfiles */
+    border: 3px solid #222;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+/* =======================
+   BOTÓN CERRAR (X)
+======================= */
+.close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 20px;
+}
+.close-button:hover {
+    background: crimson;
+    transform: rotate(90deg);
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 25px 20px;
+        gap: 20px;
+        max-height: 85vh; /* Un poco menos en móviles */
+    }
+
+    .modal-title {
+        font-size: 24px;
+    }
+
+    /* En móviles muy estrechos, apilamos los botones si es necesario
+       pero por defecto row suele funcionar bien. Si prefieres apilados: */
+    /*
+    .modal-actions {
+        flex-direction: column-reverse; 
+    }
+    */
+}
+/* Ocultar el input file feo por defecto */
+.input-file-hidden {
+    display: none;
+}
+
+/* Estilo para el botón de "Cambiar foto" (más pequeño y sutil) */
+.btn-upload {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #222;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn-upload:hover {
+    background: #333;
+    color: white;
+    border-color: crimson;
+}
+
+/* Centrar contenido de la foto */
+.preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Contenedor de botones lado a lado */
+.modal-actions {
+    display: flex;
+    gap: 15px; /* Espacio entre botones */
+    margin-top: 15px;
+}
+
+/* Ajuste para que los inputs no se peguen a sus labels */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Espacio entre el label y el input */
 }

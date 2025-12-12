@@ -65,13 +65,31 @@ public class UsuarioController {
         return "usuarios/form";
     }
 
- @PostMapping("/guardar")
+@PostMapping("/guardar")
 public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
-                             @RequestParam(value = "imagen", required = false) MultipartFile imagen) {
+                             @RequestParam(value = "imagen", required = false) MultipartFile imagen,
+                             RedirectAttributes redirectAttributes) {
     try {
         String rutaCarpeta = System.getProperty("user.dir") + "/uploads/";
         File carpeta = new File(rutaCarpeta);
         if (!carpeta.exists()) carpeta.mkdirs();
+
+           if (usuarioDto.getEmail() != null && !usuarioDto.getEmail().isEmpty()) {
+            Optional<UsuarioDto> existente = usuarioService.getByEmailOptional(usuarioDto.getEmail());
+
+            if (existente.isPresent()) {
+                // Nuevo usuario
+                if (usuarioDto.getId() == null) {
+                    redirectAttributes.addFlashAttribute("error", "El correo ya está registrado");
+                    return "redirect:/auth/register";
+                }
+                // Actualización → el correo pertenece a otro usuario
+                if (!usuarioDto.getId().equals(existente.get().getId())) {
+                    redirectAttributes.addFlashAttribute("error", "El correo ya está registrado");
+                    return "redirect:/auth/register";
+                }
+            }
+        }
 
         // Procesar nueva imagen
         if (imagen != null && !imagen.isEmpty()) {
@@ -107,21 +125,26 @@ public String guardarUsuario(@ModelAttribute("usuario") UsuarioDto usuarioDto,
             }
             usuarioService.save(usuarioDto);
         } else {
-            // Actualización → NO tocar contraseña si viene vacía
+            // Actualización
             UsuarioDto existente = usuarioService.getById(usuarioDto.getId());
 
-            // ⛔ NO copiar la contraseña encriptada al DTO
-            //   (esto causaba doble encriptación dentro del service)
-            if (usuarioDto.getContrasena() == null || usuarioDto.getContrasena().isEmpty()) {
-                usuarioDto.setContrasena(null);  // 🔥 importante
+            // ⚡ Si no viene email → conservar el que ya existe
+            if (usuarioDto.getEmail() == null || usuarioDto.getEmail().isEmpty()) {
+                usuarioDto.setEmail(existente.getEmail());
             }
 
-            // El service ya debe verificar si contrasena == null para no encriptarla
+            // NO tocar contraseña si viene vacía
+            if (usuarioDto.getContrasena() == null || usuarioDto.getContrasena().isEmpty()) {
+                usuarioDto.setContrasena(null);
+            }
+
             usuarioService.update(usuarioDto.getId(), usuarioDto);
         }
 
     } catch (IOException e) {
         e.printStackTrace();
+        redirectAttributes.addFlashAttribute("error", "Error al procesar la imagen.");
+        return "redirect:/auth/register";
     }
 
     Usuario usuario = usuarioService.getUsuarioAutenticado();

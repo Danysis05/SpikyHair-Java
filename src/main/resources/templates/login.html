@@ -21,7 +21,7 @@
 
         <div class="left-pane">
 
-            <a onclick="history.back()" class="back-btn">
+            <a th:href="@{/}" class="back-btn">
                 <i class="fa-solid fa-arrow-left-long"></i> <span>Volver</span>
             </a>
 
@@ -79,9 +79,6 @@
 
         <div class="right-pane">
             <div class="showcase-content">
-                <div class="glass-badge">
-                    <i class="fa-solid fa-crown"></i> Acceso Premium
-                </div>
                 <h3>Define tu<br>Estilo.</h3>
                 <p>Únete a la comunidad más exclusiva de barberías. Gestiona tus citas, encuentra expertos y mantén tu imagen impecable.</p>
             </div>
@@ -104,6 +101,19 @@
                 icon.classList.add('fa-eye');
             }
         }
+          document.addEventListener("DOMContentLoaded", () => {
+        const alerts = document.querySelectorAll(".alert");
+
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add("slide-out");
+
+                setTimeout(() => {
+                    alert.remove();
+                }, 800);
+            }, 3000);
+        });
+    });
     </script>
 
 </body>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title th:if="${peluqueria != null}" th:text="${peluqueria.nombre} + ' | SpikyHair'">SpikyHair</title>
     <script src="https://kit.fontawesome.com/94f5bc3331.js" crossorigin="anonymous"></script>
     <title th:if="${peluqueria == null}">SpikyHair</title>
@@ -87,7 +88,15 @@
                     <div class="services-grid carousel-track" id="servicios-track">
                         <div th:if="${servicios != null}" th:each="servicio : ${servicios}" class="service-item">
                             <div class="service-image-container">
-                                <img th:src="@{/uploads/{img}(img=${servicio.imagen})}" loading="lazy" onerror="this.src='/images/default-service.png'"/>
+                                <div class="img-wrapper">
+    <div th:if="${servicio.imagen != null}">
+        <img th:src="@{/uploads/{img}(img=${servicio.imagen})}" loading="lazy" alt="Imagen Servicio">
+    </div>
+    <div th:if="${servicio.imagen == null}" class="no-img">
+        <i class="fas fa-crop fa-3x"></i> <!-- Cambia fa-crop por el ícono que quieras -->
+    </div>
+</div>
+
                             </div>
                             <div class="service-details">
                                 <span class="service-name" th:text="${servicio.nombre}">Nombre Servicio</span>
@@ -192,56 +201,61 @@
     </div>
     <button onclick="openModal()" class="btn-book-now">Reservar Ahora</button>
     <section class="reviews-section">
-            <h2>Comentarios de Clientes</h2>
-            <div class="reviews-list">
-                <div th:if="${resenas != null}" th:each="r : ${resenas}" class="review-card">
-                    <div class="review-header">
-                        <div class="foto-contenedor">
-                            <img th:if="${r.usuario.imagenPerfil != null}"
-                                 th:src="@{'/uploads/' + ${r.usuario.imagenPerfil}}"
-                                 class="foto-usuario">
-                            <i th:if="${r.usuario.imagenPerfil == null}"
-                            class="fas fa-user-circle icono-usuario"></i>
-                        </div>
+    <h2>Comentarios de Clientes</h2>
+    <div class="reviews-list">
+        <div th:if="${resenas != null}" th:each="r : ${resenas}" 
+             class="review-card" th:id="'resena-' + ${r.id}">
 
-                        <strong th:text="${r.usuario.nombre}">Nombre Usuario</strong>
-
-                        <div class="stars">
-                            <i class="fa-solid fa-star"
-                               th:each="i : ${#numbers.sequence(1, r.puntuacion)}"></i>
-                        </div>
-                    </div>
-
-                    <p class="review-comment" th:text="${r.comentario}">
-                        Comentario...
-                    </p>
+            <div class="review-header">
+                <div class="foto-contenedor">
+                    <img th:if="${r.usuario.imagenPerfil != null}" 
+                         th:src="@{'/uploads/' + ${r.usuario.imagenPerfil}}" 
+                         class="foto-usuario">
+                    <i th:if="${r.usuario.imagenPerfil == null}" class="fas fa-user-circle icono-usuario"></i>
                 </div>
 
-                <div th:if="${resenas == null or #lists.isEmpty(resenas)}" class="no-reviews">
-                    <p>¡Sé el primero en dejar un comentario!</p>
+                <strong th:text="${r.usuario.nombre}">Nombre Usuario</strong>
+
+                <div class="stars">
+                    <i class="fa-solid fa-star" th:each="i : ${#numbers.sequence(1, r.puntuacion)}"></i>
+                </div>
+
+                <!-- Botones de eliminar solo si el usuario es dueño -->
+                <div th:if="${usuarioLogeado != null and usuarioLogeado.id == r.usuario.id}" class="review-actions">
+                    <button type="button" th:onclick="'eliminarResena(' + ${r.id} + ')'" class="btn-eliminar">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="add-review">
-                <h3>Deja tu Comentario</h3>
-                <form th:action="@{/resenas/crear/{id}(id=${peluqueria.id})}" method="post">
-                    <label for="puntuacion">Puntuación</label>
-                    <select name="puntuacion" id="puntuacion" required>
-                        <option value="">Selecciona una puntuación</option>
-                        <option value="1">★ 1</option>
-                        <option value="2">★★ 2</option>
-                        <option value="3">★★★ 3</option>
-                        <option value="4">★★★★ 4</option>
-                        <option value="5">★★★★★ 5</option>
-                    </select>
+            <p class="review-comment" th:text="${r.comentario}">Comentario...</p>
+        </div>
 
-                    <label for="comentario">Comentario</label>
-                    <textarea name="comentario" id="comentario" required maxlength="255"></textarea>
+        <div th:if="${resenas == null or #lists.isEmpty(resenas)}" class="no-reviews">
+            <p>¡Sé el primero en dejar un comentario!</p>
+        </div>
+    </div>
 
-                    <button type="submit" class="btn-add-review">Enviar Reseña</button>
-                </form>
-            </div>
-        </section>
+    <div class="add-review">
+        <h3>Deja tu Comentario</h3>
+        <form th:action="@{/resenas/crear/{id}(id=${peluqueria.id})}" method="post">
+            <label for="puntuacion">Puntuación</label>
+            <select name="puntuacion" id="puntuacion" required>
+                <option value="">Selecciona una puntuación</option>
+                <option value="1">★ 1</option>
+                <option value="2">★★ 2</option>
+                <option value="3">★★★ 3</option>
+                <option value="4">★★★★ 4</option>
+                <option value="5">★★★★★ 5</option>
+            </select>
+
+            <label for="comentario">Comentario</label>
+            <textarea name="comentario" id="comentario" required maxlength="255"></textarea>
+
+            <button type="submit" class="btn-add-review">Enviar Reseña</button>
+        </form>
+    </div>
+</section>
 
 </main>
 
@@ -286,6 +300,39 @@ function closeModal(event) {
             alert(`Por favor selecciona una hora entre ${minHora} y ${maxHora}`);
         }
     });
+  async function eliminarResena(resenaId) {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta reseña?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/resenas/eliminar/' + resenaId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            // Eliminar la tarjeta de la reseña del DOM
+            const resenaCard = document.getElementById('resena-' + resenaId);
+            if (resenaCard) {
+                resenaCard.remove();
+            }
+            alert('Reseña eliminada correctamente.');
+        } else {
+            const errorMsg = await response.text();
+            alert('Error al eliminar la reseña: ' + errorMsg);
+        }
+    } catch (error) {
+        console.error('Error al eliminar la reseña:', error);
+        alert('Ocurrió un error al eliminar la reseña.');
+    }
+}
+
+
+
 
 </script>
 

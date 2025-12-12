@@ -25,54 +25,90 @@
             <div class="header-content">
                 <div class="logo-text"><i class="fa-solid fa-scissors"></i> Spiky<span>Hair</span></div>
                 <h2>Crear Cuenta</h2>
-                <p class="subtitle">Únete a la comunidad exclusiva de caballeros.</p>
             </div>
 
             <form th:action="@{/auth/register}" method="post" th:object="${usuario}">
 
-                <div th:if="${error}" class="alert alert-danger">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span th:text="${error}">Ha ocurrido un error.</span>
-                </div>
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span th:text="${error}">Ha ocurrido un error.</span>
+    </div>
 
-                <div class="input-group">
-                    <label for="nombre">Nombre Completo</label>
-                    <div class="input-wrapper">
-                        <input type="text" th:field="*{nombre}" placeholder="Ej. Alejandro Magno" required autocomplete="name" />
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                </div>
+    <!-- Nombre completo -->
+    <div class="input-group">
+        <label for="nombre">Nombre Completo</label>
+        <div class="input-wrapper">
+            <input type="text" th:field="*{nombre}" 
+                   placeholder="Ej. Alejandro Magno" 
+                   required 
+                   minlength="3"
+                   maxlength="50"
+                   pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+" 
+                   title="Solo letras y espacios, mínimo 3 caracteres"/>
+            <i class="fa-solid fa-user"></i>
+        </div>
+    </div>
 
-                <div class="input-group">
-                    <label for="telefono">Teléfono Móvil</label>
-                    <div class="input-wrapper">
-                        <input type="tel" th:field="*{telefono}" placeholder="Ej. 300 123 4567" required autocomplete="tel"/>
-                        <i class="fa-solid fa-phone"></i>
-                    </div>
-                </div>
+    <!-- Teléfono móvil -->
+    <div class="input-group">
+        <label for="telefono">Teléfono Móvil</label>
+        <div class="input-wrapper">
+            <input type="tel" th:field="*{telefono}" 
+                   placeholder="Ej. 3001234567" 
+                   required 
+                   pattern="[0-9]{10}" 
+                   title="Debe contener exactamente 10 dígitos"/>
+            <i class="fa-solid fa-phone"></i>
+        </div>
+    </div>
 
-                <div class="input-group">
-                    <label for="email">Correo Electrónico</label>
-                    <div class="input-wrapper">
-                        <input type="email" th:field="*{email}" placeholder="tu@email.com" required autocomplete="email"/>
-                        <i class="fa-solid fa-envelope"></i>
-                    </div>
-                </div>
+    <!-- Email -->
+    <div class="input-group">
+        <label for="email">Correo Electrónico</label>
+        <div class="input-wrapper">
+            <input type="email" th:field="*{email}" 
+                   placeholder="tu@email.com" 
+                   required 
+                   maxlength="50"/>
+            <i class="fa-solid fa-envelope"></i>
+        </div>
+    </div>
 
-                <div class="input-group">
-                    <label for="contrasena">Contraseña</label>
-                    <div class="input-wrapper">
-                        <input type="password" th:field="*{contrasena}" id="passwordInput" placeholder="Mínimo 8 caracteres" required />
-                        <i class="fa-solid fa-lock"></i>
-                        <i class="fa-solid fa-eye" id="togglePassword" style="left: auto; right: 15px; pointer-events: auto; cursor: pointer;" onclick="togglePass()"></i>
-                    </div>
-                </div>
+    <!-- Contraseña -->
+    <div class="input-group">
+        <label for="contrasena">Contraseña</label>
+        <div class="input-wrapper">
+            <input type="password" th:field="*{contrasena}" 
+                   id="passwordInput" 
+                   placeholder="Mínimo 6 caracteres" 
+                   required 
+                   minlength="6" 
+                   maxlength="30"/>
+            <i class="fa-solid fa-lock"></i>
+            <i class="fa-solid fa-eye" id="togglePassword" 
+               style="left: auto; right: 15px; pointer-events: auto; cursor: pointer;" 
+               onclick="togglePass()"></i>
+        </div>
+    </div>
 
-                <button type="submit">
-                    Unirse Ahora <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
-                </button>
+    <!-- Confirmar contraseña -->
+    <div class="input-group">
+        <label for="confirmPassword">Confirmar Contraseña</label>
+        <div class="input-wrapper">
+            <input type="password" id="confirmPassword" 
+                   placeholder="Repite la contraseña" 
+                   required 
+                   minlength="6" 
+                   maxlength="30"/>
+            <i class="fa-solid fa-lock"></i>
+        </div>
+    </div>
 
-            </form>
+    <button type="submit" onclick="return validarFormulario()">
+        Unirse Ahora <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+    </button>
+
+</form>
 
             <div class="login-link">
                 <p>¿Ya tienes cuenta? <a th:href="@{/auth/login}">Iniciar Sesión</a></p>
@@ -82,7 +118,6 @@
 
         <div class="right-pane">
             <div class="showcase-content">
-                <div class="feature-badge">Beneficios Premium</div>
                 <h3>Expertos en<br>tu mejor versión.</h3>
                 <p>Accede a reservas prioritarias, historial de cortes detallado y encuentra a los mejores profesionales de tu zona con un solo clic.</p>
             </div>
@@ -105,6 +140,37 @@
                 icon.classList.add('fa-eye');
             }
         }
+                  document.addEventListener("DOMContentLoaded", () => {
+        const alerts = document.querySelectorAll(".alert");
+
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add("slide-out");
+
+                setTimeout(() => {
+                    alert.remove();
+                }, 800);
+            }, 3000);
+        });
+    });
+      function validarFormulario() {
+        const pass = document.getElementById('passwordInput').value;
+        const confirm = document.getElementById('confirmPassword').value;
+
+        if (pass !== confirm) {
+            alert("Las contraseñas no coinciden.");
+            return false;
+        }
+
+        // Validación extra: teléfono
+        const telefono = document.querySelector('input[name="telefono"]').value;
+        if (!/^\d{10}$/.test(telefono)) {
+            alert("El teléfono debe contener exactamente 10 dígitos.");
+            return false;
+        }
+
+        return true;
+    }
     </script>
 
 </body>

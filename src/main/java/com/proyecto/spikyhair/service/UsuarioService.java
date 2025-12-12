@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -133,9 +134,9 @@ public class UsuarioService implements Idao<Usuario, Long, UsuarioDto> {
         admin.setImagenPerfil("admin.png"); // Puedes dejarlo nulo o usar una imagen por defecto
         usuarioRepository.save(admin);
 
-        System.out.println("✅ Usuario ADMINISTRADOR creado correctamente.");
+        System.out.println("Usuario ADMINISTRADOR creado correctamente.");
     } else {
-        System.out.println("ℹ️ El usuario ADMINISTRADOR ya existe.");
+        System.out.println("El usuario ADMINISTRADOR ya existe.");
     }
 }
 public List<UsuarioDto> filtrarUsuarios(String nombreOEmail, String rolNombre) {
@@ -244,6 +245,13 @@ public Collection<? extends GrantedAuthority> getAuthorities(Long usuarioId) {
     // Convertir el rol a GrantedAuthority (Spring Security requiere "ROLE_" + nombreRol)
     return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()));
 }
+public Optional<UsuarioDto> getByEmailOptional(String email) {
+    return usuarioRepository.findByEmail(email)
+            .map(u -> modelMapper.map(u, UsuarioDto.class));
 }
+
+
+}
+
 
 

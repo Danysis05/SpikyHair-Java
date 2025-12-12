@@ -978,3 +978,34 @@
     border-radius: 50%;
     object-fit: cover;
 }
+.review-actions {
+    display: flex;
+    gap: 8px; /* espacio entre botones si hubiera más */
+}
+
+.btn-eliminar {
+    background-color: #ff4d4f; /* rojo suave */
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-eliminar i {
+    margin-right: 4px;
+}
+
+.btn-eliminar:hover {
+    background-color: #ff7875; /* rojo más claro al pasar el mouse */
+    transform: scale(1.05);
+}
+
+.btn-eliminar:active {
+    transform: scale(0.95);
+}
